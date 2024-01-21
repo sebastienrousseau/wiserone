@@ -1,0 +1,104 @@
+[package]
+authors = ["Wiserone Contributors <contact@wiserone.com>"]
+build = "build.rs"
+categories = ["development-tools", "command-line-utilities", "template-engine"]
+description = "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit."
+documentation = "https://lib.rs/crates/wiserone"
+edition = "2021"
+exclude = [
+    "/.git/*",
+    "/.github/*",
+    "/.gitignore",
+    "/.vscode/*"
+    ]
+homepage = "https://wiserone.com"
+keywords = ["['Wisdom', 'Quotes','Inspiration', 'Insights', 'Reflection']"]
+license = "MIT OR Apache-2.0"
+name = "wiserone"
+readme = "README.md"
+repository = "https://github.com/sebastienrousseau/wiserone"
+rust-version = "1.75.0"
+version = "0.0.1"
+include = [
+    "/benches/**",
+    "/build.rs",
+    "/Cargo.toml",
+    "/CONTRIBUTING.md",
+    "/examples/**",
+    "/LICENSE-APACHE",
+    "/LICENSE-MIT",
+    "/README.md",
+    "/src/**",
+    "/tests/**"
+]
+
+[[bench]]
+name = "benchmark"
+harness = false
+path = "benches/criterion.rs"
+
+[profile.bench]
+debug = true
+
+[dependencies]
+anyhow = "1.0.79"
+clap = { version = "4.4.18", features = ["env", "derive"] }
+dtt = "0.0.5"
+env_logger = "0.11.0"
+figlet-rs = "0.1.5"
+serde = { version = "1.0.195", features = ["derive"] }
+serde_json = "1.0.111"
+serde_yaml = "0.9.30"
+toml = "0.8.8"
+vrd = "0.0.5"
+rlg = "0.0.2"
+uuid = { version = "1.7.0", features = ["serde", "v4"] }
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[lib]
+crate-type = ["lib"]
+name = "wiserone"
+path = "src/lib.rs"
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+
+[profile.dev]
+codegen-units = 256
+debug = true
+debug-assertions = true
+incremental = true
+lto = false
+opt-level = 0
+overflow-checks = true
+panic = 'unwind'
+rpath = false
+strip = false
+
+[profile.release]
+codegen-units = 1
+debug = false
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+panic = "abort"
+rpath = false
+strip = "symbols"
+
+[profile.test]
+codegen-units = 256
+debug = true
+debug-assertions = true
+incremental = true
+lto = false
+opt-level = 0
+overflow-checks = true
+rpath = false
+strip = false
