@@ -1,5 +1,5 @@
 // Copyright notice and licensing information.
-// Copyright © 2024 WiserOne. All rights reserved.
+// Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 //! # `wiserone` 🦀

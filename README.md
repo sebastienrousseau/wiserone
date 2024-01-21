@@ -139,6 +139,8 @@ The [GitHub Actions][10] shows the platforms in which the `wiserone` library tes
 
 #### Generate a random quote
 
+##### From JSON
+
 The following command generates a random quote from the `quotes.json` file.
 
 ```shell
@@ -151,12 +153,18 @@ or locally if you have cloned the repository:
 cargo run random ./quotes/01-quotes.json
 ```
 
+##### From CSV
 
-Have a look at the `tests/data/mylibrary.csv` file for an example and
-feel free to use it for your own library as a template.
+The following command generates a random quote from the `quotes.csv` file.
 
 ```shell
-libmake --csv tests/data/mylibrary.csv
+wiserone --random ./quotes/01-quotes.csv
+```
+
+or locally if you have cloned the repository:
+
+```shell
+cargo run random ./quotes/01-quotes.csv
 ```
 
 To use the `wiserone` library in your project, add the following to your
@@ -164,13 +172,12 @@ To use the `wiserone` library in your project, add the following to your
 
 ```toml
 [dependencies]
-wiserone = "0.0.2"
+wiserone = "0.0.3"
 ```
 
 Add the following to your `main.rs` file:
 
 ```rust
-extern crate wiserone;
 use wiserone::*;
 ```
 
@@ -220,14 +227,14 @@ providing a lot of useful suggestions on how to improve this project.
 
 [0]: https://wiserone.com
 [2]: http://opensource.org/licenses/MIT
-[3]: https://github.com/sebastienrousseau/wiserone/wiserone/issues
-[4]: https://github.com/sebastienrousseau/wiserone/wiserone/blob/main/CONTRIBUTING.md
-[5]: https://github.com/sebastienrousseau/wiserone/wiserone/graphs/contributors
+[3]: https://github.com/sebastienrousseau/wiserone/issues
+[4]: https://github.com/sebastienrousseau/wiserone/blob/main/CONTRIBUTING.md
+[5]: https://github.com/sebastienrousseau/wiserone/graphs/contributors
 [6]: http://semver.org/
 [7]: https://crates.io/crates/wiserone
 [8]: https://docs.rs/wiserone
 [9]: https://lib.rs/crates/wiserone
-[10]: https://github.com/sebastienrousseau/wiserone/wiserone/actions
+[10]: https://github.com/sebastienrousseau/wiserone/actions
 [11]: https://www.rust-lang.org/policies/code-of-conduct
 [12]: https://www.reddit.com/r/rust/
 [13]: https://www.rust-lang.org/learn/get-started
@@ -235,6 +242,6 @@ providing a lot of useful suggestions on how to improve this project.
 [crates-badge]: https://img.shields.io/crates/v/wiserone.svg?style=for-the-badge 'Crates.io badge'
 [divider]: https://kura.pro/common/images/elements/divider.svg "divider"
 [docs-badge]: https://img.shields.io/docsrs/wiserone.svg?style=for-the-badge 'Docs.rs badge'
-[libs-badge]: https://img.shields.io/badge/lib.rs-v0.0.2-orange.svg?style=for-the-badge 'Lib.rs badge'
+[libs-badge]: https://img.shields.io/badge/lib.rs-v0.0.3-orange.svg?style=for-the-badge 'Lib.rs badge'
 [license-badge]: https://img.shields.io/crates/l/wiserone.svg?style=for-the-badge 'License badge'
 [made-with-rust-badge]: https://img.shields.io/badge/rust-f04041?style=for-the-badge&labelColor=c0282d&logo=rust 'Made With Rust badge'

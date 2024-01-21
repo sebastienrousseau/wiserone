@@ -1,5 +1,5 @@
 // Copyright notice and licensing information.
-// Copyright © 2024 WiserOne. All rights reserved.
+// Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use clap::Parser;
@@ -12,7 +12,7 @@ use rlg::{macro_log, LogFormat, LogLevel};
 
 use crate::html::generate_html_file;
 use crate::sitemap::generate_sitemap_file;
-use crate::quotes::{read_and_parse_quotes, read_and_parse_all_quotes};
+use crate::quotes::read_quotes_from_file;
 use crate::ascii::generate_ascii_art;
 
 #[derive(Parser)]
@@ -23,13 +23,13 @@ use crate::ascii::generate_ascii_art;
 
 #[derive(Debug)]
 pub enum Command {
-    /// Selects a random quote from the JSON file and creates an HTML
+    /// Selects a random quote from the JSON or CSV file and creates an HTML
     /// file based on the quote.
     Random {
-        /// The name of the JSON file containing quotes.
+        /// The name of the JSON or CSV file containing quotes.
         filename: String,
     },
-    /// Selects all quotes from the JSON file and creates an HTML file
+    /// Selects all quotes from the JSON or CSV file and creates an HTML file
     /// for each quote.
     All {
         /// The name of the JSON file containing quotes.
@@ -88,7 +88,7 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
             let html_filename = format!("{}.html", date);
 
             // Read and parse quotes, then select a random quote
-            let mut quotes = read_and_parse_quotes(&filename)?;
+            let mut quotes = read_quotes_from_file(&filename)?;
             let quote = quotes.select_random_quote()?;
             generate_html_file(&html_filename, quote)?;
             generate_sitemap_file("https://wiserone.com/")?;
@@ -96,7 +96,7 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
         Command::All { filename } => {
             println!("- info:wiserone: begin generating all quotes");
             // Read and parse all quotes
-            let quotes = read_and_parse_all_quotes(&filename)?;
+            let quotes = read_quotes_from_file(&filename)?;
 
             // Generate an HTML file for each quote
             for quote in quotes.select_all_quotes()? {
