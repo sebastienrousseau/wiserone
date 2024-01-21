@@ -131,7 +131,7 @@ fn test_quote_equality() {
 #[test]
 fn test_select_random_quote_empty_vector() {
     let mut quotes = Quotes::new(Vec::new());
-    assert!(matches!(quotes.select_random_quote(), Err(_)));
+    assert!(quotes.select_random_quote().is_err());
 }
 
 /// Test selecting all quotes when the vector is empty.
