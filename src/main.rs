@@ -1,6 +1,5 @@
 // Copyright notice and licensing information.
-// These lines indicate the copyright of the software and its licensing
-// terms. Copyright © 2024 WiserOne. All rights reserved.
+// Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 //! The main function of the program.

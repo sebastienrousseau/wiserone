@@ -1,3 +1,7 @@
+// Copyright notice and licensing information.
+// Copyright © 2024 The Wiser One. All rights reserved.
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 //! # Macros for the `wiserone` crate.
 
 /// This macro takes any number of arguments and parses them into a
