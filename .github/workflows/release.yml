@@ -282,7 +282,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
         with:
           tag_name: v${{ env.VERSION }}
-          release_name: Shokunin 職人 Static Site Generator 🦀 v${{ env.VERSION }}
+          release_name: The Wiser One 🦀 v${{ env.VERSION }}
           body_path: ${{ github.workspace }}/CHANGELOG.md
           draft: true
           prerelease: false
