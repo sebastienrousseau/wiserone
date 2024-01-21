@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img
-src="https://via.placeholder.com/199x199.png/E82440/78C9FF?text=wiserone"
-alt="wiserone's logo"
+src="https://kura.pro/wiserone/images/logos/wiserone.webp"
+alt="the wiser one's logo"
 height="199"
 width="199"
 align="right"
@@ -10,59 +10,36 @@ align="right"
 
 <!-- markdownlint-enable MD033 MD041 -->
 
-# wiserone
+# The Wiser One
 
-WiserOne: Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.
-
-<!-- markdownlint-disable MD033 MD041 -->
-<center>
-<!-- markdownlint-enable MD033 MD041 -->
-
-[![Made With Rust][made-with-rust-badge]][5]
-[![Crates.io][crates-badge]][7]
-[![Lib.rs][libs-badge]][9]
-[![Docs.rs][docs-badge]][8]
-[![License][license-badge]][2]
-
-• [Website][0]
-• [Documentation][8]
-• [Report Bug][3]
-• [Request Feature][3]
-• [Contributing Guidelines][4]
-
-<!-- markdownlint-disable MD033 MD041 -->
-</center>
-<!-- markdownlint-enable MD033 MD041 -->
-
-![divider][divider]
+Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.
 
 ## Overview 📖
 
-WiserOne: Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.
+The Wiser One offers daily insights and wisdom in a sleek, minimalist interface, designed to inspire deeper thinking and foster personal growth. Each visit presents a unique opportunity to reflect and gain new perspectives.
 
 ## Features ✨
 
-- Feature 1
-- Feature 2
-- Feature 3
+### Reading Quotes from a JSON File
+
+- The Wiser One can seamlessly access and parse a wide range of quotes stored in a JSON format. This allows for a diverse and extensive collection of wisdom nuggets. The JSON structure is optimized for quick retrieval, ensuring a smooth user experience.
+
+### Reading Quotes from a CSV File
+
+- The Wiser One can also read quotes from a CSV file. This allows users to easily import their own collection of quotes, or to create a custom library of quotes. The CSV format is simple and intuitive, making it easy to add, edit, or delete quotes. This feature allows users to create a personalized collection of wisdom nuggets.
+
+### Randomly Selecting a Quote
+
+- With an innovative random selection algorithm, the Wiser One presents a different quote each time, making every interaction unique. This feature encourages varied learning and prevents the monotony of repetitive content. The randomness is designed to simulate the unpredictability and richness of gaining wisdom in real life.
+
+### Creating an HTML File with a Random Quote
+
+- The Wiser One can generate a beautifully formatted HTML file for each selected quote. This allows users to save their favourite quotes in a visually appealing format, which can be easily shared or printed. The HTML output includes customizable themes and layouts, giving a personalized touch to each piece of wisdom.
+
+### Creating all the HTML Files with all the Quotes
+
+- The Wiser One can also generate a complete set of HTML files for all the quotes in the library. This allows users to easily access their entire collection of wisdom nuggets in a visually appealing format. The HTML output includes customizable themes and layouts, giving a personalized touch to each piece of wisdom.
+
+These features combine to make the Wiser One a powerful tool for those seeking daily inspiration and wisdom. The application's ease of use, coupled with its thoughtful design, makes it an ideal choice for users looking to enrich their daily routine with meaningful insights.
 
 ## Changelog 📚
-
--
-
-[0]: https://wiserone.com
-[2]: http://opensource.org/licenses/MIT
-[3]: https://github.com/sebastienrousseau/wiserone/wiserone/issues
-[4]: https://github.com/sebastienrousseau/wiserone/wiserone/blob/main/CONTRIBUTING.md
-[5]: https://github.com/sebastienrousseau/wiserone/wiserone/graphs/contributors
-[7]: https://crates.io/crates/wiserone
-[8]: https://docs.rs/wiserone
-[9]: https://lib.rs/crates/wiserone
-
-[banner]: https://via.placeholder.com/1500x500.png/000000/FFFFFF?text=wiserone "wiserone's banner"
-[crates-badge]: https://img.shields.io/crates/v/wiserone.svg?style=for-the-badge 'Crates.io badge'
-[divider]: https://via.placeholder.com/1024x1.png/d8dee4/FFFFFF?text=− "wiserone's divider"
-[docs-badge]: https://img.shields.io/docsrs/wiserone.svg?style=for-the-badge 'Docs.rs badge'
-[libs-badge]: https://img.shields.io/badge/lib.rs-v0.0.1-orange.svg?style=for-the-badge 'Lib.rs badge'
-[license-badge]: https://img.shields.io/crates/l/wiserone.svg?style=for-the-badge 'License badge'
-[made-with-rust-badge]: https://img.shields.io/badge/rust-f04041?style=for-the-badge&labelColor=c0282d&logo=rust 'Made With Rust badge'

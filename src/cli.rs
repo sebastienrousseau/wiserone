@@ -83,18 +83,18 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
 
     match command {
         Command::Random { filename } => {
-            print!("- info:wiserone: begin generating a random quote\n");
+            println!("- info:wiserone: begin generating a random quote");
             // Construct the HTML filename using `iso`
             let html_filename = format!("{}.html", date);
 
             // Read and parse quotes, then select a random quote
             let mut quotes = read_and_parse_quotes(&filename)?;
             let quote = quotes.select_random_quote()?;
-            generate_html_file(&html_filename, &quote)?;
+            generate_html_file(&html_filename, quote)?;
             generate_sitemap_file("https://wiserone.com/")?;
         },
         Command::All { filename } => {
-            print!("- info:wiserone: begin generating all quotes\n");
+            println!("- info:wiserone: begin generating all quotes");
             // Read and parse all quotes
             let quotes = read_and_parse_all_quotes(&filename)?;
 
@@ -104,13 +104,13 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
                 let date_part = quote.date_added.split('T').next().unwrap_or("");
 
                 // Replace "-" with "_" to format as "YYYY_MM_DD"
-                let formatted_date = date_part.replace("-", "_");
+                let formatted_date = date_part.replace('-', "_");
 
                 let html_filename = format!("{}.html", formatted_date);
-                generate_html_file(&html_filename, &quote)?;
+                generate_html_file(&html_filename, quote)?;
                 generate_sitemap_file("https://wiserone.com/")?;
             }
-            print!("- info:wiserone: end generating all quotes\n\n");
+            println!("- info:wiserone: end generating all quotes\n\n");
         },
     }
 

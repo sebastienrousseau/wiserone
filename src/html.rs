@@ -35,7 +35,7 @@ pub fn generate_html_file(
     layout = layout.replace("{{description}}", "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.");
     layout = layout.replace("{{hreflang}}", "en");
     layout = layout.replace("{{item_pub_date}}", &quote.date_added);
-    layout = layout.replace("{{date}}", &quote.date_added.split('T').next().unwrap_or(""));
+    layout = layout.replace("{{date}}", quote.date_added.split('T').next().unwrap_or(""));
     layout = layout.replace("{{logo}}", "https://kura.pro/wiserone/images/logos/wiserone.webp");
     layout = layout.replace("{{measurementID}}", "G-4HKZ6N3QSC");
     layout = layout.replace("{{name}}", "wiserone");
@@ -97,13 +97,13 @@ pub fn generate_html_file(
         let relative_filename_without_extension = relative_filename.trim_end_matches(".html");
 
         if is_today == relative_filename_without_extension {
-            let new_filename = format!("index.html");
+            let new_filename = "index.html".to_string();
             let new_full_path = Path::new("./docs").join(new_filename);
             let mut new_file = File::create(&new_full_path)?;
             let content = fs::read_to_string(&filename)?;
             new_file.write_all(content.as_bytes())?;
         }
     }
-    print!("- info:wiserone: add file at `{}`\n", path.display());
+    println!("- info:wiserone: add file at `{}`", path.display());
     Ok(())
 }
