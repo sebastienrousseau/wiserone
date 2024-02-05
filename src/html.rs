@@ -7,6 +7,7 @@ use rlg::{macro_log, LogFormat, LogLevel};
 use std::{error::Error, fs::{self, File}, io::Write, path::Path};
 use uuid::Uuid;
 use crate::quotes::Quote;
+use std::fmt::format;
 
 /// Creates an HTML file based on the provided quote.
 ///
@@ -33,11 +34,14 @@ pub fn generate_html_file(
     let day = dt.day;
 
     // Determine if the date matches today
-    let is_today = year == dt.year && month == &format!("{:02}", dt.month) && day == dt.day;
+    let is_today = year == dt.year && month == {
+        let res = format(format_args!("{:02}", dt.month));
+        res
+        } && day == dt.day;
 
     let date = format!("{}_{}_{}", year, month, day);
     let prefix = if is_today {
-        format!("https://wiserone.com/index.html") // If the date is today
+        "https://wiserone.com/index.html".to_string() // If the date is today
     } else {
         format!("https://wiserone.com/{}.html", date) // For any other date
     };
