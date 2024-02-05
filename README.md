@@ -172,7 +172,7 @@ To use the `wiserone` library in your project, add the following to your
 
 ```toml
 [dependencies]
-wiserone = "0.0.4"
+wiserone = "0.0.5"
 ```
 
 Add the following to your `main.rs` file:
@@ -242,6 +242,6 @@ providing a lot of useful suggestions on how to improve this project.
 [crates-badge]: https://img.shields.io/crates/v/wiserone.svg?style=for-the-badge 'Crates.io badge'
 [divider]: https://kura.pro/common/images/elements/divider.svg "divider"
 [docs-badge]: https://img.shields.io/docsrs/wiserone.svg?style=for-the-badge 'Docs.rs badge'
-[libs-badge]: https://img.shields.io/badge/lib.rs-v0.0.4-orange.svg?style=for-the-badge 'Lib.rs badge'
+[libs-badge]: https://img.shields.io/badge/lib.rs-v0.0.5-orange.svg?style=for-the-badge 'Lib.rs badge'
 [license-badge]: https://img.shields.io/crates/l/wiserone.svg?style=for-the-badge 'License badge'
 [made-with-rust-badge]: https://img.shields.io/badge/rust-f04041?style=for-the-badge&labelColor=c0282d&logo=rust 'Made With Rust badge'
