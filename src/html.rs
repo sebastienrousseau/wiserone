@@ -25,6 +25,25 @@ pub fn generate_html_file(
 ) -> Result<(), Box<dyn Error>> {
     let mut layout = fs::read_to_string("_layouts/quote.html")?;
 
+    // Define date and time
+    let dt = DateTime::new();
+    let iso = dt.iso_8601;
+    let year = dt.year;
+    let month = &iso[5..7];
+    let day = dt.day;
+    
+    // Determine if the date matches today
+    let is_today = year == dt.year && month == &format!("{:02}", dt.month) && day == dt.day;
+
+    let date = format!("{}_{}_{}", year, month, day);
+    let prefix = if is_today {
+        format!("https://wiserone.com/index.html") // If the date is today
+    } else {
+        format!("https://wiserone.com/{}.html", date) // For any other date
+    };
+
+    println!("Prefix: {}", prefix);
+
     // Replace the placeholders with values from the quote
     layout = layout.replace("{{apple_touch_icon_sizes}}", "192x192");
     layout = layout.replace("{{author}}", &quote.author);
@@ -40,19 +59,12 @@ pub fn generate_html_file(
     layout = layout.replace("{{name}}", "wiserone");
     layout = layout.replace("{{title}}", &quote.quote_text);
     layout = layout.replace("{{url}}", "https://wiserone.com");
+    layout = layout.replace("{{canonical}}", &prefix);
 
     fs::create_dir_all("./docs")?;
     let path = Path::new("./docs").join(filename);
     let mut file = fs::File::create(&path)?;
     file.write_all(layout.as_bytes())?;
-
-    // Define date and time
-    let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
-    let month = &iso[5..7];
-    let day = dt.day;
-    let date = format!("{}_{}_{}", year, month, day);
 
     // Open the log file for appending
     let mut log_file = File::create("./wiserone.log")?;
