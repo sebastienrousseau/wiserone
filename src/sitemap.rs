@@ -15,7 +15,20 @@ pub fn generate_sitemap_file(base_url: &str) -> Result<(), Box<dyn Error>> {
 
     // Obtain the current date and time in ISO 8601 format using dtt
     let dt = DateTime::new();
-    let current_iso_date = dt.iso_8601;
+    let iso = dt.iso_8601;
+    let year_str = dt.year;
+    let month_str = &iso[5..7];
+    let day_str = dt.day;
+    let hour_str = dt.hour.to_string();
+    let minute_str = dt.minute.to_string();
+    let second_str = dt.second.to_string();
+    let offset = dt.offset;
+
+    // Construct the ISO 8601 date and time string
+    let iso_8601 = format!("{}-{}-{}T{}:{}:{}{}", year_str, month_str, day_str, hour_str, minute_str, second_str, offset);
+
+    let current_iso_date = iso_8601;
+    print!("Current date and time in ISO 8601 format: {}\n", current_iso_date);
 
     // Collect HTML filenames
     if docs_path.exists() {
