@@ -27,8 +27,8 @@ pub fn generate_sitemap_file(base_url: &str) -> Result<(), Box<dyn Error>> {
     // Construct the ISO 8601 date and time string
     let iso_8601 = format!("{}-{}-{}T{}:{}:{}{}", year_str, month_str, day_str, hour_str, minute_str, second_str, offset);
 
+    // Current date and time in ISO 8601 format using dtt
     let current_iso_date = iso_8601;
-    print!("Current date and time in ISO 8601 format: {}\n", current_iso_date);
 
     // Collect HTML filenames
     if docs_path.exists() {
