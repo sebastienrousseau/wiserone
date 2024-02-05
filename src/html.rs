@@ -31,7 +31,7 @@ pub fn generate_html_file(
     let year = dt.year;
     let month = &iso[5..7];
     let day = dt.day;
-    
+
     // Determine if the date matches today
     let is_today = year == dt.year && month == &format!("{:02}", dt.month) && day == dt.day;
 
@@ -84,8 +84,11 @@ pub fn generate_html_file(
     filenames.sort(); // Sort filenames alphabetically
 
     // Iterate over sorted filenames and log each one
-    for filename in filenames {
+    for filename in &filenames {
+
         let uuid = Uuid::new_v4();
+
+        // Write the log to both the console and the file
         let file_log = macro_log!(
             &uuid.to_string(),
             &iso,
@@ -94,25 +97,40 @@ pub fn generate_html_file(
             &format!("The HTML File is created at `{}`.", filename),
             &LogFormat::CLF
         );
-
-        // Write the log to both the console and the file
         writeln!(log_file, "{}", file_log)?;
 
-        // Define a function to check if the date is today
-        let is_today = date.clone();
+        // Assuming year, month, and day are already defined correctly
+        let today_formatted = format!("{year}_{month:02}_{day:02}", year=year, month=month, day=day);
 
-        // Remove "./docs/" from the beginning of the filename
-        let relative_filename = filename.trim_start_matches("./docs/");
+        // Create the file path for the current day's file if it doesn't already exist
+        let today_file_path = format!("./docs/{}.html", today_formatted);
 
-        // Remove the ".html" extension from the relative filename
-        let relative_filename_without_extension = relative_filename.trim_end_matches(".html");
+        if Path::new(&today_file_path).exists() {
+            let content = fs::read_to_string(&today_file_path)?;
+            let index_path = Path::new("./docs/index.html");
+            fs::write(index_path, content.as_bytes())?;
 
-        if is_today == relative_filename_without_extension {
-            let new_filename = "index.html".to_string();
-            let new_full_path = Path::new("./docs").join(new_filename);
-            let mut new_file = File::create(&new_full_path)?;
-            let content = fs::read_to_string(&filename)?;
-            new_file.write_all(content.as_bytes())?;
+            // Write the log to both the console and the file
+            let file_log = macro_log!(
+                &Uuid::new_v4().to_string(),
+                &iso,
+                &LogLevel::INFO,
+                "process",
+                &format!("index.html updated with content from {}", today_file_path),
+                &LogFormat::CLF
+            );
+            writeln!(log_file, "{}", file_log)?;
+        } else {
+            // Write the log to both the console and the file
+            let file_log = macro_log!(
+                &Uuid::new_v4().to_string(),
+                &iso,
+                &LogLevel::INFO,
+                "process",
+                &format!("No file found at {}", today_file_path),
+                &LogFormat::CLF
+            );
+            writeln!(log_file, "{}", file_log)?;
         }
     }
     println!("- info:wiserone: add file at `{}`", path.display());
