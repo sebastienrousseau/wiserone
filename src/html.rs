@@ -7,6 +7,7 @@ use rlg::{macro_log, LogFormat, LogLevel};
 use std::{error::Error, fs::{self, File}, io::Write, path::Path};
 use uuid::Uuid;
 use crate::quotes::Quote;
+use std::fmt::format;
 
 /// Creates an HTML file based on the provided quote.
 ///
@@ -25,6 +26,28 @@ pub fn generate_html_file(
 ) -> Result<(), Box<dyn Error>> {
     let mut layout = fs::read_to_string("_layouts/quote.html")?;
 
+    // Define date and time
+    let dt = DateTime::new();
+    let iso = dt.iso_8601;
+    let year = dt.year;
+    let month = &iso[5..7];
+    let day = dt.day;
+
+    // Determine if the date matches today
+    let is_today = year == dt.year && month == {
+        let res = format(format_args!("{:02}", dt.month));
+        res
+        } && day == dt.day;
+
+    let date = format!("{}_{}_{}", year, month, day);
+    let prefix = if is_today {
+        "https://wiserone.com/index.html".to_string() // If the date is today
+    } else {
+        format!("https://wiserone.com/{}.html", date) // For any other date
+    };
+
+    println!("Prefix: {}", prefix);
+
     // Replace the placeholders with values from the quote
     layout = layout.replace("{{apple_touch_icon_sizes}}", "192x192");
     layout = layout.replace("{{author}}", &quote.author);
@@ -40,19 +63,12 @@ pub fn generate_html_file(
     layout = layout.replace("{{name}}", "wiserone");
     layout = layout.replace("{{title}}", &quote.quote_text);
     layout = layout.replace("{{url}}", "https://wiserone.com");
+    layout = layout.replace("{{canonical}}", &prefix);
 
     fs::create_dir_all("./docs")?;
     let path = Path::new("./docs").join(filename);
     let mut file = fs::File::create(&path)?;
     file.write_all(layout.as_bytes())?;
-
-    // Define date and time
-    let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
-    let month = &iso[5..7];
-    let day = dt.day;
-    let date = format!("{}_{}_{}", year, month, day);
 
     // Open the log file for appending
     let mut log_file = File::create("./wiserone.log")?;
@@ -72,8 +88,11 @@ pub fn generate_html_file(
     filenames.sort(); // Sort filenames alphabetically
 
     // Iterate over sorted filenames and log each one
-    for filename in filenames {
+    for filename in &filenames {
+
         let uuid = Uuid::new_v4();
+
+        // Write the log to both the console and the file
         let file_log = macro_log!(
             &uuid.to_string(),
             &iso,
@@ -82,25 +101,40 @@ pub fn generate_html_file(
             &format!("The HTML File is created at `{}`.", filename),
             &LogFormat::CLF
         );
-
-        // Write the log to both the console and the file
         writeln!(log_file, "{}", file_log)?;
 
-        // Define a function to check if the date is today
-        let is_today = date.clone();
+        // Assuming year, month, and day are already defined correctly
+        let today_formatted = format!("{year}_{month:02}_{day:02}", year=year, month=month, day=day);
 
-        // Remove "./docs/" from the beginning of the filename
-        let relative_filename = filename.trim_start_matches("./docs/");
+        // Create the file path for the current day's file if it doesn't already exist
+        let today_file_path = format!("./docs/{}.html", today_formatted);
 
-        // Remove the ".html" extension from the relative filename
-        let relative_filename_without_extension = relative_filename.trim_end_matches(".html");
+        if Path::new(&today_file_path).exists() {
+            let content = fs::read_to_string(&today_file_path)?;
+            let index_path = Path::new("./docs/index.html");
+            fs::write(index_path, content.as_bytes())?;
 
-        if is_today == relative_filename_without_extension {
-            let new_filename = "index.html".to_string();
-            let new_full_path = Path::new("./docs").join(new_filename);
-            let mut new_file = File::create(&new_full_path)?;
-            let content = fs::read_to_string(&filename)?;
-            new_file.write_all(content.as_bytes())?;
+            // Write the log to both the console and the file
+            let file_log = macro_log!(
+                &Uuid::new_v4().to_string(),
+                &iso,
+                &LogLevel::INFO,
+                "process",
+                &format!("index.html updated with content from {}", today_file_path),
+                &LogFormat::CLF
+            );
+            writeln!(log_file, "{}", file_log)?;
+        } else {
+            // Write the log to both the console and the file
+            let file_log = macro_log!(
+                &Uuid::new_v4().to_string(),
+                &iso,
+                &LogLevel::INFO,
+                "process",
+                &format!("No file found at {}", today_file_path),
+                &LogFormat::CLF
+            );
+            writeln!(log_file, "{}", file_log)?;
         }
     }
     println!("- info:wiserone: add file at `{}`", path.display());
