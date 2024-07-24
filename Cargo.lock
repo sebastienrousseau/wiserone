@@ -457,6 +457,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d3d0e0f38255e7fa3cf31335b3a56f05febd18025f4db5ef7a0cfb4f8da651f"
 
 [[package]]
+name = "hostname"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c731c3e10504cc8ed35cfe2f1db4c9274c3d35fa486e3b31df46f068ef3e867"
+dependencies = [
+ "libc",
+ "match_cfg",
+ "winapi",
+]
+
+[[package]]
 name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -540,6 +551,12 @@ name = "log"
 version = "0.4.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
+
+[[package]]
+name = "match_cfg"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ffbee8634e0d45d258acb448e7eaab3fce7a0a467395d4d9f228e3c1f01fb2e4"
 
 [[package]]
 name = "memchr"
@@ -907,6 +924,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "rlg"
+version = "0.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e02c717e23f67b23032a4acb01cf63534d6259938d592e6d2451c02f09fc368"
+dependencies = [
+ "dtt",
+ "hostname",
+ "serde_json",
+ "tokio",
+ "vrd 0.0.5",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -953,6 +983,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc76f558e0cbb2a839d37354c575f1dc3fdc6546b5be373ba43d95f231bf7c12"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-big-array"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11fc7cc2c76d73e0f27ee52abbd64eec84d46f370c88371120433196934e4b7f"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -1191,6 +1230,22 @@ checksum = "ee1067b8d17481f5be71b59d11c329e955ffe36348907e0a4a41b619682bb4af"
 dependencies = [
  "rand",
  "serde",
+]
+
+[[package]]
+name = "vrd"
+version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "36c5adc67f8ec8758d0564f48a3a760ceecc6e5375bc5b8d26fc55873cac48de"
+dependencies = [
+ "dtt",
+ "rand",
+ "rlg 0.0.3",
+ "serde",
+ "serde-big-array",
+ "serde_json",
+ "tokio",
+ "uuid",
 ]
 
 [[package]]
@@ -1458,11 +1513,11 @@ dependencies = [
  "figlet-rs",
  "mockall",
  "openssl",
- "rlg",
+ "rlg 0.0.2",
  "serde",
  "serde_json",
  "serde_yaml",
  "toml",
  "uuid",
- "vrd 0.0.5",
+ "vrd 0.0.6",
 ]
