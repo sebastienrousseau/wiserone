@@ -54,7 +54,7 @@ serde_yaml = "0.9.31"
 toml = "0.8.19"
 vrd = "0.0.5"
 rlg = "0.0.2"
-uuid = { version = "1.7.0", features = ["serde", "v4"] }
+uuid = { version = "1.10.0", features = ["serde", "v4"] }
 
 [dev-dependencies]
 criterion = "0.5.1"
