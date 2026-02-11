@@ -52,6 +52,9 @@ vrd = "0.0.12"
 rlg = "0.0.3"
 uuid = { version = "1.10.0", features = ["serde", "v4"] }
 
+# Ecosystem shared utilities
+commons = { git = "https://github.com/sebastienrousseau/commons", branch = "feat/v0.0.1", default-features = false, features = ["time", "id", "env", "validation"] }
+
 [dev-dependencies]
 criterion = "0.8.2"
 mockall = "0.15.0"
