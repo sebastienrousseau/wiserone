@@ -5,7 +5,6 @@
 //! # `wiserone` 🦀
 
 // Crate configuration
-#![cfg_attr(feature = "bench", feature(test))]
 #![deny(dead_code)]
 #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
