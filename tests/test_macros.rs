@@ -8,14 +8,9 @@ use std::collections::HashMap;
 
 // Import all macros from wiserone
 use wiserone::{
-    wiserone_assert, wiserone_join, wiserone_map, wiserone_max, wiserone_min,
+    wiserone, wiserone_assert, wiserone_join, wiserone_map, wiserone_max, wiserone_min,
     wiserone_print, wiserone_print_vec, wiserone_split, wiserone_vec
 };
-
-// Note: Some macros in the wiserone crate have implementation bugs:
-// - wiserone_min and wiserone_max don't work with multiple values
-// - wiserone_assert has issues with complex expressions
-// These tests are designed to work around those limitations
 
 #[cfg(test)]
 mod tests {
@@ -102,22 +97,27 @@ mod tests {
         assert_eq!(m[&3], "three");
     }
 
-    // Note: wiserone_assert macro has implementation issues with expression parsing
-    // Testing with simple boolean tokens only
     #[test]
     fn test_wiserone_assert_simple_true() {
         wiserone_assert!(true);
     }
 
     #[test]
-    #[should_panic(expected = "Assertion failed!")]
+    #[should_panic(expected = "Assertion failed")]
     fn test_wiserone_assert_simple_false() {
         wiserone_assert!(false);
     }
 
-    // Note: wiserone_min and wiserone_max macros have implementation bugs
-    // They don't work with multiple values due to incorrect repetition syntax
-    // Testing only single values which should work
+    #[test]
+    fn test_wiserone_assert_complex_expressions() {
+        // Test complex expressions now that the macro is fixed
+        wiserone_assert!(1 + 1 == 2);
+        wiserone_assert!(vec![1, 2, 3].len() == 3);
+        wiserone_assert!("hello".starts_with("he"));
+        let x = 10;
+        wiserone_assert!(x > 5 && x < 20);
+    }
+
     #[test]
     fn test_wiserone_min_single_value() {
         let result = wiserone_min!(42);
@@ -130,9 +130,25 @@ mod tests {
         assert_eq!(result, 42);
     }
 
-    // Skip multiple value tests due to macro implementation bugs
-    // These would fail to compile: wiserone_min!(5, 3, 8)
-    // The macro tries to do `let mut min = 5, 3, 8;` which is invalid syntax
+    #[test]
+    fn test_wiserone_min_multiple_values() {
+        // Now works with multiple values
+        assert_eq!(wiserone_min!(5, 3, 8), 3);
+        assert_eq!(wiserone_min!(1, 2, 3, 4, 5), 1);
+        assert_eq!(wiserone_min!(10, 5), 5);
+        assert_eq!(wiserone_min!(3, 3, 3), 3);
+        assert_eq!(wiserone_min!(-5, 0, 5), -5);
+    }
+
+    #[test]
+    fn test_wiserone_max_multiple_values() {
+        // Now works with multiple values
+        assert_eq!(wiserone_max!(5, 3, 8), 8);
+        assert_eq!(wiserone_max!(1, 2, 3, 4, 5), 5);
+        assert_eq!(wiserone_max!(10, 5), 10);
+        assert_eq!(wiserone_max!(3, 3, 3), 3);
+        assert_eq!(wiserone_max!(-5, 0, 5), 5);
+    }
 
     #[test]
     fn test_wiserone_split_empty_string() {
@@ -239,7 +255,6 @@ mod tests {
 
     #[test]
     fn test_wiserone_min_max_single_value_consistency() {
-        // Test single values since multiple values don't work due to macro bugs
         let val = 42;
         let min_val = wiserone_min!(val);
         let max_val = wiserone_max!(val);
@@ -247,6 +262,31 @@ mod tests {
         assert_eq!(min_val, max_val);
         assert_eq!(min_val, 42);
         assert_eq!(max_val, 42);
+    }
+
+    #[test]
+    fn test_wiserone_min_max_multiple_value_consistency() {
+        let values = [5, 3, 8, 1, 9];
+        let min_val = wiserone_min!(5, 3, 8, 1, 9);
+        let max_val = wiserone_max!(5, 3, 8, 1, 9);
+
+        assert_eq!(min_val, *values.iter().min().unwrap());
+        assert_eq!(max_val, *values.iter().max().unwrap());
+    }
+
+    #[test]
+    fn test_wiserone_quote_macro() {
+        let quote = wiserone! {
+            quote_text: "The only way to do great work is to love what you do.",
+            author: "Steve Jobs",
+            date_added: "2024-01-01T00:00:00Z",
+            image_url: "https://example.com/image.jpg"
+        };
+
+        assert_eq!(quote.quote_text, "The only way to do great work is to love what you do.");
+        assert_eq!(quote.author, "Steve Jobs");
+        assert_eq!(quote.date_added, "2024-01-01T00:00:00Z");
+        assert_eq!(quote.image_url, "https://example.com/image.jpg");
     }
 
     #[test]
@@ -269,12 +309,18 @@ mod tests {
     // Edge case testing
     #[test]
     fn test_macro_edge_cases_boundary_values() {
-        // Test with single boundary values only due to macro implementation issues
+        // Test with boundary values
         let min_val = wiserone_min!(i32::MIN);
         assert_eq!(min_val, i32::MIN);
 
         let max_val = wiserone_max!(i32::MAX);
         assert_eq!(max_val, i32::MAX);
+
+        // Test with multiple boundary values
+        assert_eq!(wiserone_min!(i32::MIN, i32::MAX), i32::MIN);
+        assert_eq!(wiserone_max!(i32::MIN, i32::MAX), i32::MAX);
+        assert_eq!(wiserone_min!(0, i32::MIN, i32::MAX), i32::MIN);
+        assert_eq!(wiserone_max!(0, i32::MIN, i32::MAX), i32::MAX);
     }
 
     #[test]
@@ -308,13 +354,13 @@ mod concurrent_tests {
             .map(|i| {
                 thread::spawn(move || {
                     let v = wiserone_vec![i, i + 1, i + 2];
-                    // Test single values only due to macro implementation bugs
-                    let min_val = wiserone_min!(i);
-                    let max_val = wiserone_max!(i);
+                    // Test with multiple values now that macros are fixed
+                    let min_val = wiserone_min!(i, i + 1, i + 2);
+                    let max_val = wiserone_max!(i, i + 1, i + 2);
 
                     assert_eq!(v, vec![i, i + 1, i + 2]);
                     assert_eq!(min_val, i);
-                    assert_eq!(max_val, i);
+                    assert_eq!(max_val, i + 2);
                 })
             })
             .collect();

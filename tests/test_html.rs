@@ -266,8 +266,8 @@ fn test_log_file_creation() {
 
     assert!(result.is_ok());
 
-    // Check if log file was created
-    let log_file = temp_dir.path().join("wiserone.log");
+    // Check if log file was created in the new location (docs/logs/)
+    let log_file = temp_dir.path().join("docs/logs/wiserone.log");
     assert!(log_file.exists());
 }
 

@@ -35,8 +35,10 @@ pub fn generate_sitemap_file(base_url: &str) -> Result<(), Box<dyn Error>> {
         for entry in fs::read_dir(docs_path)? {
             let path = entry?.path();
             if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("html") {
-                let file_name = path.file_name().unwrap().to_str().unwrap();
-                urls.push(format!("{}{}", base_url, file_name));
+                // Safely extract the filename, skipping files with invalid names
+                if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
+                    urls.push(format!("{}{}", base_url, file_name));
+                }
             }
         }
     }
