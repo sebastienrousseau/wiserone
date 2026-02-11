@@ -91,6 +91,9 @@ pub enum QuoteError {
 
     /// Error variant for when no quotes are available.
     NoQuotesAvailable,
+
+    /// Error variant for path traversal attempts.
+    PathTraversalError(String),
 }
 
 impl fmt::Display for QuoteError {
@@ -103,6 +106,9 @@ impl fmt::Display for QuoteError {
             QuoteError::NoQuotesAvailable => {
                 write!(f, "No Quotes Available")
             }
+            QuoteError::PathTraversalError(msg) => {
+                write!(f, "Path Traversal Error: {}", msg)
+            }
         }
     }
 }
@@ -113,6 +119,7 @@ impl Error for QuoteError {
             QuoteError::IOError(err) => Some(err),
             QuoteError::ParseError(_) => None,
             QuoteError::NoQuotesAvailable => None,
+            QuoteError::PathTraversalError(_) => None,
         }
     }
 }
@@ -135,6 +142,33 @@ impl From<csv::Error> for QuoteError {
     }
 }
 
+/// Validates that a file path is safe and doesn't contain path traversal sequences.
+///
+/// # Arguments
+///
+/// * `file_path` - The file path to validate.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the path is safe, or a `PathTraversalError` if unsafe.
+fn validate_file_path(file_path: &str) -> Result<(), QuoteError> {
+    // Check for directory traversal sequences
+    if file_path.contains("..") {
+        return Err(QuoteError::PathTraversalError(
+            "Path contains directory traversal sequence".into(),
+        ));
+    }
+
+    // Validate file extension
+    let path = Path::new(file_path);
+    match path.extension().and_then(|s| s.to_str()) {
+        Some("json") | Some("csv") => Ok(()),
+        _ => Err(QuoteError::ParseError(
+            "Only .json and .csv files are supported".into(),
+        )),
+    }
+}
+
 /// Reads and parses quotes from a file (either JSON or CSV).
 ///
 /// # Arguments
@@ -145,9 +179,18 @@ impl From<csv::Error> for QuoteError {
 ///
 /// Returns a `Quotes` struct if successful, or an error if the file
 /// cannot be read or parsed.
+///
+/// # Security
+///
+/// This function validates the file path to prevent directory traversal
+/// attacks. Only relative paths with .json or .csv extensions are
+/// allowed.
 pub fn read_quotes_from_file(
     file_path: &str,
 ) -> Result<Quotes, QuoteError> {
+    // Validate the file path for security
+    validate_file_path(file_path)?;
+
     let path = Path::new(file_path);
     match path.extension().and_then(|s| s.to_str()) {
         Some("json") => read_quotes_from_json(file_path),

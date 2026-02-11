@@ -4,8 +4,9 @@
 
 use clap::Parser;
 use std::error::Error;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::Write;
+use std::path::Path;
 
 use dtt::datetime::DateTime;
 use rlg::log_format::LogFormat;
@@ -16,6 +17,9 @@ use crate::ascii::generate_ascii_art;
 use crate::html::generate_html_file;
 use crate::quotes::read_quotes_from_file;
 use crate::sitemap::generate_sitemap_file;
+
+/// The directory where output files (including logs) are stored.
+const OUTPUT_DIR: &str = "./docs";
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -50,8 +54,11 @@ pub enum Command {
 /// * `i32`: An exit code indicating the success or failure of the
 ///   program.
 pub fn run_cli() -> Result<(), Box<dyn Error>> {
-    // Open the log file for appending
-    let mut log_file = File::create("./wiserone.log")?;
+    // Ensure log directory exists and open log file
+    let log_dir = Path::new(OUTPUT_DIR).join("logs");
+    fs::create_dir_all(&log_dir)?;
+    let log_path = log_dir.join("wiserone.log");
+    let mut log_file = File::create(&log_path)?;
 
     // Define date and time
     let dt = DateTime::new();

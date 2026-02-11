@@ -16,22 +16,87 @@ use std::{
 };
 use uuid::Uuid;
 
+/// The directory where HTML files are generated.
+const OUTPUT_DIR: &str = "./docs";
+
+/// The path to the HTML template file.
+const TEMPLATE_PATH: &str = "_layouts/quote.html";
+
+/// Validates that a filename is safe for use in file operations.
+///
+/// # Arguments
+///
+/// * `filename` - The filename to validate.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the filename is safe, or an error if unsafe.
+fn validate_filename(filename: &str) -> Result<(), Box<dyn Error>> {
+    // Check for directory traversal sequences
+    if filename.contains("..") || filename.contains('/') || filename.contains('\\') {
+        return Err("Invalid filename: contains directory traversal characters".into());
+    }
+
+    // Check for valid HTML extension
+    if !filename.ends_with(".html") {
+        return Err("Invalid filename: must end with .html".into());
+    }
+
+    // Check for empty or whitespace-only names
+    let name_without_ext = filename.trim_end_matches(".html");
+    if name_without_ext.is_empty() || name_without_ext.chars().all(|c| c.is_whitespace()) {
+        return Err("Invalid filename: name cannot be empty".into());
+    }
+
+    Ok(())
+}
+
+/// Validates that the template file exists and is readable.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the template is valid, or an error otherwise.
+fn validate_template() -> Result<(), Box<dyn Error>> {
+    let template_path = Path::new(TEMPLATE_PATH);
+
+    if !template_path.exists() {
+        return Err(format!("Template file not found: {}", TEMPLATE_PATH).into());
+    }
+
+    if !template_path.is_file() {
+        return Err(format!("Template path is not a file: {}", TEMPLATE_PATH).into());
+    }
+
+    Ok(())
+}
+
 /// Creates an HTML file based on the provided quote.
 ///
 /// # Arguments
 ///
-/// * `filename` - The name of the file to be created.
+/// * `filename` - The name of the file to be created (must be a simple filename, not a path).
 /// * `quote` - A reference to the quote to be used.
 ///
 /// # Returns
 ///
 /// Returns `Ok(())` if the file is successfully created, or an error
 /// otherwise.
+///
+/// # Security
+///
+/// This function validates the filename to prevent directory traversal attacks.
+/// Files are always created in the designated output directory (./docs).
 pub fn generate_html_file(
     filename: &str,
     quote: &Quote,
 ) -> Result<(), Box<dyn Error>> {
-    let mut layout = fs::read_to_string("_layouts/quote.html")?;
+    // Validate filename to prevent path traversal
+    validate_filename(filename)?;
+
+    // Validate template exists before reading
+    validate_template()?;
+
+    let mut layout = fs::read_to_string(TEMPLATE_PATH)?;
 
     // Define date and time
     let dt = DateTime::new();
@@ -81,16 +146,19 @@ pub fn generate_html_file(
     layout = layout.replace("{{url}}", "https://wiserone.com");
     layout = layout.replace("{{canonical}}", &prefix);
 
-    fs::create_dir_all("./docs")?;
-    let path = Path::new("./docs").join(filename);
+    fs::create_dir_all(OUTPUT_DIR)?;
+    let path = Path::new(OUTPUT_DIR).join(filename);
     let mut file = fs::File::create(&path)?;
     file.write_all(layout.as_bytes())?;
 
-    // Open the log file for appending
-    let mut log_file = File::create("./wiserone.log")?;
+    // Ensure log directory exists and open log file
+    let log_dir = Path::new(OUTPUT_DIR).join("logs");
+    fs::create_dir_all(&log_dir)?;
+    let log_path = log_dir.join("wiserone.log");
+    let mut log_file = File::create(&log_path)?;
 
     // Collect filenames into a vector, exclude .DS_Store, and sort them alphabetically
-    let mut filenames: Vec<_> = fs::read_dir("./docs")?
+    let mut filenames: Vec<_> = fs::read_dir(OUTPUT_DIR)?
         .filter_map(|entry| {
             entry.ok().map(|e| {
                 let path = e.path();
@@ -128,11 +196,11 @@ pub fn generate_html_file(
 
         // Create the file path for the current day's file if it doesn't already exist
         let today_file_path =
-            format!("./docs/{}.html", today_formatted);
+            Path::new(OUTPUT_DIR).join(format!("{}.html", today_formatted));
 
-        if Path::new(&today_file_path).exists() {
+        if today_file_path.exists() {
             let content = fs::read_to_string(&today_file_path)?;
-            let index_path = Path::new("./docs/index.html");
+            let index_path = Path::new(OUTPUT_DIR).join("index.html");
             fs::write(index_path, content.as_bytes())?;
 
             // Write the log to both the console and the file
@@ -143,7 +211,7 @@ pub fn generate_html_file(
                 "process",
                 &format!(
                     "index.html updated with content from {}",
-                    today_file_path
+                    today_file_path.display()
                 ),
                 &LogFormat::CLF
             );
@@ -155,7 +223,7 @@ pub fn generate_html_file(
                 &iso,
                 &LogLevel::INFO,
                 "process",
-                &format!("No file found at {}", today_file_path),
+                &format!("No file found at {}", today_file_path.display()),
                 &LogFormat::CLF
             );
             writeln!(log_file, "{}", file_log)?;
