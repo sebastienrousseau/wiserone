@@ -1,0 +1,264 @@
+name: 🚀 Comprehensive CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  # Enforce warnings as errors globally
+  RUSTFLAGS: "-Dwarnings"
+  RUST_LOG: debug
+
+# Cancel previous runs on new push
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Pre-flight checks - fast feedback
+  preflight:
+    name: 🔍 Pre-flight Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Configure dependency cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: preflight
+
+      # ZERO-WARNING POLICY: Formatting check (fail-fast)
+      - name: 🎨 Check code formatting
+        run: |
+          echo "::group::Checking Rust formatting"
+          cargo fmt --all -- --check
+          echo "::endgroup::"
+          echo "✅ Code formatting is correct"
+
+      # ZERO-WARNING POLICY: Clippy lints (fail-fast)
+      - name: 🔍 Run Clippy lints
+        run: |
+          echo "::group::Running Clippy analysis"
+          cargo clippy --workspace --all-targets --all-features --no-deps -- -D warnings
+          echo "::endgroup::"
+          echo "✅ No linting issues found"
+
+      # Type checking in strict mode
+      - name: 🔧 Type checking
+        run: |
+          echo "::group::Type checking with strict mode"
+          cargo check --workspace --all-targets --all-features
+          echo "::endgroup::"
+          echo "✅ Type checking passed"
+
+  # Cross-platform testing matrix (macOS + Linux required)
+  test-matrix:
+    name: 🧪 Test Suite (${{ matrix.os }}, ${{ matrix.toolchain }})
+    needs: preflight
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10  # Strict 10-minute timeout
+    strategy:
+      fail-fast: true  # Fail immediately on any failure
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        toolchain: [stable, nightly]
+        include:
+          - os: ubuntu-latest
+            cache-key: linux
+          - os: macos-latest
+            cache-key: macos
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: llvm-tools-preview
+
+      - name: Configure dependency cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: test-${{ matrix.cache-key }}-${{ matrix.toolchain }}
+
+      # Install coverage tools for stable builds
+      - name: Install coverage tools
+        if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          cargo install cargo-tarpaulin --locked
+          echo "✅ Coverage tools installed"
+
+      # Run tests with coverage (100% threshold enforced)
+      - name: 🧪 Run test suite with coverage
+        if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          echo "::group::Running tests with coverage analysis"
+          cargo tarpaulin --workspace --all-features --out Xml --output-dir coverage/ --fail-under 100 --verbose --timeout 300
+          echo "::endgroup::"
+          echo "✅ Tests passed with 100% coverage requirement"
+
+      # Run tests without coverage for other matrix combinations
+      - name: 🧪 Run test suite
+        if: matrix.toolchain != 'stable' || matrix.os != 'ubuntu-latest'
+        run: |
+          echo "::group::Running test suite"
+          cargo test --workspace --all-features --verbose
+          echo "::endgroup::"
+          echo "✅ All tests passed"
+
+      - name: Upload coverage to Codecov
+        if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage/cobertura.xml
+          fail_ci_if_error: true
+
+  # Security scanning pipeline (NO BYPASSING with || true)
+  security:
+    name: 🔒 Security Audit
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Configure dependency cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: security
+
+      # Install security audit tools
+      - name: Install security tools
+        run: |
+          cargo install cargo-audit cargo-deny --locked
+          echo "✅ Security tools installed"
+
+      # Dependency vulnerability scan - MUST NOT use || true
+      - name: 🛡️ Dependency vulnerability audit
+        run: |
+          echo "::group::Scanning for vulnerabilities"
+          cargo audit
+          echo "::endgroup::"
+          echo "✅ No vulnerabilities found"
+
+      # License and ban compliance - MUST NOT use || true
+      - name: 🏛️ License and compliance check
+        run: |
+          echo "::group::Checking license compliance"
+          cargo deny check
+          echo "::endgroup::"
+          echo "✅ License compliance verified"
+
+  # Documentation and examples
+  docs:
+    name: 📚 Documentation & Examples
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Configure dependency cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: docs
+
+      # Generate documentation with warnings as errors
+      - name: 📖 Generate documentation
+        run: |
+          echo "::group::Generating documentation"
+          RUSTDOCFLAGS="-Dwarnings" cargo doc --workspace --all-features --no-deps --document-private-items
+          echo "::endgroup::"
+          echo "✅ Documentation generated successfully"
+
+      # Test documentation examples
+      - name: 🧪 Test documentation examples
+        run: |
+          echo "::group::Testing doc examples"
+          cargo test --doc --workspace --all-features
+          echo "::endgroup::"
+          echo "✅ Documentation examples pass"
+
+  # Benchmarks (performance regression detection)
+  benchmarks:
+    name: 📊 Performance Benchmarks
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Configure dependency cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+          shared-key: benchmarks
+
+      - name: 🚀 Run benchmarks
+        run: |
+          echo "::group::Running performance benchmarks"
+          cargo bench --workspace --all-features
+          echo "::endgroup::"
+          echo "✅ Benchmarks completed"
+
+  # Final gate - all jobs must pass
+  ci-gate:
+    name: 🎯 CI Gate
+    runs-on: ubuntu-latest
+    needs: [preflight, test-matrix, security, docs, benchmarks]
+    if: always()
+    steps:
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.preflight.result }}" != "success" ]]; then
+            echo "❌ Pre-flight checks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.test-matrix.result }}" != "success" ]]; then
+            echo "❌ Test matrix failed"
+            exit 1
+          fi
+          if [[ "${{ needs.security.result }}" != "success" ]]; then
+            echo "❌ Security audit failed"
+            exit 1
+          fi
+          if [[ "${{ needs.docs.result }}" != "success" ]]; then
+            echo "❌ Documentation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.benchmarks.result }}" != "success" ]]; then
+            echo "❌ Benchmarks failed"
+            exit 1
+          fi
+          echo "🎉 All CI checks passed successfully!"
