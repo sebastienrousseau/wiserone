@@ -8,7 +8,6 @@ use std::fs::File;
 use std::io::Write;
 
 use dtt::DateTime;
-use rlg::{macro_log, LogFormat, LogLevel};
 
 use crate::html::generate_html_file;
 use crate::sitemap::generate_sitemap_file;
@@ -53,10 +52,10 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
 
     // Define date and time
     let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
-    let month = &iso[5..7];
-    let day = dt.day;
+    let iso = dt.to_string();
+    let year = dt.year();
+    let month = if iso.len() >= 7 { &iso[5..7] } else { "01" };
+    let day = dt.day();
     let date = format!("{}_{}_{}", year, month, day);
 
     // Generate a log entry

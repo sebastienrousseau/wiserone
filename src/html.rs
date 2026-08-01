@@ -3,11 +3,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use dtt::DateTime;
-use rlg::{macro_log, LogFormat, LogLevel};
 use std::{error::Error, fs::{self, File}, io::Write, path::Path};
 use uuid::Uuid;
 use crate::quotes::Quote;
-use std::fmt::format;
 
 /// Creates an HTML file based on the provided quote.
 ///
@@ -28,16 +26,14 @@ pub fn generate_html_file(
 
     // Define date and time
     let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
-    let month = &iso[5..7];
-    let day = dt.day;
+    let iso = dt.to_string();
+    let year = dt.year();
+    let month = if iso.len() >= 7 { &iso[5..7] } else { "01" };
+    let day = dt.day();
 
     // Determine if the date matches today
-    let is_today = year == dt.year && month == {
-        let res = format(format_args!("{:02}", dt.month));
-        res
-        } && day == dt.day;
+    let today_dt = DateTime::new();
+    let is_today = year == today_dt.year() && day == today_dt.day();
 
     let date = format!("{}_{}_{}", year, month, day);
     let prefix = if is_today {

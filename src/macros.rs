@@ -108,3 +108,11 @@ macro_rules! wiserone_print_vec {
         }
     }};
 }
+
+/// Macro for creating log entries.
+#[macro_export]
+macro_rules! macro_log {
+    ($session_id:expr, $time:expr, $level:expr, $component:expr, $description:expr, $format:expr) => {{
+        rlg::log::Log::info($description)
+    }};
+}

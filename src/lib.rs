@@ -23,9 +23,12 @@ use std::fs::File;
 use std::io::Write;
 
 use dtt::DateTime;
-use rlg::{macro_log, LogFormat, LogLevel};
 
 use crate::loggers::init_logger;
+
+/// The `macros` module contains functions for generating macros.
+#[macro_use]
+pub mod macros;
 
 /// The `ascii` module contains functions for generating ASCII art.
 pub mod ascii;
@@ -47,9 +50,6 @@ pub mod sitemap;
 /// The `loggers` module contains the loggers for the library.
 pub mod loggers;
 
-/// The `macros` module contains functions for generating macros.
-pub mod macros;
-
 /// Entry point of the application.
 ///
 /// # Returns
@@ -61,7 +61,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     // Define date and time
     let date = DateTime::new();
-    let iso = date.iso_8601;
+    let iso = date.to_string();
 
     // Open the log file for appending
     let mut log_file = File::create("./wiserone.log")?;
