@@ -22,8 +22,10 @@ use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 
-use dtt::DateTime;
-use rlg::{macro_log, LogFormat, LogLevel};
+use dtt::datetime::DateTime;
+use rlg::log_format::LogFormat;
+use rlg::log_level::LogLevel;
+use rlg::macro_log;
 
 use crate::loggers::init_logger;
 
@@ -61,7 +63,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     // Define date and time
     let date = DateTime::new();
-    let iso = date.iso_8601;
+    let iso = date.format_iso8601()?;
 
     // Open the log file for appending
     let mut log_file = File::create("./wiserone.log")?;
@@ -70,15 +72,14 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     cli::run_cli()?;
 
     // Generate a log entry
-    let quote_log =
-        macro_log!(
-            "id",
-            &iso,
-            &LogLevel::INFO,
-            "process",
-            "Quote HTML file generated successfully.",
-            &LogFormat::CLF
-        );
+    let quote_log = macro_log!(
+        "id",
+        &iso,
+        &LogLevel::INFO,
+        "process",
+        "Quote HTML file generated successfully.",
+        &LogFormat::CLF
+    );
 
     // Write the log to both the console and the file
     writeln!(log_file, "{}", quote_log)?;

@@ -2,12 +2,19 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use dtt::DateTime;
-use rlg::{macro_log, LogFormat, LogLevel};
-use std::{error::Error, fs::{self, File}, io::Write, path::Path};
-use uuid::Uuid;
 use crate::quotes::Quote;
+use dtt::datetime::DateTime;
+use rlg::log_format::LogFormat;
+use rlg::log_level::LogLevel;
+use rlg::macro_log;
 use std::fmt::format;
+use std::{
+    error::Error,
+    fs::{self, File},
+    io::Write,
+    path::Path,
+};
+use uuid::Uuid;
 
 /// Creates an HTML file based on the provided quote.
 ///
@@ -28,16 +35,19 @@ pub fn generate_html_file(
 
     // Define date and time
     let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
+    let iso = dt.format_iso8601()?;
+    let year = dt.year();
     let month = &iso[5..7];
-    let day = dt.day;
+    let day = dt.day();
 
     // Determine if the date matches today
-    let is_today = year == dt.year && month == {
-        let res = format(format_args!("{:02}", dt.month));
-        res
-        } && day == dt.day;
+    let is_today = year == dt.year()
+        && month == {
+            let res =
+                format(format_args!("{:02}", u8::from(dt.month())));
+            res
+        }
+        && day == dt.day();
 
     let date = format!("{}_{}_{}", year, month, day);
     let prefix = if is_today {
@@ -57,8 +67,14 @@ pub fn generate_html_file(
     layout = layout.replace("{{description}}", "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.");
     layout = layout.replace("{{hreflang}}", "en");
     layout = layout.replace("{{item_pub_date}}", &quote.date_added);
-    layout = layout.replace("{{date}}", quote.date_added.split('T').next().unwrap_or(""));
-    layout = layout.replace("{{logo}}", "https://kura.pro/wiserone/images/logos/wiserone.webp");
+    layout = layout.replace(
+        "{{date}}",
+        quote.date_added.split('T').next().unwrap_or(""),
+    );
+    layout = layout.replace(
+        "{{logo}}",
+        "https://kura.pro/wiserone/images/logos/wiserone.webp",
+    );
     layout = layout.replace("{{measurementID}}", "G-4HKZ6N3QSC");
     layout = layout.replace("{{name}}", "wiserone");
     layout = layout.replace("{{title}}", &quote.quote_text);
@@ -89,7 +105,6 @@ pub fn generate_html_file(
 
     // Iterate over sorted filenames and log each one
     for filename in &filenames {
-
         let uuid = Uuid::new_v4();
 
         // Write the log to both the console and the file
@@ -104,10 +119,16 @@ pub fn generate_html_file(
         writeln!(log_file, "{}", file_log)?;
 
         // Assuming year, month, and day are already defined correctly
-        let today_formatted = format!("{year}_{month:02}_{day:02}", year=year, month=month, day=day);
+        let today_formatted = format!(
+            "{year}_{month:02}_{day:02}",
+            year = year,
+            month = month,
+            day = day
+        );
 
         // Create the file path for the current day's file if it doesn't already exist
-        let today_file_path = format!("./docs/{}.html", today_formatted);
+        let today_file_path =
+            format!("./docs/{}.html", today_formatted);
 
         if Path::new(&today_file_path).exists() {
             let content = fs::read_to_string(&today_file_path)?;
@@ -120,7 +141,10 @@ pub fn generate_html_file(
                 &iso,
                 &LogLevel::INFO,
                 "process",
-                &format!("index.html updated with content from {}", today_file_path),
+                &format!(
+                    "index.html updated with content from {}",
+                    today_file_path
+                ),
                 &LogFormat::CLF
             );
             writeln!(log_file, "{}", file_log)?;

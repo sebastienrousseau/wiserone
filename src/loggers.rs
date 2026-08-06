@@ -6,7 +6,7 @@
 use std::io::Write;
 
 use env_logger::Env;
-use rlg::LogLevel;
+use rlg::log_level::LogLevel;
 
 /// Initializes the logging system.
 ///
@@ -19,7 +19,7 @@ use rlg::LogLevel;
 /// # Examples
 ///
 /// ```
-/// use rlg::LogLevel;
+/// use rlg::log_level::LogLevel;
 /// use wiserone::loggers::init_logger;
 ///
 /// // Initialize the logging system with a default log level of `info`
