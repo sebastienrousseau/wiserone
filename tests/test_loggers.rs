@@ -5,21 +5,21 @@
 #[cfg(test)]
 mod tests {
 
+    use rlg::log_format::LogFormat;
+    use rlg::log_level::LogLevel;
     use rlg::macro_log;
-    use rlg::{LogFormat, LogLevel};
 
     #[test]
     fn test_logging() {
         // Create a log entry
-        let log_entry =
-            macro_log!(
-                "session_id",
-                "time",
-                &LogLevel::INFO,
-                "component",
-                "Log message",
-                &LogFormat::CLF
-            );
+        let log_entry = macro_log!(
+            "session_id",
+            "time",
+            &LogLevel::INFO,
+            "component",
+            "Log message",
+            &LogFormat::CLF
+        );
 
         // Define expected values
         let expected_session_id = "session_id";

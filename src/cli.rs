@@ -7,13 +7,15 @@ use std::error::Error;
 use std::fs::File;
 use std::io::Write;
 
-use dtt::DateTime;
-use rlg::{macro_log, LogFormat, LogLevel};
+use dtt::datetime::DateTime;
+use rlg::log_format::LogFormat;
+use rlg::log_level::LogLevel;
+use rlg::macro_log;
 
-use crate::html::generate_html_file;
-use crate::sitemap::generate_sitemap_file;
-use crate::quotes::read_quotes_from_file;
 use crate::ascii::generate_ascii_art;
+use crate::html::generate_html_file;
+use crate::quotes::read_quotes_from_file;
+use crate::sitemap::generate_sitemap_file;
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -53,22 +55,21 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
 
     // Define date and time
     let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
+    let iso = dt.format_iso8601()?;
+    let year = dt.year();
     let month = &iso[5..7];
-    let day = dt.day;
+    let day = dt.day();
     let date = format!("{}_{}_{}", year, month, day);
 
     // Generate a log entry
-    let ascii_art_log =
-        macro_log!(
-            "id",
-            &iso,
-            &LogLevel::INFO,
-            "process",
-            "ASCII art generation event started.",
-            &LogFormat::CLF
-        );
+    let ascii_art_log = macro_log!(
+        "id",
+        &iso,
+        &LogLevel::INFO,
+        "process",
+        "ASCII art generation event started.",
+        &LogFormat::CLF
+    );
 
     match generate_ascii_art("The Wiser One") {
         Ok(ascii_art) => println!("{}", ascii_art),
@@ -83,7 +84,9 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
 
     match command {
         Command::Random { filename } => {
-            println!("- info:wiserone: begin generating a random quote");
+            println!(
+                "- info:wiserone: begin generating a random quote"
+            );
             // Construct the HTML filename using `iso`
             let html_filename = format!("{}.html", date);
 
@@ -92,7 +95,7 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
             let quote = quotes.select_random_quote()?;
             generate_html_file(&html_filename, quote)?;
             generate_sitemap_file("https://wiserone.com/")?;
-        },
+        }
         Command::All { filename } => {
             println!("- info:wiserone: begin generating all quotes");
             // Read and parse all quotes
@@ -101,7 +104,8 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
             // Generate an HTML file for each quote
             for quote in quotes.select_all_quotes()? {
                 // Split `date_added` at "T" and take the date part
-                let date_part = quote.date_added.split('T').next().unwrap_or("");
+                let date_part =
+                    quote.date_added.split('T').next().unwrap_or("");
 
                 // Replace "-" with "_" to format as "YYYY_MM_DD"
                 let formatted_date = date_part.replace('-', "_");
@@ -111,7 +115,7 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
                 generate_sitemap_file("https://wiserone.com/")?;
             }
             println!("- info:wiserone: end generating all quotes\n\n");
-        },
+        }
     }
 
     Ok(())
