@@ -17,7 +17,7 @@ pub fn generate_sitemap_file(
 
     // Obtain the current date and time in ISO 8601 format using dtt
     let dt = DateTime::new();
-    let iso = dt.format_iso8601()?;
+    let iso = dt.format_rfc3339()?;
     let year_str = dt.year();
     let month_str = &iso[5..7];
     let day_str = dt.day();

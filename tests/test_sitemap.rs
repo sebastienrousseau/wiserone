@@ -4,12 +4,13 @@
 
 #[cfg(test)]
 mod tests {
-    use wiserone::sitemap::generate_sitemap_file;
-    use std::fs;
     use std::error::Error;
+    use std::fs;
+    use wiserone::sitemap::generate_sitemap_file;
 
     #[test]
-    fn test_generate_sitemap_file_no_html_files() -> Result<(), Box<dyn Error>> {
+    fn test_generate_sitemap_file_no_html_files(
+    ) -> Result<(), Box<dyn Error>> {
         // Ensure the docs directory is empty
         fs::remove_dir_all("./docs")?;
         fs::create_dir("./docs")?;

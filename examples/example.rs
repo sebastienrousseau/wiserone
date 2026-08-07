@@ -38,4 +38,3 @@ fn main() -> Result<(), Box<dyn Error>> {
     // If everything executes successfully, return Ok.
     Ok(())
 }
-

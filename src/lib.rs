@@ -63,7 +63,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     // Define date and time
     let date = DateTime::new();
-    let iso = date.format_iso8601()?;
+    let iso = date.format_rfc3339()?;
 
     // Open the log file for appending
     let mut log_file = File::create("./wiserone.log")?;

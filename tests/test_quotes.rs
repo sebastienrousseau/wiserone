@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use std::collections::HashSet;
-use wiserone::quotes::{Quotes, Quote};
+use wiserone::quotes::{Quote, Quotes};
 
 /// Test the creation and field access of the Quote struct.
 #[test]
@@ -63,7 +63,8 @@ fn test_random_quote_selection() {
         Err(e) => panic!("Failed to select a random quote: {}", e),
     };
 
-    let quotes_texts: HashSet<_> = quotes.quotes.iter().map(|q| &q.quote_text).collect();
+    let quotes_texts: HashSet<_> =
+        quotes.quotes.iter().map(|q| &q.quote_text).collect();
 
     assert!(quotes_texts.contains(&selected_quote_text));
 }
@@ -140,7 +141,9 @@ fn test_select_all_quotes_empty_vector() {
     let quotes = Quotes::new(Vec::new()); // empty vector
 
     match quotes.select_all_quotes() {
-        Ok(_) => panic!("Expected an error for empty quotes vector, but got Ok"),
+        Ok(_) => panic!(
+            "Expected an error for empty quotes vector, but got Ok"
+        ),
         Err(e) => assert_eq!(e.to_string(), "No available quotes"),
     }
 }
@@ -156,7 +159,8 @@ fn test_quote_serialization_deserialization() {
     };
 
     let serialized = serde_json::to_string(&quote).unwrap();
-    let deserialized: Quote = serde_json::from_str(&serialized).unwrap();
+    let deserialized: Quote =
+        serde_json::from_str(&serialized).unwrap();
 
     assert_eq!(quote, deserialized);
 }

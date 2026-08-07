@@ -55,7 +55,7 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
 
     // Define date and time
     let dt = DateTime::new();
-    let iso = dt.format_iso8601()?;
+    let iso = dt.format_rfc3339()?;
     let year = dt.year();
     let month = &iso[5..7];
     let day = dt.day();
