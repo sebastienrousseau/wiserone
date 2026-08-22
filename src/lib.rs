@@ -9,7 +9,6 @@
 #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
 #![forbid(unsafe_code)]
-#![warn(unreachable_pub)]
 #![doc(
     html_favicon_url = "",
     html_logo_url = "",

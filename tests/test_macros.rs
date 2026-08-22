@@ -65,7 +65,7 @@ mod tests {
     fn test_wiserone_map_single_pair() {
         let m = wiserone_map!["key" => "value"];
         let mut expected = HashMap::new();
-        expected.insert("key", "value");
+        let _ = expected.insert("key", "value");
         assert_eq!(m, expected);
         assert_eq!(m.len(), 1);
         assert_eq!(m["key"], "value");

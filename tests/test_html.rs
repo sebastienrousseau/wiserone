@@ -2,6 +2,8 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Integration tests for HTML page generation (`wiserone::html`).
+
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
@@ -284,12 +286,12 @@ fn test_index_html_creation() {
     fs::create_dir_all("./docs").unwrap();
 
     // Create a file with today's date format
-    use dtt::DateTime;
+    use dtt::datetime::DateTime;
     let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
+    let iso = dt.format_rfc3339().expect("rfc3339");
+    let year = dt.year();
     let month = &iso[5..7];
-    let day = dt.day;
+    let day = dt.day();
 
     let today_filename = format!("{}_{:02}_{}.html", year, month.parse::<u32>().unwrap(), day);
     let test_content = "Today's content";

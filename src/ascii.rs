@@ -7,7 +7,7 @@ use std::error::Error;
 use std::fmt;
 
 /// Error type for ASCII art generation failures.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ArtError {
     /// Represents a failure to load the FIGlet.
     FontLoadError,

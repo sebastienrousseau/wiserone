@@ -15,19 +15,16 @@ mod tests {
 
     #[test]
     fn test_main_binary_exists() {
-        // Test that the binary can be built successfully
-        let output = Command::new("cargo")
-            .args(&["build", "--bin", "wiserone"])
-            .output()
-            .expect("Failed to execute cargo build");
-
-        assert!(output.status.success(), "Binary should build successfully");
-
-        // Check that the binary exists
-        let binary_path = "target/debug/wiserone";
+        // Cargo builds the bin target before running integration tests
+        // and exposes its path here. Use that rather than a hardcoded
+        // "target/debug/wiserone": the target directory is
+        // configurable (CARGO_TARGET_DIR, or `build.target-dir` in a
+        // cargo config), so the literal path is wrong on any machine
+        // that sets one, and wrong for every --target/--release build.
+        let binary_path = env!("CARGO_BIN_EXE_wiserone");
         assert!(
             Path::new(binary_path).exists(),
-            "Binary should exist after build"
+            "binary should exist at {binary_path}"
         );
     }
 
@@ -35,7 +32,7 @@ mod tests {
     fn test_main_help_flag() {
         // Test that --help flag works
         let output = Command::new("cargo")
-            .args(&["run", "--", "--help"])
+            .args(["run", "--", "--help"])
             .output()
             .expect("Failed to run with --help");
 
@@ -57,7 +54,7 @@ mod tests {
     fn test_main_invalid_arguments() {
         // Test with completely invalid arguments
         let output = Command::new("cargo")
-            .args(&["run", "--", "--invalid-flag-that-does-not-exist"])
+            .args(["run", "--", "--invalid-flag-that-does-not-exist"])
             .output()
             .expect("Failed to run with invalid args");
 
@@ -78,7 +75,7 @@ mod tests {
     fn test_main_version_flag() {
         // Test that version flag works (if implemented)
         let output = Command::new("cargo")
-            .args(&["run", "--", "--version"])
+            .args(["run", "--", "--version"])
             .output()
             .expect("Failed to run with --version");
 
@@ -100,7 +97,7 @@ mod tests {
 
         let output = Command::new("cargo")
             .current_dir(temp_path)
-            .args(&["run", "--manifest-path",
+            .args(["run", "--manifest-path",
                    &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR"))])
             .output()
             .expect("Failed to run in temp directory");
@@ -121,7 +118,7 @@ mod tests {
 
         let _output = Command::new("cargo")
             .current_dir(temp_dir.path())
-            .args(&[
+            .args([
                 "run",
                 "--manifest-path",
                 &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
@@ -157,7 +154,7 @@ mod tests {
         // Test that the application handles file I/O errors gracefully
         let output = match Command::new("cargo")
             .current_dir(&restricted_path)
-            .args(&[
+            .args([
                 "run",
                 "--manifest-path",
                 &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR"))
@@ -187,7 +184,7 @@ mod tests {
         // Test graceful shutdown on interrupt (if applicable)
         // This is a basic test to ensure the process can be started and stopped
         let mut child = Command::new("cargo")
-            .args(&[
+            .args([
                 "run",
                 "--manifest-path",
                 &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
@@ -219,7 +216,7 @@ mod tests {
         let _output = Command::new("cargo")
             .env("RUST_LOG", "debug")
             .env("RUST_BACKTRACE", "1")
-            .args(&[
+            .args([
                 "run",
                 "--manifest-path",
                 &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
@@ -238,7 +235,7 @@ mod tests {
         // Test that --help works from the project directory
         let output = Command::new("cargo")
             .current_dir(env!("CARGO_MANIFEST_DIR"))
-            .args(&["run", "--", "--help"])
+            .args(["run", "--", "--help"])
             .output()
             .expect("Failed to run from project dir");
 
@@ -256,7 +253,7 @@ mod tests {
 
         for _ in 0..3 {
             let output = Command::new("cargo")
-                .args(&["run", "--", "--help"])
+                .args(["run", "--", "--help"])
                 .output()
                 .expect("Failed to run command");
 

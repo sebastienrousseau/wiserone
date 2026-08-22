@@ -2,6 +2,8 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Integration tests for the command-line interface (`wiserone::cli`).
+
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
@@ -180,13 +182,13 @@ fn test_cli_csv_file_processing() {
 /// Test date formatting logic
 #[test]
 fn test_date_formatting() {
-    use dtt::DateTime;
+    use dtt::datetime::DateTime;
 
     let dt = DateTime::new();
-    let iso = dt.iso_8601;
-    let year = dt.year;
+    let iso = dt.format_rfc3339().expect("rfc3339");
+    let year = dt.year();
     let month = &iso[5..7];
-    let day = dt.day;
+    let day = dt.day();
     let formatted_date = format!("{}_{}_{}", year, month, day);
 
     // Verify format matches YYYY_MM_DD pattern
@@ -236,14 +238,14 @@ fn test_malformed_date_handling() {
 /// Property-based test for date formatting consistency
 #[test]
 fn test_date_formatting_properties() {
-    use dtt::DateTime;
+    use dtt::datetime::DateTime;
 
     // Test that date formatting is deterministic
     let dt1 = DateTime::new();
     let dt2 = DateTime::new();
 
-    let iso1 = dt1.iso_8601;
-    let iso2 = dt2.iso_8601;
+    let iso1 = dt1.format_rfc3339().expect("rfc3339");
+    let iso2 = dt2.format_rfc3339().expect("rfc3339");
 
     let month1 = &iso1[5..7];
     let month2 = &iso2[5..7];
@@ -252,6 +254,6 @@ fn test_date_formatting_properties() {
     let month_num1: u8 = month1.parse().unwrap();
     let month_num2: u8 = month2.parse().unwrap();
 
-    assert!(month_num1 >= 1 && month_num1 <= 12);
-    assert!(month_num2 >= 1 && month_num2 <= 12);
+    assert!((1..=12).contains(&month_num1));
+    assert!((1..=12).contains(&month_num2));
 }

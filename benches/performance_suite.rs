@@ -4,11 +4,8 @@
 
 //! Comprehensive performance benchmarks for wiserone hot paths
 
-extern crate criterion;
-extern crate tempfile;
-extern crate wiserone;
-
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use std::hint::black_box;
 use std::fs;
 use std::path::Path;
 use tempfile::TempDir;
@@ -58,9 +55,9 @@ fn benchmark_quote_parsing(c: &mut Criterion) {
         write_csv_file(&csv_path, &quotes).unwrap();
 
         let mut group = c.benchmark_group("quote_parsing");
-        group.throughput(Throughput::Elements(size as u64));
+        let _ = group.throughput(Throughput::Elements(size as u64));
 
-        group.bench_with_input(
+        let _ = group.bench_with_input(
             BenchmarkId::new("json", size),
             &json_path,
             |b, path| {
@@ -70,7 +67,7 @@ fn benchmark_quote_parsing(c: &mut Criterion) {
             }
         );
 
-        group.bench_with_input(
+        let _ = group.bench_with_input(
             BenchmarkId::new("csv", size),
             &csv_path,
             |b, path| {
@@ -90,19 +87,19 @@ fn benchmark_quote_selection(c: &mut Criterion) {
         let quotes = generate_synthetic_quotes(size);
 
         let mut group = c.benchmark_group("quote_selection");
-        group.throughput(Throughput::Elements(size as u64));
+        let _ = group.throughput(Throughput::Elements(size as u64));
 
-        group.bench_function(
+        let _ = group.bench_function(
             BenchmarkId::new("random_selection", size),
             |b| {
                 b.iter(|| {
                     let mut q = generate_synthetic_quotes(size);
-                    black_box(q.select_random_quote().unwrap());
+                    let _ = black_box(q.select_random_quote().unwrap());
                 })
             }
         );
 
-        group.bench_function(
+        let _ = group.bench_function(
             BenchmarkId::new("all_quotes_sorted", size),
             |b| {
                 b.iter(|| {
@@ -141,7 +138,7 @@ fn benchmark_template_processing(c: &mut Criterion) {
         image_url: "https://example.com/image.webp".to_string(),
     };
 
-    c.bench_function("template_processing", |b| {
+    let _ = c.bench_function("template_processing", |b| {
         b.iter(|| {
             let mut result = template.clone();
             result = result.replace("{{title}}", &quote.quote_text);
@@ -166,14 +163,14 @@ fn benchmark_file_operations(c: &mut Criterion) {
         let file_path = temp_dir.path().join(format!("test_{}.html", size));
 
         let mut group = c.benchmark_group("file_operations");
-        group.throughput(Throughput::Bytes(size as u64));
+        let _ = group.throughput(Throughput::Bytes(size as u64));
 
-        group.bench_with_input(
+        let _ = group.bench_with_input(
             BenchmarkId::new("write", size),
             &(&file_path, &content),
             |b, (path, content)| {
                 b.iter(|| {
-                    black_box(fs::write(path, content).unwrap())
+                    fs::write(path, content).unwrap()
                 })
             }
         );
@@ -181,7 +178,7 @@ fn benchmark_file_operations(c: &mut Criterion) {
         // Create file for read benchmark
         fs::write(&file_path, &content).unwrap();
 
-        group.bench_with_input(
+        let _ = group.bench_with_input(
             BenchmarkId::new("read", size),
             &file_path,
             |b, path| {
@@ -195,7 +192,7 @@ fn benchmark_file_operations(c: &mut Criterion) {
 
 /// Benchmark memory allocation patterns
 fn benchmark_memory_operations(c: &mut Criterion) {
-    c.bench_function("string_concatenation", |b| {
+    let _ = c.bench_function("string_concatenation", |b| {
         b.iter(|| {
             let mut result = String::new();
             for i in 0..1000 {
@@ -205,7 +202,7 @@ fn benchmark_memory_operations(c: &mut Criterion) {
         })
     });
 
-    c.bench_function("vector_allocation", |b| {
+    let _ = c.bench_function("vector_allocation", |b| {
         b.iter(|| {
             let mut vec = Vec::new();
             for i in 0..1000 {
@@ -215,7 +212,7 @@ fn benchmark_memory_operations(c: &mut Criterion) {
         })
     });
 
-    c.bench_function("vector_with_capacity", |b| {
+    let _ = c.bench_function("vector_with_capacity", |b| {
         b.iter(|| {
             let mut vec = Vec::with_capacity(1000);
             for i in 0..1000 {

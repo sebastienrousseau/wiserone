@@ -2,6 +2,8 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Integration tests for ASCII-art banner generation (`wiserone::ascii`).
+
 #[cfg(test)]
 mod tests {
     use wiserone::ascii::generate_ascii_art;

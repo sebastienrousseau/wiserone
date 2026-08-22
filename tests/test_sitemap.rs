@@ -2,6 +2,8 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Integration tests for sitemap generation (`wiserone::sitemap`).
+
 #[cfg(test)]
 mod tests {
     use std::error::Error;

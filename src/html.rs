@@ -90,6 +90,35 @@ pub fn generate_html_file(
     filename: &str,
     quote: &Quote,
 ) -> Result<(), Box<dyn Error>> {
+    generate_html_file_in(filename, quote, Path::new(OUTPUT_DIR))
+}
+
+/// Generates an HTML file for `quote` inside `output_dir`.
+///
+/// Behaves exactly like [`generate_html_file`], but writes into the
+/// directory given rather than the default `./docs`. Prefer this in
+/// tests so a run never touches the project's own output tree.
+///
+/// # Arguments
+///
+/// * `filename` - name of the file to create inside `output_dir`.
+/// * `quote` - the quote rendered into the template.
+/// * `output_dir` - directory written into; created if absent.
+///
+/// # Errors
+///
+/// Returns an error if the filename fails validation, the template is
+/// missing, or the directory or file cannot be written.
+///
+/// # Security
+///
+/// The filename is validated to prevent directory traversal; files are
+/// always created inside `output_dir`.
+pub fn generate_html_file_in(
+    filename: &str,
+    quote: &Quote,
+    output_dir: &Path,
+) -> Result<(), Box<dyn Error>> {
     // Validate filename to prevent path traversal
     validate_filename(filename)?;
 
@@ -146,19 +175,19 @@ pub fn generate_html_file(
     layout = layout.replace("{{url}}", "https://wiserone.com");
     layout = layout.replace("{{canonical}}", &prefix);
 
-    fs::create_dir_all(OUTPUT_DIR)?;
-    let path = Path::new(OUTPUT_DIR).join(filename);
-    let mut file = fs::File::create(&path)?;
+    fs::create_dir_all(output_dir)?;
+    let path = output_dir.join(filename);
+    let mut file = File::create(&path)?;
     file.write_all(layout.as_bytes())?;
 
     // Ensure log directory exists and open log file
-    let log_dir = Path::new(OUTPUT_DIR).join("logs");
+    let log_dir = output_dir.join("logs");
     fs::create_dir_all(&log_dir)?;
     let log_path = log_dir.join("wiserone.log");
     let mut log_file = File::create(&log_path)?;
 
     // Collect filenames into a vector, exclude .DS_Store, and sort them alphabetically
-    let mut filenames: Vec<_> = fs::read_dir(OUTPUT_DIR)?
+    let mut filenames: Vec<_> = fs::read_dir(output_dir)?
         .filter_map(|entry| {
             entry.ok().map(|e| {
                 let path = e.path();
@@ -196,11 +225,11 @@ pub fn generate_html_file(
 
         // Create the file path for the current day's file if it doesn't already exist
         let today_file_path =
-            Path::new(OUTPUT_DIR).join(format!("{}.html", today_formatted));
+            output_dir.join(format!("{}.html", today_formatted));
 
         if today_file_path.exists() {
             let content = fs::read_to_string(&today_file_path)?;
-            let index_path = Path::new(OUTPUT_DIR).join("index.html");
+            let index_path = output_dir.join("index.html");
             fs::write(index_path, content.as_bytes())?;
 
             // Write the log to both the console and the file

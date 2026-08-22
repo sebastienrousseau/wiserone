@@ -2,7 +2,7 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-extern crate wiserone;
+//! Example: generate a quote HTML page and print the quote as JSON.
 
 // Importing necessary modules and traits from the standard library and `wiserone` crate.
 use serde_json::to_string_pretty;

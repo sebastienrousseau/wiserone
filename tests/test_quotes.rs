@@ -2,6 +2,8 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Integration tests for quote loading, parsing and path validation.
+
 use std::collections::HashSet;
 use wiserone::quotes::{Quote, Quotes};
 
