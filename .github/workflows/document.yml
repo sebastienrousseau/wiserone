@@ -3,10 +3,10 @@ name: 🧪 Document
 on:
   push:
     branches:
-      - feat/wiserone
+      - main
   pull_request:
     branches:
-      - feat/wiserone
+      - main
   release:
     types: [created]
 
@@ -45,9 +45,11 @@ jobs:
           retention-days: 1
 
       - name: Write CNAME file
+        if: github.event_name == 'release'
         run: echo 'docs.wiserone.com' > ./target/doc/CNAME
 
       - name: Deploy to GitHub Pages
+        if: github.event_name == 'release'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
