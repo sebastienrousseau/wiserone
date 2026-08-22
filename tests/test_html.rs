@@ -190,11 +190,15 @@ fn test_date_extraction() {
             image_url: "https://example.com/date-test.jpg".to_string(),
         };
 
-        let filename = format!("date_test_{}.html", input_date.replace([':', '-', 'T', 'Z', '+'], "_"));
+        let filename = format!(
+            "date_test_{}.html",
+            input_date.replace([':', '-', 'T', 'Z', '+'], "_")
+        );
         let result = generate_html_file(&filename, &quote);
         assert!(result.is_ok());
 
-        let file_path = temp_dir.path().join(format!("docs/{}", filename));
+        let file_path =
+            temp_dir.path().join(format!("docs/{}", filename));
         let content = fs::read_to_string(&file_path).unwrap();
         assert!(content.contains(expected_date));
     }
@@ -293,10 +297,16 @@ fn test_index_html_creation() {
     let month = &iso[5..7];
     let day = dt.day();
 
-    let today_filename = format!("{}_{:02}_{}.html", year, month.parse::<u32>().unwrap(), day);
+    let today_filename = format!(
+        "{}_{:02}_{}.html",
+        year,
+        month.parse::<u32>().unwrap(),
+        day
+    );
     let test_content = "Today's content";
 
-    let today_file = temp_dir.path().join(format!("docs/{}", today_filename));
+    let today_file =
+        temp_dir.path().join(format!("docs/{}", today_filename));
     let mut file = File::create(&today_file).unwrap();
     file.write_all(test_content.as_bytes()).unwrap();
 
@@ -395,7 +405,8 @@ fn test_filename_edge_cases() {
         let result = generate_html_file(filename, &quote);
         assert!(result.is_ok(), "Failed for filename: {}", filename);
 
-        let file_path = temp_dir.path().join(format!("docs/{}", filename));
+        let file_path =
+            temp_dir.path().join(format!("docs/{}", filename));
         assert!(file_path.exists(), "File not created: {}", filename);
     }
 

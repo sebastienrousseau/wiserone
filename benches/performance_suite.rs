@@ -4,12 +4,14 @@
 
 //! Comprehensive performance benchmarks for wiserone hot paths
 
-use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use std::hint::black_box;
+use criterion::{
+    criterion_group, criterion_main, BenchmarkId, Criterion, Throughput,
+};
 use std::fs;
+use std::hint::black_box;
 use std::path::Path;
 use tempfile::TempDir;
-use wiserone::quotes::{Quote, Quotes, read_quotes_from_file};
+use wiserone::quotes::{read_quotes_from_file, Quote, Quotes};
 
 /// Generate synthetic quote data for benchmarking
 fn generate_synthetic_quotes(count: usize) -> Quotes {
@@ -26,7 +28,10 @@ fn generate_synthetic_quotes(count: usize) -> Quotes {
 }
 
 /// Write synthetic quotes to JSON file
-fn write_json_file(path: &Path, quotes: &Quotes) -> std::io::Result<()> {
+fn write_json_file(
+    path: &Path,
+    quotes: &Quotes,
+) -> std::io::Result<()> {
     let json = serde_json::to_string_pretty(quotes)?;
     fs::write(path, json)
 }
@@ -62,9 +67,12 @@ fn benchmark_quote_parsing(c: &mut Criterion) {
             &json_path,
             |b, path| {
                 b.iter(|| {
-                    black_box(read_quotes_from_file(path.to_str().unwrap()).unwrap())
+                    black_box(
+                        read_quotes_from_file(path.to_str().unwrap())
+                            .unwrap(),
+                    )
                 })
-            }
+            },
         );
 
         let _ = group.bench_with_input(
@@ -72,9 +80,12 @@ fn benchmark_quote_parsing(c: &mut Criterion) {
             &csv_path,
             |b, path| {
                 b.iter(|| {
-                    black_box(read_quotes_from_file(path.to_str().unwrap()).unwrap())
+                    black_box(
+                        read_quotes_from_file(path.to_str().unwrap())
+                            .unwrap(),
+                    )
                 })
-            }
+            },
         );
     }
 }
@@ -96,7 +107,7 @@ fn benchmark_quote_selection(c: &mut Criterion) {
                     let mut q = generate_synthetic_quotes(size);
                     let _ = black_box(q.select_random_quote().unwrap());
                 })
-            }
+            },
         );
 
         let _ = group.bench_function(
@@ -105,7 +116,7 @@ fn benchmark_quote_selection(c: &mut Criterion) {
                 b.iter(|| {
                     black_box(quotes.select_all_quotes().unwrap())
                 })
-            }
+            },
         );
     }
 }
@@ -129,7 +140,8 @@ fn benchmark_template_processing(c: &mut Criterion) {
         <p>CDN: {{cdn}}</p>
     </body>
     </html>
-    "#.repeat(10); // Make template larger to simulate real workload
+    "#
+    .repeat(10); // Make template larger to simulate real workload
 
     let quote = Quote {
         quote_text: "This is a test quote with sufficient length to simulate real quote processing".to_string(),
@@ -143,11 +155,17 @@ fn benchmark_template_processing(c: &mut Criterion) {
             let mut result = template.clone();
             result = result.replace("{{title}}", &quote.quote_text);
             result = result.replace("{{author}}", &quote.author);
-            result = result.replace("{{date}}", quote.date_added.split('T').next().unwrap_or(""));
+            result = result.replace(
+                "{{date}}",
+                quote.date_added.split('T').next().unwrap_or(""),
+            );
             result = result.replace("{{banner}}", &quote.image_url);
-            result = result.replace("{{canonical}}", "https://example.com");
-            result = result.replace("{{description}}", "Test description");
-            result = result.replace("{{cdn}}", "https://cdn.example.com");
+            result =
+                result.replace("{{canonical}}", "https://example.com");
+            result =
+                result.replace("{{description}}", "Test description");
+            result =
+                result.replace("{{cdn}}", "https://cdn.example.com");
             black_box(result)
         })
     });
@@ -160,7 +178,8 @@ fn benchmark_file_operations(c: &mut Criterion) {
 
     for size in content_sizes {
         let content = "x".repeat(size);
-        let file_path = temp_dir.path().join(format!("test_{}.html", size));
+        let file_path =
+            temp_dir.path().join(format!("test_{}.html", size));
 
         let mut group = c.benchmark_group("file_operations");
         let _ = group.throughput(Throughput::Bytes(size as u64));
@@ -169,10 +188,8 @@ fn benchmark_file_operations(c: &mut Criterion) {
             BenchmarkId::new("write", size),
             &(&file_path, &content),
             |b, (path, content)| {
-                b.iter(|| {
-                    fs::write(path, content).unwrap()
-                })
-            }
+                b.iter(|| fs::write(path, content).unwrap())
+            },
         );
 
         // Create file for read benchmark
@@ -182,10 +199,8 @@ fn benchmark_file_operations(c: &mut Criterion) {
             BenchmarkId::new("read", size),
             &file_path,
             |b, path| {
-                b.iter(|| {
-                    black_box(fs::read_to_string(path).unwrap())
-                })
-            }
+                b.iter(|| black_box(fs::read_to_string(path).unwrap()))
+            },
         );
     }
 }
@@ -196,7 +211,10 @@ fn benchmark_memory_operations(c: &mut Criterion) {
         b.iter(|| {
             let mut result = String::new();
             for i in 0..1000 {
-                result.push_str(&format!("Item {}: This is a test string\n", i));
+                result.push_str(&format!(
+                    "Item {}: This is a test string\n",
+                    i
+                ));
             }
             black_box(result)
         })

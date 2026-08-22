@@ -81,14 +81,12 @@ fn create_layout_template(temp_dir: &Path) {
 /// Test Command enum parsing for Random variant
 #[test]
 fn test_command_random_variant() {
-    let cmd = Command::Random {
-        filename: "test.json".to_string()
-    };
+    let cmd = Command::Random { filename: "test.json".to_string() };
 
     match cmd {
         Command::Random { filename } => {
             assert_eq!(filename, "test.json");
-        },
+        }
         _ => panic!("Expected Random variant"),
     }
 }
@@ -96,14 +94,12 @@ fn test_command_random_variant() {
 /// Test Command enum parsing for All variant
 #[test]
 fn test_command_all_variant() {
-    let cmd = Command::All {
-        filename: "test.json".to_string()
-    };
+    let cmd = Command::All { filename: "test.json".to_string() };
 
     match cmd {
         Command::All { filename } => {
             assert_eq!(filename, "test.json");
-        },
+        }
         _ => panic!("Expected All variant"),
     }
 }
@@ -130,7 +126,9 @@ fn test_run_cli_with_json_file() {
     let result = std::panic::catch_unwind(|| {
         // We can't easily test run_cli() directly due to clap parsing
         // So we test the underlying components it uses
-        let mut quotes = wiserone::quotes::read_quotes_from_file(&quotes_file).unwrap();
+        let mut quotes =
+            wiserone::quotes::read_quotes_from_file(&quotes_file)
+                .unwrap();
         let quote = quotes.select_random_quote().unwrap();
         assert!(!quote.quote_text.is_empty());
         assert!(!quote.author.is_empty());
@@ -150,7 +148,7 @@ fn test_cli_file_io_error_handling() {
     // Test with non-existent file (absolute path)
     let non_existent = temp_dir.path().join("non_existent.json");
     let result = wiserone::quotes::read_quotes_from_file(
-        &non_existent.to_string_lossy()
+        &non_existent.to_string_lossy(),
     );
     assert!(result.is_err());
 
@@ -160,7 +158,7 @@ fn test_cli_file_io_error_handling() {
     file.write_all(b"invalid json content").unwrap();
 
     let result = wiserone::quotes::read_quotes_from_file(
-        &invalid_json_file.to_string_lossy()
+        &invalid_json_file.to_string_lossy(),
     );
     assert!(result.is_err());
 }

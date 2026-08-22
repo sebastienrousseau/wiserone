@@ -33,8 +33,14 @@ const TEMPLATE_PATH: &str = "_layouts/quote.html";
 /// Returns `Ok(())` if the filename is safe, or an error if unsafe.
 fn validate_filename(filename: &str) -> Result<(), Box<dyn Error>> {
     // Check for directory traversal sequences
-    if filename.contains("..") || filename.contains('/') || filename.contains('\\') {
-        return Err("Invalid filename: contains directory traversal characters".into());
+    if filename.contains("..")
+        || filename.contains('/')
+        || filename.contains('\\')
+    {
+        return Err(
+            "Invalid filename: contains directory traversal characters"
+                .into(),
+        );
     }
 
     // Check for valid HTML extension
@@ -44,7 +50,9 @@ fn validate_filename(filename: &str) -> Result<(), Box<dyn Error>> {
 
     // Check for empty or whitespace-only names
     let name_without_ext = filename.trim_end_matches(".html");
-    if name_without_ext.is_empty() || name_without_ext.chars().all(|c| c.is_whitespace()) {
+    if name_without_ext.is_empty()
+        || name_without_ext.chars().all(|c| c.is_whitespace())
+    {
         return Err("Invalid filename: name cannot be empty".into());
     }
 
@@ -60,11 +68,19 @@ fn validate_template() -> Result<(), Box<dyn Error>> {
     let template_path = Path::new(TEMPLATE_PATH);
 
     if !template_path.exists() {
-        return Err(format!("Template file not found: {}", TEMPLATE_PATH).into());
+        return Err(format!(
+            "Template file not found: {}",
+            TEMPLATE_PATH
+        )
+        .into());
     }
 
     if !template_path.is_file() {
-        return Err(format!("Template path is not a file: {}", TEMPLATE_PATH).into());
+        return Err(format!(
+            "Template path is not a file: {}",
+            TEMPLATE_PATH
+        )
+        .into());
     }
 
     Ok(())
@@ -252,7 +268,10 @@ pub fn generate_html_file_in(
                 &iso,
                 &LogLevel::INFO,
                 "process",
-                &format!("No file found at {}", today_file_path.display()),
+                &format!(
+                    "No file found at {}",
+                    today_file_path.display()
+                ),
                 &LogFormat::CLF
             );
             writeln!(log_file, "{}", file_log)?;

@@ -97,8 +97,11 @@ mod tests {
 
         let output = Command::new("cargo")
             .current_dir(temp_path)
-            .args(["run", "--manifest-path",
-                   &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR"))])
+            .args([
+                "run",
+                "--manifest-path",
+                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
+            ])
             .output()
             .expect("Failed to run in temp directory");
 
@@ -123,7 +126,7 @@ mod tests {
                 "--manifest-path",
                 &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
                 "--",
-                "--help" // Use help to avoid full execution that might fail
+                "--help", // Use help to avoid full execution that might fail
             ])
             .output()
             .expect("Failed to run command");
@@ -137,10 +140,12 @@ mod tests {
         // Test error handling by running in a restricted environment
         let temp_dir = tempdir().expect("Failed to create temp dir");
         let restricted_path = temp_dir.path().join("readonly");
-        fs::create_dir(&restricted_path).expect("Failed to create directory");
+        fs::create_dir(&restricted_path)
+            .expect("Failed to create directory");
 
         // Make directory read-only to trigger potential I/O errors
-        let metadata = fs::metadata(&restricted_path).expect("Failed to get metadata");
+        let metadata = fs::metadata(&restricted_path)
+            .expect("Failed to get metadata");
         let mut permissions = metadata.permissions();
 
         #[cfg(unix)]
@@ -157,7 +162,7 @@ mod tests {
             .args([
                 "run",
                 "--manifest-path",
-                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR"))
+                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
             ])
             .output()
         {
@@ -169,10 +174,10 @@ mod tests {
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             assert!(
-                stderr.contains("help") ||
-                stderr.contains("Error") ||
-                stderr.contains("error") ||
-                stderr.contains("permission"),
+                stderr.contains("help")
+                    || stderr.contains("Error")
+                    || stderr.contains("error")
+                    || stderr.contains("permission"),
                 "Error output should be informative, got: {}",
                 stderr
             );
@@ -189,7 +194,7 @@ mod tests {
                 "--manifest-path",
                 &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
                 "--",
-                "--help"
+                "--help",
             ])
             .spawn()
             .expect("Failed to spawn process");
@@ -221,7 +226,7 @@ mod tests {
                 "--manifest-path",
                 &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
                 "--",
-                "--help"
+                "--help",
             ])
             .output()
             .expect("Failed to run with environment variables");
@@ -257,7 +262,11 @@ mod tests {
                 .output()
                 .expect("Failed to run command");
 
-            outputs.push((output.status.success(), output.stdout, output.stderr));
+            outputs.push((
+                output.status.success(),
+                output.stdout,
+                output.stderr,
+            ));
         }
 
         // All runs should have the same success status

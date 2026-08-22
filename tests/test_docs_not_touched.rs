@@ -48,7 +48,8 @@ fn no_test_clears_the_projects_docs_dir() {
             continue;
         }
 
-        let source = fs::read_to_string(&path).expect("read test source");
+        let source =
+            fs::read_to_string(&path).expect("read test source");
         // A file that relocates the process cwd resolves "./docs"
         // inside its own temp dir, so only destructive calls matter.
         let relocates_cwd = source.contains("set_current_dir");
@@ -58,8 +59,8 @@ fn no_test_clears_the_projects_docs_dir() {
             if code.starts_with("//") {
                 continue;
             }
-            let mentions_docs =
-                code.contains("\"./docs\"") || code.contains("\"./docs/");
+            let mentions_docs = code.contains("\"./docs\"")
+                || code.contains("\"./docs/");
             if !mentions_docs {
                 continue;
             }

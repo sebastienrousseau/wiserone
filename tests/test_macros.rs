@@ -8,8 +8,9 @@ use std::collections::HashMap;
 
 // Import all macros from wiserone
 use wiserone::{
-    wiserone, wiserone_assert, wiserone_join, wiserone_map, wiserone_max, wiserone_min,
-    wiserone_print, wiserone_print_vec, wiserone_split, wiserone_vec
+    wiserone, wiserone_assert, wiserone_join, wiserone_map,
+    wiserone_max, wiserone_min, wiserone_print, wiserone_print_vec,
+    wiserone_split, wiserone_vec,
 };
 
 #[cfg(test)]
@@ -47,8 +48,12 @@ mod tests {
 
     #[test]
     fn test_wiserone_vec_different_types() {
-        let strings = wiserone_vec!["hello".to_string(), "world".to_string()];
-        assert_eq!(strings, vec!["hello".to_string(), "world".to_string()]);
+        let strings =
+            wiserone_vec!["hello".to_string(), "world".to_string()];
+        assert_eq!(
+            strings,
+            vec!["hello".to_string(), "world".to_string()]
+        );
 
         let floats = wiserone_vec![1.1, 2.2, 3.3];
         assert_eq!(floats, vec![1.1, 2.2, 3.3]);
@@ -167,28 +172,52 @@ mod tests {
     #[test]
     fn test_wiserone_split_multiple_words() {
         let result = wiserone_split!("hello world rust");
-        assert_eq!(result, vec!["hello".to_string(), "world".to_string(), "rust".to_string()]);
+        assert_eq!(
+            result,
+            vec![
+                "hello".to_string(),
+                "world".to_string(),
+                "rust".to_string()
+            ]
+        );
         assert_eq!(result.len(), 3);
     }
 
     #[test]
     fn test_wiserone_split_extra_whitespace() {
         let result = wiserone_split!("  hello   world  ");
-        assert_eq!(result, vec!["hello".to_string(), "world".to_string()]);
+        assert_eq!(
+            result,
+            vec!["hello".to_string(), "world".to_string()]
+        );
         assert_eq!(result.len(), 2);
     }
 
     #[test]
     fn test_wiserone_split_tabs_and_newlines() {
         let result = wiserone_split!("hello\tworld\nrust");
-        assert_eq!(result, vec!["hello".to_string(), "world".to_string(), "rust".to_string()]);
+        assert_eq!(
+            result,
+            vec![
+                "hello".to_string(),
+                "world".to_string(),
+                "rust".to_string()
+            ]
+        );
         assert_eq!(result.len(), 3);
     }
 
     #[test]
     fn test_wiserone_split_unicode() {
         let result = wiserone_split!("hello 世界 مرحبا");
-        assert_eq!(result, vec!["hello".to_string(), "世界".to_string(), "مرحبا".to_string()]);
+        assert_eq!(
+            result,
+            vec![
+                "hello".to_string(),
+                "世界".to_string(),
+                "مرحبا".to_string()
+            ]
+        );
         assert_eq!(result.len(), 3);
     }
 
@@ -214,7 +243,8 @@ mod tests {
     #[test]
     fn test_wiserone_join_mixed_types() {
         let number = 42;
-        let result = wiserone_join!("The answer is ", number.to_string());
+        let result =
+            wiserone_join!("The answer is ", number.to_string());
         assert_eq!(result, "The answer is 42");
     }
 
@@ -283,7 +313,10 @@ mod tests {
             image_url: "https://example.com/image.jpg"
         };
 
-        assert_eq!(quote.quote_text, "The only way to do great work is to love what you do.");
+        assert_eq!(
+            quote.quote_text,
+            "The only way to do great work is to love what you do."
+        );
         assert_eq!(quote.author, "Steve Jobs");
         assert_eq!(quote.date_added, "2024-01-01T00:00:00Z");
         assert_eq!(quote.image_url, "https://example.com/image.jpg");
