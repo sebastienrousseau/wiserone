@@ -3,10 +3,10 @@ name: 🧪 Check
 on:
   push:
     branches:
-      - feat/wiserone
+      - main
   pull_request:
     branches:
-      - feat/wiserone
+      - main
   release:
     types: [created]
 
