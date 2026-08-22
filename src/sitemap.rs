@@ -8,11 +8,47 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 
-/// Generates a sitemap.xml file for all HTML files in the docs folder.
+/// Generates a `sitemap.xml` file for all HTML files in the `./docs` folder.
+///
+/// This is a thin wrapper over [`generate_sitemap_file_in`] that targets the
+/// project's default output directory. Prefer [`generate_sitemap_file_in`] in
+/// tests, so that a run never touches the committed `docs/` tree.
 pub fn generate_sitemap_file(
     base_url: &str,
 ) -> Result<(), Box<dyn Error>> {
-    let docs_path = Path::new("./docs");
+    generate_sitemap_file_in(base_url, Path::new("./docs"))
+}
+
+/// Generates a `sitemap.xml` file for all HTML files in `docs_dir`.
+///
+/// The sitemap is written to `docs_dir/sitemap.xml`. Every HTML file directly
+/// inside `docs_dir` is listed as `{base_url}{file_name}`.
+///
+/// # Arguments
+///
+/// * `base_url` - URL prefix each entry is joined onto.
+/// * `docs_dir` - directory scanned for `.html` files and written into.
+///
+/// # Errors
+///
+/// Returns an error if `docs_dir` cannot be read, or if `sitemap.xml` cannot
+/// be created or written.
+///
+/// # Examples
+///
+/// ```no_run
+/// use std::path::Path;
+/// use wiserone::sitemap::generate_sitemap_file_in;
+///
+/// // Write into a scratch directory instead of the committed `docs/` tree.
+/// generate_sitemap_file_in("https://example.com/", Path::new("/tmp/out"))?;
+/// # Ok::<(), Box<dyn std::error::Error>>(())
+/// ```
+pub fn generate_sitemap_file_in(
+    base_url: &str,
+    docs_dir: &Path,
+) -> Result<(), Box<dyn Error>> {
+    let docs_path = docs_dir;
     let mut urls = Vec::new();
 
     // Obtain the current date and time in ISO 8601 format using dtt
@@ -82,7 +118,7 @@ pub fn generate_sitemap_file(
     sitemap_xml.push_str("</urlset>");
 
     // Write the sitemap to a file
-    let mut file = fs::File::create("./docs/sitemap.xml")?;
+    let mut file = fs::File::create(docs_path.join("sitemap.xml"))?;
     file.write_all(sitemap_xml.as_bytes())?;
 
     Ok(())
