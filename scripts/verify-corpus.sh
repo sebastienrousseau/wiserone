@@ -12,7 +12,11 @@ set -euo pipefail
 # A mismatch fails. An unreachable endpoint warns, so a flaky network
 # does not redden an otherwise good build.
 
-cd "$(git rev-parse --show-toplevel)"
+# Resolve the repo root from this script's own location rather than
+# from `git rev-parse`, which yields an empty string — and so `cd ""` —
+# when the script is invoked by absolute path from outside a checkout.
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+cd "$script_dir/.."
 
 CORPUS="${1:-quotes/quotes.json}"
 UPSTREAM="${WISERONE_POOL_URL:-https://wiserone.com/quotes.json}"
