@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Command"],"fn":["run_cli"]};
+window.SIDEBAR_ITEMS = {"enum":["Command"],"fn":["run_cli","run_cli_from"]};

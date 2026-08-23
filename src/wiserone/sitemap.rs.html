@@ -85,42 +85,46 @@
 <a href=#85 id=85 data-nosnippet>85</a>                &amp;&amp; path.extension().and_then(|s| s.to_str())
 <a href=#86 id=86 data-nosnippet>86</a>                    == <span class="prelude-val">Some</span>(<span class="string">"html"</span>)
 <a href=#87 id=87 data-nosnippet>87</a>            {
-<a href=#88 id=88 data-nosnippet>88</a>                <span class="kw">let </span>file_name =
-<a href=#89 id=89 data-nosnippet>89</a>                    path.file_name().unwrap().to_str().unwrap();
-<a href=#90 id=90 data-nosnippet>90</a>                urls.push(<span class="macro">format!</span>(<span class="string">"{}{}"</span>, base_url, file_name));
-<a href=#91 id=91 data-nosnippet>91</a>            }
-<a href=#92 id=92 data-nosnippet>92</a>        }
-<a href=#93 id=93 data-nosnippet>93</a>    }
-<a href=#94 id=94 data-nosnippet>94</a>
-<a href=#95 id=95 data-nosnippet>95</a>    <span class="comment">// Start the XML string with namespaces
-<a href=#96 id=96 data-nosnippet>96</a>    </span><span class="kw">let </span><span class="kw-2">mut </span>sitemap_xml =
-<a href=#97 id=97 data-nosnippet>97</a>        String::from(<span class="string">"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n"</span>);
-<a href=#98 id=98 data-nosnippet>98</a>    sitemap_xml += <span class="string">"&lt;urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" "</span>;
-<a href=#99 id=99 data-nosnippet>99</a>    sitemap_xml += <span class="string">"xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\" "</span>;
-<a href=#100 id=100 data-nosnippet>100</a>    sitemap_xml += <span class="string">"xmlns:xhtml=\"http://www.w3.org/1999/xhtml\" "</span>;
-<a href=#101 id=101 data-nosnippet>101</a>    sitemap_xml += <span class="string">"xmlns:mobile=\"http://www.google.com/schemas/sitemap-mobile/1.0\" "</span>;
-<a href=#102 id=102 data-nosnippet>102</a>    sitemap_xml += <span class="string">"xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" "</span>;
-<a href=#103 id=103 data-nosnippet>103</a>    sitemap_xml += <span class="string">"xmlns:video=\"http://www.google.com/schemas/sitemap-video/1.1\"&gt;\n"</span>;
-<a href=#104 id=104 data-nosnippet>104</a>
-<a href=#105 id=105 data-nosnippet>105</a>    <span class="comment">// Add URLs to the sitemap with changefreq and dynamic lastmod
-<a href=#106 id=106 data-nosnippet>106</a>    </span><span class="kw">for </span>url <span class="kw">in </span>urls {
-<a href=#107 id=107 data-nosnippet>107</a>        sitemap_xml
-<a href=#108 id=108 data-nosnippet>108</a>            .push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"  &lt;url&gt;\n    &lt;loc&gt;{}&lt;/loc&gt;\n"</span>, url));
-<a href=#109 id=109 data-nosnippet>109</a>        sitemap_xml.push_str(<span class="string">"    &lt;changefreq&gt;weekly&lt;/changefreq&gt;\n"</span>);
-<a href=#110 id=110 data-nosnippet>110</a>        sitemap_xml.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-<a href=#111 id=111 data-nosnippet>111</a>            <span class="string">"    &lt;lastmod&gt;{}&lt;/lastmod&gt;\n"</span>,
-<a href=#112 id=112 data-nosnippet>112</a>            current_iso_date
-<a href=#113 id=113 data-nosnippet>113</a>        ));
-<a href=#114 id=114 data-nosnippet>114</a>        sitemap_xml.push_str(<span class="string">"  &lt;/url&gt;\n"</span>);
-<a href=#115 id=115 data-nosnippet>115</a>    }
-<a href=#116 id=116 data-nosnippet>116</a>
-<a href=#117 id=117 data-nosnippet>117</a>    <span class="comment">// Close the XML string
-<a href=#118 id=118 data-nosnippet>118</a>    </span>sitemap_xml.push_str(<span class="string">"&lt;/urlset&gt;"</span>);
-<a href=#119 id=119 data-nosnippet>119</a>
-<a href=#120 id=120 data-nosnippet>120</a>    <span class="comment">// Write the sitemap to a file
-<a href=#121 id=121 data-nosnippet>121</a>    </span><span class="kw">let </span><span class="kw-2">mut </span>file = fs::File::create(docs_path.join(<span class="string">"sitemap.xml"</span>))<span class="question-mark">?</span>;
-<a href=#122 id=122 data-nosnippet>122</a>    file.write_all(sitemap_xml.as_bytes())<span class="question-mark">?</span>;
+<a href=#88 id=88 data-nosnippet>88</a>                <span class="comment">// Safely extract the filename, skipping files with
+<a href=#89 id=89 data-nosnippet>89</a>                // invalid names rather than panicking on them.
+<a href=#90 id=90 data-nosnippet>90</a>                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(file_name) =
+<a href=#91 id=91 data-nosnippet>91</a>                    path.file_name().and_then(|n| n.to_str())
+<a href=#92 id=92 data-nosnippet>92</a>                {
+<a href=#93 id=93 data-nosnippet>93</a>                    urls.push(<span class="macro">format!</span>(<span class="string">"{}{}"</span>, base_url, file_name));
+<a href=#94 id=94 data-nosnippet>94</a>                }
+<a href=#95 id=95 data-nosnippet>95</a>            }
+<a href=#96 id=96 data-nosnippet>96</a>        }
+<a href=#97 id=97 data-nosnippet>97</a>    }
+<a href=#98 id=98 data-nosnippet>98</a>
+<a href=#99 id=99 data-nosnippet>99</a>    <span class="comment">// Start the XML string with namespaces
+<a href=#100 id=100 data-nosnippet>100</a>    </span><span class="kw">let </span><span class="kw-2">mut </span>sitemap_xml =
+<a href=#101 id=101 data-nosnippet>101</a>        String::from(<span class="string">"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\n"</span>);
+<a href=#102 id=102 data-nosnippet>102</a>    sitemap_xml += <span class="string">"&lt;urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" "</span>;
+<a href=#103 id=103 data-nosnippet>103</a>    sitemap_xml += <span class="string">"xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\" "</span>;
+<a href=#104 id=104 data-nosnippet>104</a>    sitemap_xml += <span class="string">"xmlns:xhtml=\"http://www.w3.org/1999/xhtml\" "</span>;
+<a href=#105 id=105 data-nosnippet>105</a>    sitemap_xml += <span class="string">"xmlns:mobile=\"http://www.google.com/schemas/sitemap-mobile/1.0\" "</span>;
+<a href=#106 id=106 data-nosnippet>106</a>    sitemap_xml += <span class="string">"xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" "</span>;
+<a href=#107 id=107 data-nosnippet>107</a>    sitemap_xml += <span class="string">"xmlns:video=\"http://www.google.com/schemas/sitemap-video/1.1\"&gt;\n"</span>;
+<a href=#108 id=108 data-nosnippet>108</a>
+<a href=#109 id=109 data-nosnippet>109</a>    <span class="comment">// Add URLs to the sitemap with changefreq and dynamic lastmod
+<a href=#110 id=110 data-nosnippet>110</a>    </span><span class="kw">for </span>url <span class="kw">in </span>urls {
+<a href=#111 id=111 data-nosnippet>111</a>        sitemap_xml
+<a href=#112 id=112 data-nosnippet>112</a>            .push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"  &lt;url&gt;\n    &lt;loc&gt;{}&lt;/loc&gt;\n"</span>, url));
+<a href=#113 id=113 data-nosnippet>113</a>        sitemap_xml.push_str(<span class="string">"    &lt;changefreq&gt;weekly&lt;/changefreq&gt;\n"</span>);
+<a href=#114 id=114 data-nosnippet>114</a>        sitemap_xml.push_str(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
+<a href=#115 id=115 data-nosnippet>115</a>            <span class="string">"    &lt;lastmod&gt;{}&lt;/lastmod&gt;\n"</span>,
+<a href=#116 id=116 data-nosnippet>116</a>            current_iso_date
+<a href=#117 id=117 data-nosnippet>117</a>        ));
+<a href=#118 id=118 data-nosnippet>118</a>        sitemap_xml.push_str(<span class="string">"  &lt;/url&gt;\n"</span>);
+<a href=#119 id=119 data-nosnippet>119</a>    }
+<a href=#120 id=120 data-nosnippet>120</a>
+<a href=#121 id=121 data-nosnippet>121</a>    <span class="comment">// Close the XML string
+<a href=#122 id=122 data-nosnippet>122</a>    </span>sitemap_xml.push_str(<span class="string">"&lt;/urlset&gt;"</span>);
 <a href=#123 id=123 data-nosnippet>123</a>
-<a href=#124 id=124 data-nosnippet>124</a>    <span class="prelude-val">Ok</span>(())
-<a href=#125 id=125 data-nosnippet>125</a>}
+<a href=#124 id=124 data-nosnippet>124</a>    <span class="comment">// Write the sitemap to a file
+<a href=#125 id=125 data-nosnippet>125</a>    </span><span class="kw">let </span><span class="kw-2">mut </span>file = fs::File::create(docs_path.join(<span class="string">"sitemap.xml"</span>))<span class="question-mark">?</span>;
+<a href=#126 id=126 data-nosnippet>126</a>    file.write_all(sitemap_xml.as_bytes())<span class="question-mark">?</span>;
+<a href=#127 id=127 data-nosnippet>127</a>
+<a href=#128 id=128 data-nosnippet>128</a>    <span class="prelude-val">Ok</span>(())
+<a href=#129 id=129 data-nosnippet>129</a>}
 </code></pre></div></section></main></body></html>
