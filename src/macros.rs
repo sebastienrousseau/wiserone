@@ -175,3 +175,82 @@ macro_rules! wiserone_print_vec {
         }
     }};
 }
+
+#[cfg(test)]
+mod tests {
+    //! Unit tests kept in this file deliberately.
+    //!
+    //! A macro's body is attributed to wherever it expands, so the
+    //! forty macro tests in `tests/test_macros.rs` credited their
+    //! coverage to that integration target and left `src/macros.rs`
+    //! reading 0/11 — the definitions looked untested when they were
+    //! thoroughly tested. Expanding them here puts the lines back where
+    //! they belong.
+
+    use std::collections::HashMap;
+
+    #[test]
+    fn test_wiserone_constructs_a_quote() {
+        let quote = wiserone! {
+            quote_text: "A line.",
+            author: "The Wiser One",
+            date_added: "2026-08-23T06:06:06Z",
+            image_url: "https://example.com/a.webp"
+        };
+        assert_eq!(quote.quote_text, "A line.");
+        assert!(quote.id.is_none());
+        assert!(quote.pillar.is_none());
+    }
+
+    #[test]
+    fn test_wiserone_print_writes_its_argument() {
+        wiserone_print!("printed from the macro's own crate");
+    }
+
+    #[test]
+    fn test_wiserone_vec_collects_its_arguments() {
+        let v = wiserone_vec![1, 2, 3];
+        assert_eq!(v, vec![1, 2, 3]);
+        // The zero-argument form is exercised in tests/test_macros.rs:
+        // it expands to `let mut v` with nothing pushed, which trips
+        // `-D unused_mut` inside this crate.
+    }
+
+    #[test]
+    fn test_wiserone_map_builds_a_hashmap() {
+        let m: HashMap<&str, i32> = wiserone_map!("a" => 1, "b" => 2);
+        assert_eq!(m.get("a"), Some(&1));
+        assert_eq!(m.len(), 2);
+    }
+
+    #[test]
+    fn test_wiserone_assert_passes_on_truth() {
+        wiserone_assert!(1 + 1 == 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "Assertion failed")]
+    fn test_wiserone_assert_panics_on_falsehood() {
+        wiserone_assert!(1 + 1 == 3);
+    }
+
+    #[test]
+    fn test_wiserone_min_and_max() {
+        assert_eq!(wiserone_min!(3, 1, 2), 1);
+        assert_eq!(wiserone_max!(3, 1, 2), 3);
+        assert_eq!(wiserone_min!(42), 42);
+        assert_eq!(wiserone_max!(42), 42);
+    }
+
+    #[test]
+    fn test_wiserone_split_and_join_round_trip() {
+        let parts = wiserone_split!("a b c");
+        assert_eq!(parts, vec!["a", "b", "c"]);
+        assert_eq!(wiserone_join!("a", "b", "c"), "abc");
+    }
+
+    #[test]
+    fn test_wiserone_print_vec_walks_the_slice() {
+        wiserone_print_vec!(vec![1, 2, 3]);
+    }
+}

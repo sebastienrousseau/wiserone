@@ -62,7 +62,26 @@ pub mod macros;
 pub fn run() -> Result<(), Box<dyn Error>> {
     // Initialize the logger using the `env_logger` crate
     init_logger(None)?;
+    run_with(std::env::args_os())
+}
 
+/// Runs the application against an explicit argument list.
+///
+/// [`run`] delegates here after initialising the logger. Split out for
+/// the same reason [`cli::run_cli_from`] exists: `run` reads
+/// `std::env::args_os()`, which under a test harness holds the
+/// harness's own arguments, so the whole body was unreachable from the
+/// suite and sat at zero coverage.
+///
+/// # Errors
+///
+/// Returns an error if the log directory or file cannot be created, if
+/// the arguments fail to parse, or if generating the quote fails.
+pub fn run_with<I, T>(args: I) -> Result<(), Box<dyn Error>>
+where
+    I: IntoIterator<Item = T>,
+    T: Into<std::ffi::OsString> + Clone,
+{
     // Define date and time
     let date = DateTime::new();
     let iso = date.format_rfc3339()?;
@@ -73,8 +92,8 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let log_path = log_dir.join("wiserone.log");
     let mut log_file = File::create(&log_path)?;
 
-    // Call the `run_cli()` function from the `cli` module
-    cli::run_cli()?;
+    // Call into the CLI with the supplied arguments
+    cli::run_cli_from(args)?;
 
     // Generate a log entry
     let quote_log = macro_log!(
