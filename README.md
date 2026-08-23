@@ -144,13 +144,13 @@ The [GitHub Actions][10] shows the platforms in which the `wiserone` library tes
 The following command generates a random quote from the `quotes.json` file.
 
 ```shell
-wiserone --random ./quotes/01-quotes.json
+wiserone --random ./quotes/quotes.json
 ```
 
 or locally if you have cloned the repository:
 
 ```shell
-cargo run random ./quotes/01-quotes.json
+cargo run random ./quotes/quotes.json
 ```
 
 ##### From CSV
@@ -158,13 +158,13 @@ cargo run random ./quotes/01-quotes.json
 The following command generates a random quote from the `quotes.csv` file.
 
 ```shell
-wiserone --random ./quotes/01-quotes.csv
+wiserone --random ./quotes/quotes.csv
 ```
 
 or locally if you have cloned the repository:
 
 ```shell
-cargo run random ./quotes/01-quotes.csv
+cargo run random ./quotes/quotes.csv
 ```
 
 To use the `wiserone` library in your project, add the following to your

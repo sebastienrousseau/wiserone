@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // The function `read_and_parse_quotes` is expected to read a JSON file,
     // parse it, and return a collection of quotes.
     println!("Reading and parsing quotes from a JSON file:");
-    let mut quotes = read_quotes_from_file("./quotes/01-quotes.json")?;
+    let mut quotes = read_quotes_from_file("./quotes/quotes.json")?;
     let json_string = to_string_pretty(&quotes).unwrap();
     println!("Quotes:\n{}\n", json_string);
 
