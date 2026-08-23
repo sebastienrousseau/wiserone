@@ -31,8 +31,8 @@ mod tests {
     #[test]
     fn test_main_help_flag() {
         // Test that --help flag works
-        let output = Command::new("cargo")
-            .args(["run", "--", "--help"])
+        let output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
+            .args(["--help"])
             .output()
             .expect("Failed to run with --help");
 
@@ -53,8 +53,8 @@ mod tests {
     #[test]
     fn test_main_invalid_arguments() {
         // Test with completely invalid arguments
-        let output = Command::new("cargo")
-            .args(["run", "--", "--invalid-flag-that-does-not-exist"])
+        let output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
+            .args(["--invalid-flag-that-does-not-exist"])
             .output()
             .expect("Failed to run with invalid args");
 
@@ -74,8 +74,8 @@ mod tests {
     #[test]
     fn test_main_version_flag() {
         // Test that version flag works (if implemented)
-        let output = Command::new("cargo")
-            .args(["run", "--", "--version"])
+        let output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
+            .args(["--version"])
             .output()
             .expect("Failed to run with --version");
 
@@ -95,13 +95,9 @@ mod tests {
         let temp_dir = tempdir().expect("Failed to create temp dir");
         let temp_path = temp_dir.path();
 
-        let output = Command::new("cargo")
+        let output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
             .current_dir(temp_path)
-            .args([
-                "run",
-                "--manifest-path",
-                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
-            ])
+            .args::<[&str; 0], &str>([])
             .output()
             .expect("Failed to run in temp directory");
 
@@ -119,15 +115,10 @@ mod tests {
         // Test that main creates expected output files
         let temp_dir = tempdir().expect("Failed to create temp dir");
 
-        let _output = Command::new("cargo")
+        let _output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
             .current_dir(temp_dir.path())
-            .args([
-                "run",
-                "--manifest-path",
-                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
-                "--",
-                "--help", // Use help to avoid full execution that might fail
-            ])
+            // Use help to avoid full execution that might fail
+            .args(["--help"])
             .output()
             .expect("Failed to run command");
 
@@ -157,13 +148,9 @@ mod tests {
         }
 
         // Test that the application handles file I/O errors gracefully
-        let output = match Command::new("cargo")
+        let output = match Command::new(env!("CARGO_BIN_EXE_wiserone"))
             .current_dir(&restricted_path)
-            .args([
-                "run",
-                "--manifest-path",
-                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
-            ])
+            .args::<[&str; 0], &str>([])
             .output()
         {
             Ok(o) => o,
@@ -188,14 +175,8 @@ mod tests {
     fn test_main_signal_handling() {
         // Test graceful shutdown on interrupt (if applicable)
         // This is a basic test to ensure the process can be started and stopped
-        let mut child = Command::new("cargo")
-            .args([
-                "run",
-                "--manifest-path",
-                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
-                "--",
-                "--help",
-            ])
+        let mut child = Command::new(env!("CARGO_BIN_EXE_wiserone"))
+            .args(["--help"])
             .spawn()
             .expect("Failed to spawn process");
 
@@ -218,16 +199,10 @@ mod tests {
     #[test]
     fn test_main_environment_variables() {
         // Test behavior with different environment variables
-        let _output = Command::new("cargo")
+        let _output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
             .env("RUST_LOG", "debug")
             .env("RUST_BACKTRACE", "1")
-            .args([
-                "run",
-                "--manifest-path",
-                &format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR")),
-                "--",
-                "--help",
-            ])
+            .args(["--help"])
             .output()
             .expect("Failed to run with environment variables");
 
@@ -238,9 +213,9 @@ mod tests {
     #[test]
     fn test_main_working_directory_independence() {
         // Test that --help works from the project directory
-        let output = Command::new("cargo")
+        let output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
             .current_dir(env!("CARGO_MANIFEST_DIR"))
-            .args(["run", "--", "--help"])
+            .args(["--help"])
             .output()
             .expect("Failed to run from project dir");
 
@@ -257,8 +232,8 @@ mod tests {
         let mut outputs = Vec::new();
 
         for _ in 0..3 {
-            let output = Command::new("cargo")
-                .args(["run", "--", "--help"])
+            let output = Command::new(env!("CARGO_BIN_EXE_wiserone"))
+                .args(["--help"])
                 .output()
                 .expect("Failed to run command");
 
