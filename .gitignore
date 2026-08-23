@@ -1,6 +1,10 @@
 *.DS_Store
 *.profraw
 /.vscode/
+# CLI output. `wiserone random|daily|all` writes generated pages here,
+# and a stray `git add -A` used to sweep them into a commit. Nothing
+# publishes this directory — document.yml deploys target/doc.
+/docs/
 /output/
 /public/
 /target/

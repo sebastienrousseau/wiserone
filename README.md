@@ -141,6 +141,20 @@ The [GitHub Actions][10] shows the platforms in which the `wiserone` library tes
 
 ##### From JSON
 
+The following command generates the quote of the day — the same one
+[wiserone.com](https://wiserone.com) is showing, selected from the pool
+by the same UTC ordinal, so the CLI and the site never disagree.
+
+```shell
+wiserone --daily ./quotes/quotes.json
+```
+
+Or, with `cargo`:
+
+```shell
+cargo run daily ./quotes/quotes.json
+```
+
 The following command generates a random quote from the `quotes.json` file.
 
 ```shell

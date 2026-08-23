@@ -27,6 +27,11 @@ macro_rules! wiserone {
         image_url: $image_url:expr $(,)?
     ) => {
         $crate::quotes::Quote {
+            // Pool metadata is not part of the macro's surface: callers
+            // construct one-off quotes, not corpus entries. Defaulted so
+            // existing `wiserone! { ... }` sites keep compiling.
+            id: None,
+            pillar: None,
             quote_text: $quote_text.to_string(),
             author: $author.to_string(),
             date_added: $date_added.to_string(),

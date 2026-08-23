@@ -11,6 +11,8 @@ use wiserone::quotes::{Quote, Quotes};
 #[test]
 fn test_quote_struct() {
     let quote = Quote {
+        id: None,
+        pillar: None,
         quote_text: "Test quote".to_string(),
         author: "Test author".to_string(),
         date_added: "2024-01-21".to_string(),
@@ -28,12 +30,16 @@ fn test_quote_struct() {
 fn test_quotes_struct_initialization() {
     let quotes_vec = vec![
         Quote {
+            id: None,
+            pillar: None,
             quote_text: "Quote 1".to_string(),
             author: "Author 1".to_string(),
             date_added: "2024-01-21".to_string(),
             image_url: "http://example.com/image1.jpg".to_string(),
         },
         Quote {
+            id: None,
+            pillar: None,
             quote_text: "Quote 2".to_string(),
             author: "Author 2".to_string(),
             date_added: "2024-01-22".to_string(),
@@ -50,6 +56,8 @@ fn test_quotes_struct_initialization() {
 fn test_random_quote_selection() {
     let quotes_vec = vec![
         Quote {
+            id: None,
+            pillar: None,
             quote_text: "Test quote 1".to_string(),
             author: "Author 1".to_string(),
             date_added: "2024-01-01".to_string(),
@@ -76,6 +84,8 @@ fn test_random_quote_selection() {
 fn test_all_quotes_selection() {
     let quotes_vec = vec![
         Quote {
+            id: None,
+            pillar: None,
             quote_text: "Test quote 1".to_string(),
             author: "Author 1".to_string(),
             date_added: "2024-01-01".to_string(),
@@ -83,6 +93,8 @@ fn test_all_quotes_selection() {
         },
         //... more quotes...
         Quote {
+            id: None,
+            pillar: None,
             quote_text: "Test quote 2".to_string(),
             author: "Author 2".to_string(),
             date_added: "2024-01-02".to_string(),
@@ -109,6 +121,8 @@ fn test_all_quotes_selection() {
 #[test]
 fn test_quote_equality() {
     let quote1 = Quote {
+        id: None,
+        pillar: None,
         quote_text: "Same quote".to_string(),
         author: "Same author".to_string(),
         date_added: "2024-01-21".to_string(),
@@ -120,6 +134,8 @@ fn test_quote_equality() {
     assert_eq!(quote1, quote2);
 
     let quote3 = Quote {
+        id: None,
+        pillar: None,
         quote_text: "Different quote".to_string(),
         // other fields same as quote1
         author: "Same author".to_string(),
@@ -154,6 +170,8 @@ fn test_select_all_quotes_empty_vector() {
 #[test]
 fn test_quote_serialization_deserialization() {
     let quote = Quote {
+        id: None,
+        pillar: None,
         quote_text: "Test quote".to_string(),
         author: "Test author".to_string(),
         date_added: "2024-01-21".to_string(),
@@ -171,6 +189,8 @@ fn test_quote_serialization_deserialization() {
 #[test]
 fn test_invalid_quote_creation() {
     let quote = Quote {
+        id: None,
+        pillar: None,
         quote_text: "".to_string(),
         author: "".to_string(),
         date_added: "2024-01-21".to_string(),
