@@ -52,9 +52,15 @@ macro_rules! wiserone_print {
 #[macro_export]
 macro_rules! wiserone_vec {
     ($($elem:expr),*) => {{
-        let mut v = Vec::new();
-        $(v.push($elem);)*
-        v
+        // init-then-push rather than `vec![...]`: the repeated push is
+        // what lets the macro take a variadic list. Allowed at the
+        // expansion, so call sites under `-D warnings` stay clean.
+        #[allow(clippy::vec_init_then_push)]
+        {
+            let mut v = Vec::new();
+            $(v.push($elem);)*
+            v
+        }
     }};
 }
 
@@ -64,7 +70,9 @@ macro_rules! wiserone_map {
     ($($key:expr => $value:expr),*) => {{
         use std::collections::HashMap;
         let mut m = HashMap::new();
-        $(m.insert($key, $value);)*
+        // The displaced value is deliberately discarded; binding it
+        // keeps `-D warnings` quiet at every expansion site.
+        $(let _ = m.insert($key, $value);)*
         m
     }};
 }
@@ -207,10 +215,14 @@ mod tests {
         wiserone_print!("printed from the macro's own crate");
     }
 
+    // The macro bodies expand here now, so clippy lints the expansion
+    // rather than the call site: `wiserone_vec!` builds with
+    // init-then-push, and `wiserone_map!` discards the `insert` result.
+    // Both are properties of the macros, not of these tests.
     #[test]
     fn test_wiserone_vec_collects_its_arguments() {
         let v = wiserone_vec![1, 2, 3];
-        assert_eq!(v, vec![1, 2, 3]);
+        assert_eq!(v, [1, 2, 3]);
         // The zero-argument form is exercised in tests/test_macros.rs:
         // it expands to `let mut v` with nothing pushed, which trips
         // `-D unused_mut` inside this crate.
@@ -251,6 +263,6 @@ mod tests {
 
     #[test]
     fn test_wiserone_print_vec_walks_the_slice() {
-        wiserone_print_vec!(vec![1, 2, 3]);
+        wiserone_print_vec!([1, 2, 3]);
     }
 }
