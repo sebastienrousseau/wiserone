@@ -13,7 +13,7 @@ exclude = [
     ]
 homepage = "https://wiserone.com"
 keywords = ['Wisdom', 'Quotes','Inspiration', 'Insights', 'Reflection']
-license = "MIT OR Apache-2.0"
+license = "Apache-2.0 OR MIT"
 name = "wiserone"
 readme = "README.md"
 repository = "https://github.com/sebastienrousseau/wiserone"

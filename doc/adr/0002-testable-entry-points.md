@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
 
 # ADR 0002 — Entry points come in pairs
 

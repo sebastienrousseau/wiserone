@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
 
 <p align="center">
   <img src="https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg" alt="The Wiser One logo" width="128" />
