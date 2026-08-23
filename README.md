@@ -1,261 +1,230 @@
-<!-- markdownlint-disable MD033 MD041 -->
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 
-<img
-src="https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg"
-alt="the wiser one's logo"
-height="199"
-width="199"
-align="right"
-/>
+<p align="center">
+  <img src="https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg" alt="The Wiser One logo" width="128" />
+</p>
 
-<!-- markdownlint-enable MD033 MD041 -->
+<h1 align="center">wiserone</h1>
 
-# The Wiser One
+<p align="center">
+  A command-line tool that renders a daily quote to HTML — the same
+  quote <a href="https://wiserone.com">wiserone.com</a> is showing.
+</p>
 
-Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.
+<p align="center">
+  <a href="https://github.com/sebastienrousseau/wiserone/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/wiserone/ci.yml?style=for-the-badge&logo=github" alt="Build" /></a>
+  <a href="https://crates.io/crates/wiserone"><img src="https://img.shields.io/crates/v/wiserone.svg?style=for-the-badge&color=fc8d62&logo=rust" alt="Crates.io" /></a>
+  <a href="https://docs.rs/wiserone"><img src="https://img.shields.io/badge/docs.rs-wiserone-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" alt="Docs.rs" /></a>
+  <a href="https://lib.rs/crates/wiserone"><img src="https://img.shields.io/badge/lib.rs-wiserone-orange.svg?style=for-the-badge" alt="lib.rs" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg?style=for-the-badge" alt="License" /></a>
+</p>
 
-<!-- markdownlint-disable MD033 MD041 -->
-<center>
-<!-- markdownlint-enable MD033 MD041 -->
+---
 
-[![Made With Rust][made-with-rust-badge]][5]
-[![Crates.io][crates-badge]][7]
-[![Lib.rs][libs-badge]][9]
-[![Docs.rs][docs-badge]][8]
-[![License][license-badge]][2]
+## Contents
 
-• [Website][0]
-• [Documentation][8]
-• [Report Bug][3]
-• [Request Feature][3]
-• [Contributing Guidelines][4]
+**Getting started**
 
-<!-- markdownlint-disable MD033 MD041 -->
-</center>
-<!-- markdownlint-enable MD033 MD041 -->
+- [Install](#install) — Cargo, source
+- [Quick Start](#quick-start) — a quote on screen in two commands
 
-![divider][divider]
+**Reference**
 
-## Overview 📖
+- [Commands](#commands) — `daily`, `random`, `all`
+- [How selection works](#how-selection-works) — why `daily` agrees with the website
+- [The corpus](#the-corpus) — schema, JSON and CSV
+- [Library usage](#library-usage) — using the crate directly
+- [Output](#output) — what gets written, and where
 
-The Wiser One offers daily insights and wisdom in a sleek, minimalist interface, designed to inspire deeper thinking and foster personal growth. Each visit presents a unique opportunity to reflect and gain new perspectives.
+**Operational**
 
-## Features ✨
+- [Platform support](#platform-support) — tiers
+- [Development](#development) — test, lint, coverage, corpus drift
+- [Security](#security) — path handling guarantees
+- [Documentation](#documentation) — all reference docs
+- [License](#license)
 
-### Reading Quotes from a JSON File
+---
 
-- The Wiser One can seamlessly access and parse a wide range of quotes stored in a JSON format. This allows for a diverse and extensive collection of wisdom nuggets. The JSON structure is optimized for quick retrieval, ensuring a smooth user experience.
+## Install
 
-### Reading Quotes from a CSV File
+| Channel | Install |
+|---|---|
+| Cargo (crates.io) | `cargo install wiserone --locked` |
+| Cargo (from source) | `cargo install --locked --path .` |
 
-- The Wiser One can also read quotes from a CSV file. This allows users to easily import their own collection of quotes, or to create a custom library of quotes. The CSV format is simple and intuitive, making it easy to add, edit, or delete quotes. This feature allows users to create a personalized collection of wisdom nuggets.
+Requires Rust **1.75.0** or later. See [`doc/POLICIES.md`](doc/POLICIES.md).
 
-### Randomly Selecting a Quote
-
-- With an innovative random selection algorithm, the Wiser One presents a different quote each time, making every interaction unique. This feature encourages varied learning and prevents the monotony of repetitive content. The randomness is designed to simulate the unpredictability and richness of gaining wisdom in real life.
-
-### Creating an HTML File with a Random Quote
-
-- The Wiser One can generate a beautifully formatted HTML file for each selected quote. This allows users to save their favourite quotes in a visually appealing format, which can be easily shared or printed. The HTML output includes customizable themes and layouts, giving a personalized touch to each piece of wisdom.
-
-### Creating all the HTML Files with all the Quotes
-
-- The Wiser One can also generate a complete set of HTML files for all the quotes in the library. This allows users to easily access their entire collection of wisdom nuggets in a visually appealing format. The HTML output includes customizable themes and layouts, giving a personalized touch to each piece of wisdom.
-
-These features combine to make the Wiser One a powerful tool for those seeking daily inspiration and wisdom. The application's ease of use, coupled with its thoughtful design, makes it an ideal choice for users looking to enrich their daily routine with meaningful insights.
-
-## Getting Started 🚀
-
-It takes just a few minutes to get up and running with `wiserone`.
-
-### Installation
-
-To install `wiserone`, you need to have the Rust toolchain installed on
-your machine. You can install the Rust toolchain by following the
-instructions on the [Rust website][13].
-
-Once you have the Rust toolchain installed, you can install `wiserone`
-using the following command:
+## Quick Start
 
 ```shell
-cargo install wiserone
+git clone https://github.com/sebastienrousseau/wiserone
+cd wiserone
+cargo run -- daily ./quotes/quotes.json
 ```
 
-You can then run the help command to see the available options:
+That writes `docs/YYYY_MM_DD.html` and mirrors it to `docs/index.html`,
+carrying the same quote [wiserone.com](https://wiserone.com) is showing
+today.
+
+## Commands
+
+| Command | Selects | Writes |
+|---|---|---|
+| `wiserone daily <file>` | The quote of the day, matching the website | `docs/YYYY_MM_DD.html` + `docs/index.html` |
+| `wiserone random <file>` | Any quote at random | `docs/YYYY_MM_DD.html` + `docs/index.html` |
+| `wiserone all <file>` | Every quote in the corpus | `docs/quote-NNNN.html` per quote |
 
 ```shell
-wiserone --help
+wiserone daily  ./quotes/quotes.json
+wiserone random ./quotes/quotes.csv
+wiserone all    ./quotes/quotes.json
 ```
 
-### Requirements
+## How selection works
 
-The minimum supported Rust toolchain version is currently Rust
-**1.75.0** or later (stable).
+The corpus is an ordered **pool**, not a calendar. `daily` computes:
 
-### Platform support
-
-`wiserone` is supported and tested on the following platforms:
-
-### Tier 1 platforms 🏆
-
-| | Operating System | Target | Description |
-| --- | --- | --- | --- |
-| ✅ | Linux   | aarch64-unknown-linux-gnu | 64-bit Linux systems on ARM architecture |
-| ✅ | Linux   | i686-unknown-linux-gnu | 32-bit Linux (kernel 3.2+, glibc 2.17+) |
-| ✅ | Linux   | x86_64-unknown-linux-gnu | 64-bit Linux (kernel 2.6.32+, glibc 2.11+) |
-| ✅ | macOS   | x86_64-apple-darwin | 64-bit macOS (10.7 Lion or later) |
-| ✅ | Windows | i686-pc-windows-gnu | 32-bit Windows (7 or later) |
-| ✅ | Windows | i686-pc-windows-msvc | 32-bit Windows (7 or later) |
-| ✅ | Windows | x86_64-pc-windows-gnu | 64-bit Windows (7 or later) |
-| ✅ | Windows | x86_64-pc-windows-msvc | 64-bit Windows (7 or later) |
-
-### Tier 2 platforms 🥈
-
-| | Operating System | Target | Description |
-| --- | --- | --- | --- |
-| ✅ | Linux   | aarch64-unknown-linux-musl | 64-bit Linux systems on ARM architecture |
-| ✅ | Linux   | arm-unknown-linux-gnueabi | ARMv6 Linux (kernel 3.2, glibc 2.17) |
-| ✅ | Linux   | arm-unknown-linux-gnueabihf | ARMv7 Linux, hardfloat (kernel 3.2, glibc 2.17) |
-| ✅ | Linux   | armv7-unknown-linux-gnueabihf | ARMv7 Linux, hardfloat (kernel 3.2, glibc 2.17) |
-| ✅ | Linux   | mips-unknown-linux-gnu | MIPS Linux (kernel 2.6.32+, glibc 2.11+) |
-| ✅ | Linux   | mips64-unknown-linux-gnuabi64 | MIPS64 Linux (kernel 2.6.32+, glibc 2.11+) |
-| ✅ | Linux   | mips64el-unknown-linux-gnuabi64 | MIPS64 Linux (kernel 2.6.32+, glibc 2.11+) |
-| ✅ | Linux   | mipsel-unknown-linux-gnu | MIPS Linux (kernel 2.6.32+, glibc 2.11+) |
-| ✅ | macOS   | aarch64-apple-darwin | 64-bit macOS (10.7 Lion or later) |
-| ✅ | Windows | aarch64-pc-windows-msvc | 64-bit Windows (7 or later) |
-
-The [GitHub Actions][10] shows the platforms in which the `wiserone` library tests are run.
-
-### Documentation
-
-**Info:** Please check out our [website][0] for more information. You can find our documentation on [docs.rs][8], [lib.rs][9] and
-[crates.io][7].
-
-## Usage
-
-### Command-line interface
-
-`wiserone` provides a convenient way to generate daily quotes from a JSON file using the command line interface. There are a few options available to help you get started.
-
-#### Generate a random quote
-
-##### From JSON
-
-The following command generates the quote of the day — the same one
-[wiserone.com](https://wiserone.com) is showing, selected from the pool
-by the same UTC ordinal, so the CLI and the site never disagree.
-
-```shell
-wiserone --daily ./quotes/quotes.json
+```text
+index = day_number % pool_length
 ```
 
-Or, with `cargo`:
+`day_number` is days elapsed since 0001-01-01, in UTC — the value
+Python's `date.toordinal()` returns, and the value
+[wiserone.com](https://wiserone.com) rotates on. The pool is ordered by
+`id`. Given the same corpus in the same order, the CLI and the website
+show the same quote on the same day, and a test pins that against a
+known date.
 
-```shell
-cargo run daily ./quotes/quotes.json
+Two consequences worth knowing:
+
+- **`date_added` selects nothing.** It records the day a line was
+  written. It is not unique, and anything keyed on it will collide.
+- **Order is load-bearing.** Reordering or renumbering shifts which
+  quote every future day shows.
+
+The reasoning is in [ADR 0001](doc/adr/0001-quote-pool-and-rotation.md).
+
+## The corpus
+
+```json
+{
+  "quotes": [
+    {
+      "id": 0,
+      "pillar": "elimination",
+      "quote_text": "Say no to a hundred good things.",
+      "author": "The Wiser One",
+      "date_added": "2024-02-17T06:06:06Z",
+      "image_url": "https://cloudcdn.pro/stocks/images/example.webp"
+    }
+  ]
+}
 ```
 
-The following command generates a random quote from the `quotes.json` file.
+| Field | Meaning |
+|---|---|
+| `id` | Pool position — what `daily` indexes |
+| `pillar` | Thematic block, e.g. `elimination`, `mortality` |
+| `quote_text` | The line |
+| `author` | Attribution |
+| `date_added` | Provenance: when it was written |
+| `image_url` | Banner image |
 
-```shell
-wiserone --random ./quotes/quotes.json
-```
+`quotes/quotes.csv` holds the same rows, same order, same columns. A
+test asserts the two formats stay identical.
 
-or locally if you have cloned the repository:
+Only `.json` and `.csv` are accepted. Paths containing `..` are
+rejected before the file is read.
 
-```shell
-cargo run random ./quotes/quotes.json
-```
-
-##### From CSV
-
-The following command generates a random quote from the `quotes.csv` file.
-
-```shell
-wiserone --random ./quotes/quotes.csv
-```
-
-or locally if you have cloned the repository:
-
-```shell
-cargo run random ./quotes/quotes.csv
-```
-
-To use the `wiserone` library in your project, add the following to your
-`Cargo.toml` file:
-
-```toml
-[dependencies]
-wiserone = "0.0.5"
-```
-
-Add the following to your `main.rs` file:
+## Library usage
 
 ```rust
-use wiserone::*;
+use wiserone::quotes::{current_day_number, read_quotes_from_file};
+
+let quotes = read_quotes_from_file("./quotes/quotes.json")?;
+let today = quotes.select_daily_quote(current_day_number())?;
+println!("{} — {}", today.quote_text, today.author);
 ```
 
-then you can use the functions in your application code.
+Build a one-off quote with the macro, which defaults pool metadata:
 
-### Examples
+```rust
+use wiserone::wiserone;
 
-To get started with `wiserone`, you can use the examples provided in the
-`examples` directory of the project.
+let quote = wiserone! {
+    quote_text: "Taste is knowing which good idea to throw away.",
+    author: "The Wiser One",
+    date_added: "2026-08-23T06:06:06Z",
+    image_url: "https://example.com/banner.webp"
+};
+```
 
-To run the examples, clone the repository and run the following command
-in your terminal from the project root directory.
+## Output
+
+Pages are written to `./docs`, which is git-ignored — it is generated
+output, not source. Generation needs `_layouts/quote.html`; a missing
+template, or a directory in its place, is reported as an error rather
+than a panic.
+
+Each page's canonical URL is `https://wiserone.com/q/<slug>/`, the
+website's canonical address for that quote.
+
+## Platform support
+
+| Tier | Platforms |
+|---|---|
+| Tier 1 🏆 | `x86_64-unknown-linux-gnu`, `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc` |
+| Tier 2 🥈 | `aarch64-unknown-linux-gnu`, `x86_64-unknown-linux-musl` |
+
+Tier 1 is built and tested on every push; Tier 2 is built.
+
+## Development
 
 ```shell
-cargo run --example example
+cargo test                                    # 140 tests
+cargo fmt --check                             # formatting
+cargo clippy --all-targets --all-features     # lints (-D warnings in CI)
+cargo tarpaulin --follow-exec --fail-under 92 # coverage
+./scripts/verify-corpus.sh                    # corpus vs wiserone.com
 ```
 
-## Semantic Versioning Policy 🚥
+The corpus lives in three repositories and the website's copy is
+canonical. `verify-corpus.sh` fetches
+[`wiserone.com/quotes.json`](https://wiserone.com/quotes.json) and fails
+on any divergence in content or order. See
+[`doc/TESTING.md`](doc/TESTING.md).
 
-For transparency into our release cycle and in striving to maintain
-backward compatibility, `wiserone` follows [semantic versioning][6].
+## Security
 
-## License 📝
+Two guarantees for a tool that writes files:
 
-The project is licensed under the terms of MIT OR Apache-2.0.
+- **Output filenames** are validated before use: no `..`, no path
+  separators, must end in `.html`, non-empty without the extension.
+- **Input paths** are validated before being read: no `..`, and only
+  `.json` or `.csv`.
 
-## Contribution 🤝
+Both rejection paths are covered by tests. Report vulnerabilities via
+[`SECURITY.md`](.github/SECURITY.md).
 
-We welcome all people who want to contribute. Please see the
-[contributing instructions][4] for more information.
+## Documentation
 
-Contributions in any form (issues, pull requests, etc.) to this project
-must adhere to the [Rust's Code of Conduct][11].
+| Document | Covers |
+|---|---|
+| [`doc/ARCHITECTURE.md`](doc/ARCHITECTURE.md) | Crate layout, the pool, selection, page generation |
+| [`doc/USER-GUIDE.md`](doc/USER-GUIDE.md) | Commands, corpus format, troubleshooting |
+| [`doc/TESTING.md`](doc/TESTING.md) | Suite layout, coverage policy, measurement traps |
+| [`doc/POLICIES.md`](doc/POLICIES.md) | Versioning, MSRV, platforms, coverage, corpus changes |
+| [`doc/adr/0001-quote-pool-and-rotation.md`](doc/adr/0001-quote-pool-and-rotation.md) | Why quotes are a pool, not a calendar |
+| [`doc/adr/0002-testable-entry-points.md`](doc/adr/0002-testable-entry-points.md) | Why entry points come in pairs |
+| [API docs](https://docs.rs/wiserone) | Generated reference |
+
+## License
+
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE)
+or [MIT license](LICENSE-MIT) at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally
-submitted for inclusion in the work by you, as defined in the
+submitted for inclusion in this crate by you, as defined in the
 Apache-2.0 license, shall be dual licensed as above, without any
 additional terms or conditions.
-
-## Acknowledgements 💙
-
-A big thank you to all the awesome contributors of [wiserone][5] for their
-help and support.
-
-A special thank you goes to the [Rust Reddit][12] community for
-providing a lot of useful suggestions on how to improve this project.
-
-[0]: https://wiserone.com
-[2]: http://opensource.org/licenses/MIT
-[3]: https://github.com/sebastienrousseau/wiserone/issues
-[4]: https://github.com/sebastienrousseau/wiserone/blob/main/CONTRIBUTING.md
-[5]: https://github.com/sebastienrousseau/wiserone/graphs/contributors
-[6]: http://semver.org/
-[7]: https://crates.io/crates/wiserone
-[8]: https://docs.rs/wiserone
-[9]: https://lib.rs/crates/wiserone
-[10]: https://github.com/sebastienrousseau/wiserone/actions
-[11]: https://www.rust-lang.org/policies/code-of-conduct
-[12]: https://www.reddit.com/r/rust/
-[13]: https://www.rust-lang.org/learn/get-started
-
-[crates-badge]: https://img.shields.io/crates/v/wiserone.svg?style=for-the-badge 'Crates.io badge'
-[divider]: https://cloudcdn.pro/common/images/elements/divider.svg "divider"
-[docs-badge]: https://img.shields.io/docsrs/wiserone.svg?style=for-the-badge 'Docs.rs badge'
-[libs-badge]: https://img.shields.io/badge/lib.rs-v0.0.5-orange.svg?style=for-the-badge 'Lib.rs badge'
-[license-badge]: https://img.shields.io/crates/l/wiserone.svg?style=for-the-badge 'License badge'
-[made-with-rust-badge]: https://img.shields.io/badge/rust-f04041?style=for-the-badge&labelColor=c0282d&logo=rust 'Made With Rust badge'

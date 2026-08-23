@@ -293,13 +293,13 @@ pub fn read_quotes_from_file(
     // Validate the file path for security
     validate_file_path(file_path)?;
 
+    // No catch-all arm: `validate_file_path` above already rejects
+    // anything that is not `.json` or `.csv`, so a third branch here is
+    // unreachable. It was dead code that coverage could never enter.
     let path = Path::new(file_path);
     match path.extension().and_then(|s| s.to_str()) {
-        Some("json") => read_quotes_from_json(file_path),
         Some("csv") => read_quotes_from_csv(file_path),
-        _ => Err(QuoteError::ParseError(
-            "Unsupported file format".into(),
-        )),
+        _ => read_quotes_from_json(file_path),
     }
 }
 
