@@ -5,12 +5,10 @@
 //! # `wiserone` 🦀
 
 // Crate configuration
-#![cfg_attr(feature = "bench", feature(test))]
 #![deny(dead_code)]
 #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
 #![forbid(unsafe_code)]
-#![warn(unreachable_pub)]
 #![doc(
     html_favicon_url = "",
     html_logo_url = "",
@@ -19,8 +17,9 @@
 
 // Import necessary dependencies
 use std::error::Error;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::Write;
+use std::path::Path;
 
 use dtt::datetime::DateTime;
 use rlg::log_format::LogFormat;
@@ -28,6 +27,9 @@ use rlg::log_level::LogLevel;
 use rlg::macro_log;
 
 use crate::loggers::init_logger;
+
+/// The directory where output files (including logs) are stored.
+const OUTPUT_DIR: &str = "./docs";
 
 /// The `ascii` module contains functions for generating ASCII art.
 pub mod ascii;
@@ -65,8 +67,11 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let date = DateTime::new();
     let iso = date.format_rfc3339()?;
 
-    // Open the log file for appending
-    let mut log_file = File::create("./wiserone.log")?;
+    // Ensure log directory exists and open log file
+    let log_dir = Path::new(OUTPUT_DIR).join("logs");
+    fs::create_dir_all(&log_dir)?;
+    let log_path = log_dir.join("wiserone.log");
+    let mut log_file = File::create(&log_path)?;
 
     // Call the `run_cli()` function from the `cli` module
     cli::run_cli()?;

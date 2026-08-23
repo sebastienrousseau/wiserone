@@ -4,8 +4,9 @@
 
 use clap::Parser;
 use std::error::Error;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::Write;
+use std::path::Path;
 
 use dtt::datetime::DateTime;
 use rlg::log_format::LogFormat;
@@ -16,6 +17,9 @@ use crate::ascii::generate_ascii_art;
 use crate::html::generate_html_file;
 use crate::quotes::read_quotes_from_file;
 use crate::sitemap::generate_sitemap_file;
+
+/// The directory where output files (including logs) are stored.
+const OUTPUT_DIR: &str = "./docs";
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -50,8 +54,42 @@ pub enum Command {
 /// * `i32`: An exit code indicating the success or failure of the
 ///   program.
 pub fn run_cli() -> Result<(), Box<dyn Error>> {
-    // Open the log file for appending
-    let mut log_file = File::create("./wiserone.log")?;
+    match run_cli_from(std::env::args_os()) {
+        // A clap error here is `--help`, `--version`, or a usage
+        // mistake. `Error::exit` renders it the way a CLI should:
+        // help and version to stdout with status 0, usage errors to
+        // stderr with status 2. Returning it instead would make
+        // `wiserone --help` exit non-zero.
+        Err(e) => match e.downcast::<clap::Error>() {
+            Ok(clap_error) => clap_error.exit(),
+            Err(other) => Err(other),
+        },
+        ok => ok,
+    }
+}
+
+/// Runs the CLI against an explicit argument list.
+///
+/// [`run_cli`] delegates here with [`std::env::args_os`]. Prefer this
+/// wherever the arguments should not depend on how the process was
+/// started: under `cargo bench` the process arguments include
+/// `--bench`, and under `cargo test` they belong to the test harness,
+/// so parsing them would fail for reasons unrelated to this CLI.
+///
+/// # Errors
+///
+/// Returns an error if `args` fail to parse, or if generating the
+/// output files fails.
+pub fn run_cli_from<I, T>(args: I) -> Result<(), Box<dyn Error>>
+where
+    I: IntoIterator<Item = T>,
+    T: Into<std::ffi::OsString> + Clone,
+{
+    // Ensure log directory exists and open log file
+    let log_dir = Path::new(OUTPUT_DIR).join("logs");
+    fs::create_dir_all(&log_dir)?;
+    let log_path = log_dir.join("wiserone.log");
+    let mut log_file = File::create(&log_path)?;
 
     // Define date and time
     let dt = DateTime::new();
@@ -80,7 +118,7 @@ pub fn run_cli() -> Result<(), Box<dyn Error>> {
     writeln!(log_file, "{}", ascii_art_log)?;
 
     // Parse the command line arguments using the `clap` crate.
-    let command = Command::parse();
+    let command = Command::try_parse_from(args)?;
 
     match command {
         Command::Random { filename } => {

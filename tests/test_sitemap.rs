@@ -2,6 +2,8 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+//! Integration tests for sitemap generation (`wiserone::sitemap`).
+
 #[cfg(test)]
 mod tests {
     use std::error::Error;
@@ -17,8 +19,11 @@ mod tests {
     /// a test writing or clearing it leaves the working tree dirty and
     /// invites an accidental `git add -A` of the deletions.
     fn scratch_dir(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir()
-            .join(format!("wiserone-{}-{}", name, process::id()));
+        let dir = std::env::temp_dir().join(format!(
+            "wiserone-{}-{}",
+            name,
+            process::id()
+        ));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).expect("create scratch dir");
         dir
@@ -31,7 +36,8 @@ mod tests {
 
         generate_sitemap_file_in("https://example.com/docs/", &dir)?;
 
-        let sitemap_content = fs::read_to_string(dir.join("sitemap.xml"))?;
+        let sitemap_content =
+            fs::read_to_string(dir.join("sitemap.xml"))?;
         assert!(sitemap_content.contains("<urlset xmlns="));
         assert!(!sitemap_content.contains("<loc>"));
 
@@ -48,14 +54,17 @@ mod tests {
 
         generate_sitemap_file_in("https://example.com/docs/", &dir)?;
 
-        let sitemap_content = fs::read_to_string(dir.join("sitemap.xml"))?;
+        let sitemap_content =
+            fs::read_to_string(dir.join("sitemap.xml"))?;
         assert!(sitemap_content.contains(
             "<loc>https://example.com/docs/2024_01_01.html</loc>"
         ));
         // Non-HTML files are not listed.
         assert!(!sitemap_content.contains("not-a-page.txt"));
         // The sitemap itself is not listed as a page.
-        assert!(!sitemap_content.contains("<loc>https://example.com/docs/sitemap.xml</loc>"));
+        assert!(!sitemap_content.contains(
+            "<loc>https://example.com/docs/sitemap.xml</loc>"
+        ));
 
         fs::remove_dir_all(&dir)?;
         Ok(())

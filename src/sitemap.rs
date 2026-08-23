@@ -85,9 +85,13 @@ pub fn generate_sitemap_file_in(
                 && path.extension().and_then(|s| s.to_str())
                     == Some("html")
             {
-                let file_name =
-                    path.file_name().unwrap().to_str().unwrap();
-                urls.push(format!("{}{}", base_url, file_name));
+                // Safely extract the filename, skipping files with
+                // invalid names rather than panicking on them.
+                if let Some(file_name) =
+                    path.file_name().and_then(|n| n.to_str())
+                {
+                    urls.push(format!("{}{}", base_url, file_name));
+                }
             }
         }
     }
