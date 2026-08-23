@@ -62,7 +62,20 @@ pub mod macros;
 pub fn run() -> Result<(), Box<dyn Error>> {
     // Initialize the logger using the `env_logger` crate
     init_logger(None)?;
-    run_with(std::env::args_os())
+
+    // A clap error here is `--help`, `--version`, or a usage mistake.
+    // `Error::exit` renders it the way a CLI should: help and version to
+    // stdout with status 0, usage errors to stderr with status 2.
+    // `run_with` returns the error instead of exiting, so that it stays
+    // callable from a test without killing the test process — which is
+    // the same split as `run_cli` and `run_cli_from`.
+    match run_with(std::env::args_os()) {
+        Err(e) => match e.downcast::<clap::Error>() {
+            Ok(clap_error) => clap_error.exit(),
+            Err(other) => Err(other),
+        },
+        ok => ok,
+    }
 }
 
 /// Runs the application against an explicit argument list.
