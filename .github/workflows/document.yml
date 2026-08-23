@@ -40,11 +40,15 @@ jobs:
           retention-days: 1
 
       - name: Write CNAME file
-        if: github.event_name == 'release'
         run: echo 'docs.wiserone.com' > ./target/doc/CNAME
 
+      # Publishes on every push to main. This guard was added when
+      # wiserone.com was this repository's Pages domain and a stray
+      # deploy could have taken the live site down. The domain is now
+      # docs.wiserone.com and the site itself lives in
+      # sebastienrousseau/wiserone.github.io, so publishing rustdoc here
+      # on push is exactly what is wanted.
       - name: Deploy to GitHub Pages
-        if: github.event_name == 'release'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
