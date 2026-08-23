@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ArtError"],"fn":["generate_ascii_art"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["generate_sitemap_file","generate_sitemap_file_in"]};

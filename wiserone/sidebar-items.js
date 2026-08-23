@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["run"],"macro":[["wiserone",1],["wiserone_assert",1],["wiserone_join",1],["wiserone_map",1],["wiserone_max",1],["wiserone_min",1],["wiserone_print",1],["wiserone_print_vec",1],["wiserone_split",1],["wiserone_vec",1]],"mod":["ascii","cli","html","loggers","macros","quotes","sitemap"]};

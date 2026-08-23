@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["QuoteError"],"fn":["read_quotes_from_file"],"struct":["Quote","Quotes"]};
