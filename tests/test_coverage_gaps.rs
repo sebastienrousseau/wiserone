@@ -211,3 +211,163 @@ fn test_slug_handles_degenerate_input() {
     assert_eq!(slug("café"), "caf");
     assert_eq!(slug("a"), "a");
 }
+
+/// `generate_html_file_in` validates its filename before touching the
+/// disk. Every rejection branch was unexercised — which is the wrong
+/// half of a path-traversal guard to leave untested.
+#[test]
+fn test_filename_validation_rejects_traversal_and_bad_names() {
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp = TempDir::new().unwrap();
+    let original = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp.path()).unwrap();
+    layout(temp.path());
+
+    let quote = wiserone::quotes::Quote {
+        id: None,
+        pillar: None,
+        quote_text: "A line.".to_string(),
+        author: "A".to_string(),
+        date_added: "2026-08-23T06:06:06Z".to_string(),
+        image_url: "https://e.com/a.jpg".to_string(),
+    };
+
+    let rejected = [
+        "../escape.html",
+        "dir/page.html",
+        "dir\\page.html",
+        "page.txt",
+        ".html",
+        "   .html",
+    ];
+    let mut failures = Vec::new();
+    for name in rejected {
+        if wiserone::html::generate_html_file_in(
+            name,
+            &quote,
+            temp.path(),
+        )
+        .is_ok()
+        {
+            failures.push(name);
+        }
+    }
+
+    let accepted = wiserone::html::generate_html_file_in(
+        "fine.html",
+        &quote,
+        temp.path(),
+    );
+
+    std::env::set_current_dir(&original).unwrap();
+    assert!(failures.is_empty(), "these were accepted: {failures:?}");
+    assert!(accepted.is_ok(), "a valid name must be accepted");
+}
+
+/// A missing or non-file template must be reported, not panicked on.
+#[test]
+fn test_template_must_exist_and_be_a_file() {
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp = TempDir::new().unwrap();
+    let original = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp.path()).unwrap();
+
+    let quote = wiserone::quotes::Quote {
+        id: None,
+        pillar: None,
+        quote_text: "A line.".to_string(),
+        author: "A".to_string(),
+        date_added: "2026-08-23T06:06:06Z".to_string(),
+        image_url: "https://e.com/a.jpg".to_string(),
+    };
+
+    // No _layouts at all.
+    let missing = wiserone::html::generate_html_file_in(
+        "a.html",
+        &quote,
+        temp.path(),
+    );
+
+    // _layouts/quote.html exists but is a directory.
+    fs::create_dir_all("_layouts/quote.html").unwrap();
+    let not_a_file = wiserone::html::generate_html_file_in(
+        "b.html",
+        &quote,
+        temp.path(),
+    );
+
+    std::env::set_current_dir(&original).unwrap();
+    assert!(missing.is_err(), "a missing template must be an error");
+    assert!(
+        not_a_file.is_err(),
+        "a template that is a directory must be an error"
+    );
+}
+
+#[test]
+fn test_art_error_display_covers_both_variants() {
+    use wiserone::ascii::ArtError;
+    assert!(ArtError::FontLoadError
+        .to_string()
+        .contains("Failed to load"));
+    assert!(ArtError::ConversionError
+        .to_string()
+        .contains("Failed to convert"));
+}
+
+#[test]
+fn test_malformed_csv_becomes_a_parse_error() {
+    let temp = TempDir::new().unwrap();
+    let path = temp.path().join("broken.csv");
+    let mut f = File::create(&path).unwrap();
+    // Header promises columns the rows do not supply.
+    writeln!(f, "quote_text,author,date_added,image_url").unwrap();
+    writeln!(f, "only,two").unwrap();
+
+    let result = read_quotes_from_file(&path.to_string_lossy());
+    assert!(matches!(result, Err(QuoteError::ParseError(_))));
+}
+
+/// `all` falls back to date-derived filenames for a corpus with no ids.
+#[test]
+fn test_all_falls_back_to_dates_for_a_legacy_corpus() {
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp = TempDir::new().unwrap();
+    let original = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp.path()).unwrap();
+
+    let path = temp.path().join("legacy.json");
+    let mut f = File::create(&path).unwrap();
+    write!(
+        f,
+        r#"{{"quotes":[
+            {{"quote_text":"One","author":"A","date_added":"2024-01-01T06:06:06Z","image_url":"https://e.com/a.jpg"}},
+            {{"quote_text":"Two","author":"A","date_added":"2024-01-02T06:06:06Z","image_url":"https://e.com/a.jpg"}}
+        ]}}"#
+    )
+    .unwrap();
+
+    layout(temp.path());
+    fs::create_dir_all("./docs").unwrap();
+
+    let result = wiserone::cli::run_cli_from(vec![
+        "wiserone".to_string(),
+        "all".to_string(),
+        path.to_string_lossy().to_string(),
+    ]);
+    let dated = fs::read_dir("./docs")
+        .unwrap()
+        .filter_map(Result::ok)
+        .filter(|e| {
+            let n = e.file_name().to_string_lossy().to_string();
+            n.starts_with("2024_")
+        })
+        .count();
+
+    std::env::set_current_dir(&original).unwrap();
+    assert!(result.is_ok(), "all failed: {:?}", result.err());
+    assert_eq!(
+        dated, 2,
+        "legacy quotes must fall back to date filenames"
+    );
+}
