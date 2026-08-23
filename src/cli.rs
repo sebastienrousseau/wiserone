@@ -146,7 +146,8 @@ where
             );
             let html_filename = format!("{}.html", date);
             let quotes = read_quotes_from_file(&filename)?;
-            let quote = quotes.select_daily_quote(current_day_number())?;
+            let quote =
+                quotes.select_daily_quote(current_day_number())?;
             generate_html_file(&html_filename, quote)?;
             generate_sitemap_file("https://wiserone.com/")?;
         }

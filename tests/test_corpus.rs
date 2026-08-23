@@ -128,7 +128,8 @@ fn test_daily_selection_is_deterministic_and_wraps() {
     let again = quotes.select_daily_quote(739_851).unwrap();
     assert_eq!(first.quote_text, again.quote_text);
 
-    let after_a_pass = quotes.select_daily_quote(739_851 + len).unwrap();
+    let after_a_pass =
+        quotes.select_daily_quote(739_851 + len).unwrap();
     assert_eq!(first.quote_text, after_a_pass.quote_text);
 
     let next_day = quotes.select_daily_quote(739_852).unwrap();
@@ -205,6 +206,9 @@ fn test_slug_never_exceeds_the_length_budget() {
 fn test_slug_has_no_leading_or_trailing_hyphen() {
     for quote in &corpus().quotes {
         let s = slug(&quote.quote_text);
-        assert!(!s.starts_with('-') && !s.ends_with('-'), "bad slug: {s}");
+        assert!(
+            !s.starts_with('-') && !s.ends_with('-'),
+            "bad slug: {s}"
+        );
     }
 }
