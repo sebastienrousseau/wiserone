@@ -212,3 +212,23 @@ fn test_slug_has_no_leading_or_trailing_hyphen() {
         );
     }
 }
+
+#[test]
+fn test_current_day_number_is_a_plausible_ordinal() {
+    let today = wiserone::quotes::current_day_number();
+    // 2024-01-01 is 738886; 2100-01-01 is 766644. Anything outside that
+    // means the epoch offset or the divisor is wrong.
+    assert!(
+        (738_886..766_644).contains(&today),
+        "implausible ordinal: {today}"
+    );
+}
+
+#[test]
+fn test_current_day_number_selects_a_real_quote() {
+    let quotes = corpus();
+    let today = wiserone::quotes::current_day_number();
+    let quote = quotes.select_daily_quote(today).unwrap();
+    assert!(!quote.quote_text.is_empty());
+    assert!(quote.id.is_some());
+}
