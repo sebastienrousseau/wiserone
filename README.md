@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img
-src="https://kura.pro/wiserone/images/logos/wiserone.webp"
+src="https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg"
 alt="the wiser one's logo"
 height="199"
 width="199"
@@ -240,7 +240,7 @@ providing a lot of useful suggestions on how to improve this project.
 [13]: https://www.rust-lang.org/learn/get-started
 
 [crates-badge]: https://img.shields.io/crates/v/wiserone.svg?style=for-the-badge 'Crates.io badge'
-[divider]: https://kura.pro/common/images/elements/divider.svg "divider"
+[divider]: https://cloudcdn.pro/common/images/elements/divider.svg "divider"
 [docs-badge]: https://img.shields.io/docsrs/wiserone.svg?style=for-the-badge 'Docs.rs badge'
 [libs-badge]: https://img.shields.io/badge/lib.rs-v0.0.5-orange.svg?style=for-the-badge 'Lib.rs badge'
 [license-badge]: https://img.shields.io/crates/l/wiserone.svg?style=for-the-badge 'License badge'

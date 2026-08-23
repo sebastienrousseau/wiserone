@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 <img
-src="https://kura.pro/wiserone/images/logos/wiserone.webp"
+src="https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg"
 alt="the wiser one's logo"
 height="199"
 width="199"
