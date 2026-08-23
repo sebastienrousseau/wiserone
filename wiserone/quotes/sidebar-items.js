@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["QuoteError"],"fn":["read_quotes_from_file"],"struct":["Quote","Quotes"]};
+window.SIDEBAR_ITEMS = {"enum":["QuoteError"],"fn":["current_day_number","read_quotes_from_file","slug"],"struct":["Quote","Quotes"]};
