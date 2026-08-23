@@ -145,12 +145,26 @@ jobs:
           echo "::endgroup::"
           echo "✅ All tests passed"
 
+      # Reporting, not a gate. Coverage is already enforced above by
+      # tarpaulin's --fail-under, which needs no third-party service.
+      #
+      # fail_ci_if_error is false because this repository has no
+      # CODECOV_TOKEN secret, and Codecov rejects tokenless uploads:
+      #
+      #   ['info'] -> No token specified or token is empty
+      #   ['error'] There was an error running the uploader
+      #
+      # With it true, an unavailable upload service failed the build
+      # while every test passed and the coverage floor was met. Add a
+      # CODECOV_TOKEN secret (metadata-gen passes one) to restore
+      # uploads, and flip this back if the report should be blocking.
       - name: Upload coverage to Codecov
         if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v3
         with:
           files: coverage/cobertura.xml
-          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   # Security scanning pipeline (NO BYPASSING with || true)
   security:
