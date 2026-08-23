@@ -62,7 +62,7 @@ pub fn generate_html_file(
     layout = layout.replace("{{apple_touch_icon_sizes}}", "192x192");
     layout = layout.replace("{{author}}", &quote.author);
     layout = layout.replace("{{banner}}", &quote.image_url);
-    layout = layout.replace("{{cdn}}", "https://kura.pro");
+    layout = layout.replace("{{cdn}}", "https://cloudcdn.pro");
     layout = layout.replace("{{charset}}", "utf-8");
     layout = layout.replace("{{description}}", "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.");
     layout = layout.replace("{{hreflang}}", "en");
@@ -73,7 +73,7 @@ pub fn generate_html_file(
     );
     layout = layout.replace(
         "{{logo}}",
-        "https://kura.pro/wiserone/images/logos/wiserone.webp",
+        "https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg",
     );
     layout = layout.replace("{{measurementID}}", "G-4HKZ6N3QSC");
     layout = layout.replace("{{name}}", "wiserone");
