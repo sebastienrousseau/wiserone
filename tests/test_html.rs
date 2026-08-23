@@ -94,7 +94,7 @@ fn test_generate_html_file_success() {
     assert!(content.contains("https://example.com/test-banner.jpg"));
     assert!(content.contains("192x192")); // apple_touch_icon_sizes
     assert!(content.contains("utf-8")); // charset
-    assert!(content.contains("https://kura.pro")); // cdn
+    assert!(content.contains("https://cloudcdn.pro")); // cdn
     assert!(content.contains("en")); // hreflang
     assert!(content.contains("https://wiserone.com")); // url
     assert!(content.contains("wiserone")); // name
