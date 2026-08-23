@@ -1,13 +1,12 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use crate::quotes::Quote;
+use crate::quotes::{slug, Quote};
 use dtt::datetime::DateTime;
 use rlg::log_format::LogFormat;
 use rlg::log_level::LogLevel;
 use rlg::macro_log;
-use std::fmt::format;
 use std::{
     error::Error,
     fs::{self, File},
@@ -150,21 +149,17 @@ pub fn generate_html_file_in(
     let month = &iso[5..7];
     let day = dt.day();
 
-    // Determine if the date matches today
-    let is_today = year == dt.year()
-        && month == {
-            let res =
-                format(format_args!("{:02}", u8::from(dt.month())));
-            res
-        }
-        && day == dt.day();
-
-    let date = format!("{}_{}_{}", year, month, day);
-    let prefix = if is_today {
-        "https://wiserone.com/index.html".to_string() // If the date is today
-    } else {
-        format!("https://wiserone.com/{}.html", date) // For any other date
-    };
+    // The canonical is the quote's own page on wiserone.com.
+    //
+    // This used to be `if is_today { index.html } else { <date>.html }`,
+    // which was wrong twice over. The condition compared `dt` against
+    // itself — `year == dt.year() && ...` — so it was always true and the
+    // else branch was unreachable. And the URL it built,
+    // `wiserone.com/YYYY_MM_DD.html`, has never been a page the site
+    // serves; dated URLs use hyphens and, since the corpus became a
+    // pool, they all canonicalise to `/q/<slug>/` anyway.
+    let prefix =
+        format!("https://wiserone.com/q/{}/", slug(&quote.quote_text));
 
     println!("Prefix: {}", prefix);
 

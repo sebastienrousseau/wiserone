@@ -1,6 +1,6 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Comprehensive performance benchmarks for wiserone hot paths
 
@@ -18,6 +18,8 @@ fn generate_synthetic_quotes(count: usize) -> Quotes {
     let mut quotes = Vec::new();
     for i in 0..count {
         quotes.push(Quote {
+            id: None,
+            pillar: None,
             quote_text: format!("This is test quote number {} with some meaningful content to simulate real quote lengths", i),
             author: format!("Author {}", i),
             date_added: format!("2024-{:02}-{:02}T06:06:06Z", (i % 12) + 1, (i % 28) + 1),
@@ -144,6 +146,8 @@ fn benchmark_template_processing(c: &mut Criterion) {
     .repeat(10); // Make template larger to simulate real workload
 
     let quote = Quote {
+        id: None,
+        pillar: None,
         quote_text: "This is a test quote with sufficient length to simulate real quote processing".to_string(),
         author: "Test Author".to_string(),
         date_added: "2024-01-01T06:06:06Z".to_string(),

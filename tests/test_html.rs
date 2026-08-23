@@ -1,6 +1,6 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Integration tests for HTML page generation (`wiserone::html`).
 
@@ -53,6 +53,8 @@ fn create_test_layout(temp_dir: &Path) {
 /// Create a test quote
 fn create_test_quote() -> Quote {
     Quote {
+        id: None,
+        pillar: None,
         quote_text: "Test wisdom quote".to_string(),
         author: "Test Philosopher".to_string(),
         date_added: "2024-01-15T10:30:00Z".to_string(),
@@ -139,6 +141,8 @@ fn test_placeholder_replacement() {
     fs::create_dir_all("./docs").unwrap();
 
     let quote = Quote {
+        id: None,
+        pillar: None,
         quote_text: "Special <>&\" chars".to_string(),
         author: "Test & Author".to_string(),
         date_added: "2024-12-25T15:30:45Z".to_string(),
@@ -184,6 +188,8 @@ fn test_date_extraction() {
 
     for (input_date, expected_date) in test_cases {
         let quote = Quote {
+            id: None,
+            pillar: None,
             quote_text: format!("Quote for {}", input_date),
             author: "Date Tester".to_string(),
             date_added: input_date.to_string(),

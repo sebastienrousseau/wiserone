@@ -39,6 +39,13 @@ jobs:
         id: run-tests-all-features
         run: cargo test --verbose --workspace --all-features
 
+      # The corpus is duplicated across this crate, the Swift app and
+      # the website. Structural checks live in tests/test_corpus.rs;
+      # this is the one thing a test cannot do — confirm the shipped
+      # corpus still matches what wiserone.com publishes.
+      - name: Verify corpus against wiserone.com
+        run: ./scripts/verify-corpus.sh
+
       # Install grcov
       # - name: Install grcov
       #   # Only run this job on the main branch when a commit is pushed.

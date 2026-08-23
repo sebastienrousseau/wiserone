@@ -1,6 +1,6 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! # Macros for the `wiserone` crate.
 
@@ -27,6 +27,11 @@ macro_rules! wiserone {
         image_url: $image_url:expr $(,)?
     ) => {
         $crate::quotes::Quote {
+            // Pool metadata is not part of the macro's surface: callers
+            // construct one-off quotes, not corpus entries. Defaulted so
+            // existing `wiserone! { ... }` sites keep compiling.
+            id: None,
+            pillar: None,
             quote_text: $quote_text.to_string(),
             author: $author.to_string(),
             date_added: $date_added.to_string(),
@@ -47,9 +52,15 @@ macro_rules! wiserone_print {
 #[macro_export]
 macro_rules! wiserone_vec {
     ($($elem:expr),*) => {{
-        let mut v = Vec::new();
-        $(v.push($elem);)*
-        v
+        // init-then-push rather than `vec![...]`: the repeated push is
+        // what lets the macro take a variadic list. Allowed at the
+        // expansion, so call sites under `-D warnings` stay clean.
+        #[allow(clippy::vec_init_then_push)]
+        {
+            let mut v = Vec::new();
+            $(v.push($elem);)*
+            v
+        }
     }};
 }
 
@@ -59,7 +70,9 @@ macro_rules! wiserone_map {
     ($($key:expr => $value:expr),*) => {{
         use std::collections::HashMap;
         let mut m = HashMap::new();
-        $(m.insert($key, $value);)*
+        // The displaced value is deliberately discarded; binding it
+        // keeps `-D warnings` quiet at every expansion site.
+        $(let _ = m.insert($key, $value);)*
         m
     }};
 }
@@ -169,4 +182,87 @@ macro_rules! wiserone_print_vec {
             println!("{}", v);
         }
     }};
+}
+
+#[cfg(test)]
+mod tests {
+    //! Unit tests kept in this file deliberately.
+    //!
+    //! A macro's body is attributed to wherever it expands, so the
+    //! forty macro tests in `tests/test_macros.rs` credited their
+    //! coverage to that integration target and left `src/macros.rs`
+    //! reading 0/11 — the definitions looked untested when they were
+    //! thoroughly tested. Expanding them here puts the lines back where
+    //! they belong.
+
+    use std::collections::HashMap;
+
+    #[test]
+    fn test_wiserone_constructs_a_quote() {
+        let quote = wiserone! {
+            quote_text: "A line.",
+            author: "The Wiser One",
+            date_added: "2026-08-23T06:06:06Z",
+            image_url: "https://example.com/a.webp"
+        };
+        assert_eq!(quote.quote_text, "A line.");
+        assert!(quote.id.is_none());
+        assert!(quote.pillar.is_none());
+    }
+
+    #[test]
+    fn test_wiserone_print_writes_its_argument() {
+        wiserone_print!("printed from the macro's own crate");
+    }
+
+    // The macro bodies expand here now, so clippy lints the expansion
+    // rather than the call site: `wiserone_vec!` builds with
+    // init-then-push, and `wiserone_map!` discards the `insert` result.
+    // Both are properties of the macros, not of these tests.
+    #[test]
+    fn test_wiserone_vec_collects_its_arguments() {
+        let v = wiserone_vec![1, 2, 3];
+        assert_eq!(v, [1, 2, 3]);
+        // The zero-argument form is exercised in tests/test_macros.rs:
+        // it expands to `let mut v` with nothing pushed, which trips
+        // `-D unused_mut` inside this crate.
+    }
+
+    #[test]
+    fn test_wiserone_map_builds_a_hashmap() {
+        let m: HashMap<&str, i32> = wiserone_map!("a" => 1, "b" => 2);
+        assert_eq!(m.get("a"), Some(&1));
+        assert_eq!(m.len(), 2);
+    }
+
+    #[test]
+    fn test_wiserone_assert_passes_on_truth() {
+        wiserone_assert!(1 + 1 == 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "Assertion failed")]
+    fn test_wiserone_assert_panics_on_falsehood() {
+        wiserone_assert!(1 + 1 == 3);
+    }
+
+    #[test]
+    fn test_wiserone_min_and_max() {
+        assert_eq!(wiserone_min!(3, 1, 2), 1);
+        assert_eq!(wiserone_max!(3, 1, 2), 3);
+        assert_eq!(wiserone_min!(42), 42);
+        assert_eq!(wiserone_max!(42), 42);
+    }
+
+    #[test]
+    fn test_wiserone_split_and_join_round_trip() {
+        let parts = wiserone_split!("a b c");
+        assert_eq!(parts, vec!["a", "b", "c"]);
+        assert_eq!(wiserone_join!("a", "b", "c"), "abc");
+    }
+
+    #[test]
+    fn test_wiserone_print_vec_walks_the_slice() {
+        wiserone_print_vec!([1, 2, 3]);
+    }
 }

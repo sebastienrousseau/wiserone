@@ -1,6 +1,6 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Tests for the macros module.
 

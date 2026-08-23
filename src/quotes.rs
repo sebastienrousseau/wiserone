@@ -1,16 +1,85 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use csv;
 use serde::{Deserialize, Serialize};
 use serde_json;
-use std::{error::Error, fmt, fs, path::Path};
+use std::{
+    error::Error,
+    fmt, fs,
+    path::Path,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use vrd::Random;
+
+/// Builds the URL slug wiserone.com publishes a quote under.
+///
+/// The site's canonical page for every quote is `/q/<slug>/`, and each
+/// dated URL points its `rel=canonical` there, so this is the only
+/// truthful canonical for a generated page.
+///
+/// Lowercases, strips anything outside `[a-z0-9]` to single hyphens,
+/// and truncates to 64 characters on a hyphen boundary — the same rule
+/// the site's generator applies. Kept in step by
+/// `test_slug_matches_published_urls`.
+#[must_use]
+pub fn slug(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut pending_hyphen = false;
+    for ch in text.chars() {
+        if ch.is_ascii_alphanumeric() {
+            if pending_hyphen && !out.is_empty() {
+                out.push('-');
+            }
+            pending_hyphen = false;
+            out.push(ch.to_ascii_lowercase());
+        } else {
+            pending_hyphen = true;
+        }
+    }
+
+    if out.len() > 64 {
+        out.truncate(64);
+        if let Some(cut) = out.rfind('-') {
+            out.truncate(cut);
+        }
+    }
+    out
+}
+
+/// Days elapsed since 0001-01-01 in the proleptic Gregorian calendar.
+///
+/// This is the ordinal Python's `date.toordinal()` returns, which is
+/// what wiserone.com rotates on; 1970-01-01 is 719163. Pair it with
+/// [`Quotes::select_daily_quote`] to show the same quote the site does.
+///
+/// Uses UTC, so the quote changes at midnight UTC everywhere rather
+/// than drifting with the machine's timezone.
+#[must_use]
+pub fn current_day_number() -> i64 {
+    const UNIX_EPOCH_ORDINAL: i64 = 719_163;
+    const SECONDS_PER_DAY: i64 = 86_400;
+
+    let seconds = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs() as i64);
+    UNIX_EPOCH_ORDINAL + seconds.div_euclid(SECONDS_PER_DAY)
+}
 
 /// Struct representing a single quote.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Quote {
+    /// Position in the pool.
+    ///
+    /// wiserone.com selects the quote of the day by this index, so it is
+    /// what orders the corpus. Optional so that a legacy file without it
+    /// still loads.
+    #[serde(default)]
+    pub id: Option<usize>,
+    /// Thematic block this quote belongs to, e.g. `elimination`.
+    #[serde(default)]
+    pub pillar: Option<String>,
     /// The text of the quote.
     pub quote_text: String,
     /// The author of the quote.
@@ -36,6 +105,39 @@ impl Quotes {
     /// * `quotes` - A vector of `Quote` structs.
     pub fn new(quotes: Vec<Quote>) -> Self {
         Quotes { quotes }
+    }
+
+    /// Selects the quote for a given day, the way the website does.
+    ///
+    /// `day_number` is a proleptic Gregorian ordinal — the value
+    /// Python's `date.toordinal()` returns, where 1970-01-01 is 719163 —
+    /// and the quote is `pool[day_number % len]`. Given the same corpus
+    /// in the same order, this and wiserone.com show the same quote on
+    /// the same day.
+    ///
+    /// The pool is ordered by [`Quote::id`]; entries without one keep
+    /// their position in the file, which is why a legacy corpus still
+    /// works but will not agree with the site.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if there are no quotes available.
+    pub fn select_daily_quote(
+        &self,
+        day_number: i64,
+    ) -> Result<&Quote, Box<dyn Error>> {
+        if self.quotes.is_empty() {
+            return Err("No available quotes".into());
+        }
+
+        let mut ordered: Vec<&Quote> = self.quotes.iter().collect();
+        ordered.sort_by_key(|q| q.id.unwrap_or(usize::MAX));
+
+        let len = ordered.len() as i64;
+        // Floored modulo: a negative ordinal would otherwise index
+        // backwards and panic.
+        let index = (((day_number % len) + len) % len) as usize;
+        Ok(ordered[index])
     }
 
     /// Selects a random quote.
@@ -191,13 +293,13 @@ pub fn read_quotes_from_file(
     // Validate the file path for security
     validate_file_path(file_path)?;
 
+    // No catch-all arm: `validate_file_path` above already rejects
+    // anything that is not `.json` or `.csv`, so a third branch here is
+    // unreachable. It was dead code that coverage could never enter.
     let path = Path::new(file_path);
     match path.extension().and_then(|s| s.to_str()) {
-        Some("json") => read_quotes_from_json(file_path),
         Some("csv") => read_quotes_from_csv(file_path),
-        _ => Err(QuoteError::ParseError(
-            "Unsupported file format".into(),
-        )),
+        _ => read_quotes_from_json(file_path),
     }
 }
 

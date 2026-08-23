@@ -1,6 +1,6 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use clap::Parser;
 use std::error::Error;
@@ -15,7 +15,7 @@ use rlg::macro_log;
 
 use crate::ascii::generate_ascii_art;
 use crate::html::generate_html_file;
-use crate::quotes::read_quotes_from_file;
+use crate::quotes::{current_day_number, read_quotes_from_file};
 use crate::sitemap::generate_sitemap_file;
 
 /// The directory where output files (including logs) are stored.
@@ -32,6 +32,12 @@ pub enum Command {
     /// Selects a random quote from the JSON or CSV file and creates an HTML
     /// file based on the quote.
     Random {
+        /// The name of the JSON or CSV file containing quotes.
+        filename: String,
+    },
+    /// Selects the quote of the day — the same one wiserone.com shows —
+    /// and creates an HTML file based on it.
+    Daily {
         /// The name of the JSON or CSV file containing quotes.
         filename: String,
     },
@@ -134,6 +140,17 @@ where
             generate_html_file(&html_filename, quote)?;
             generate_sitemap_file("https://wiserone.com/")?;
         }
+        Command::Daily { filename } => {
+            println!(
+                "- info:wiserone: begin generating the quote of the day"
+            );
+            let html_filename = format!("{}.html", date);
+            let quotes = read_quotes_from_file(&filename)?;
+            let quote =
+                quotes.select_daily_quote(current_day_number())?;
+            generate_html_file(&html_filename, quote)?;
+            generate_sitemap_file("https://wiserone.com/")?;
+        }
         Command::All { filename } => {
             println!("- info:wiserone: begin generating all quotes");
             // Read and parse all quotes
@@ -141,14 +158,21 @@ where
 
             // Generate an HTML file for each quote
             for quote in quotes.select_all_quotes()? {
-                // Split `date_added` at "T" and take the date part
-                let date_part =
-                    quote.date_added.split('T').next().unwrap_or("");
-
-                // Replace "-" with "_" to format as "YYYY_MM_DD"
-                let formatted_date = date_part.replace('-', "_");
-
-                let html_filename = format!("{}.html", formatted_date);
+                // Name by pool position, not by date. `date_added` used
+                // to be one-per-day and unique; in a pool it records the
+                // day a line was written, and six of the current 136
+                // share a date. Naming by it silently overwrote files.
+                let html_filename = match quote.id {
+                    Some(id) => format!("quote-{:04}.html", id),
+                    None => {
+                        let date_part = quote
+                            .date_added
+                            .split('T')
+                            .next()
+                            .unwrap_or("");
+                        format!("{}.html", date_part.replace('-', "_"))
+                    }
+                };
                 generate_html_file(&html_filename, quote)?;
                 generate_sitemap_file("https://wiserone.com/")?;
             }

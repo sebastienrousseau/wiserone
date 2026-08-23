@@ -1,6 +1,6 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! Integration tests for the command-line interface (`wiserone::cli`).
 
@@ -107,7 +107,7 @@ fn test_command_all_variant() {
 /// Test run_cli with valid JSON file - Random command simulation
 #[test]
 fn test_run_cli_with_json_file() {
-    let _lock = DIR_MUTEX.lock().unwrap();
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
     let temp_dir = TempDir::new().unwrap();
     let original_dir = std::env::current_dir().unwrap();
 
@@ -254,4 +254,126 @@ fn test_date_formatting_properties() {
 
     assert!((1..=12).contains(&month_num1));
     assert!((1..=12).contains(&month_num2));
+}
+
+/// Drives `run_cli_from` end to end for the `daily` subcommand.
+///
+/// The other CLI tests stop short of `run_cli_from`, so command
+/// dispatch, HTML generation and the sitemap write were never executed
+/// by the suite — `daily` shipped with its whole path uncovered.
+#[test]
+fn test_run_cli_daily_generates_a_page() {
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp_dir = TempDir::new().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_dir.path()).unwrap();
+
+    let quotes_file = create_test_quote_json(temp_dir.path());
+    create_layout_template(temp_dir.path());
+    fs::create_dir_all("./docs").unwrap();
+
+    let result = wiserone::cli::run_cli_from(vec![
+        "wiserone".to_string(),
+        "daily".to_string(),
+        quotes_file,
+    ]);
+
+    // The generator writes the dated page and mirrors it to index.html.
+    let dated = fs::read_dir("./docs")
+        .unwrap()
+        .filter_map(Result::ok)
+        .any(|e| {
+            let name = e.file_name().to_string_lossy().to_string();
+            name.ends_with(".html") && name != "index.html"
+        });
+    let index_exists = Path::new("./docs/index.html").exists();
+
+    std::env::set_current_dir(&original_dir).unwrap();
+
+    assert!(result.is_ok(), "daily failed: {:?}", result.err());
+    assert!(dated, "daily wrote no dated page");
+    assert!(
+        index_exists,
+        "daily did not mirror the page to index.html"
+    );
+}
+
+/// `random` must also complete through the real dispatch path.
+#[test]
+fn test_run_cli_random_generates_a_page() {
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp_dir = TempDir::new().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_dir.path()).unwrap();
+
+    let quotes_file = create_test_quote_json(temp_dir.path());
+    create_layout_template(temp_dir.path());
+    fs::create_dir_all("./docs").unwrap();
+
+    let result = wiserone::cli::run_cli_from(vec![
+        "wiserone".to_string(),
+        "random".to_string(),
+        quotes_file,
+    ]);
+    let wrote_something = fs::read_dir("./docs")
+        .unwrap()
+        .filter_map(Result::ok)
+        .any(|e| {
+            e.path().extension().and_then(|s| s.to_str())
+                == Some("html")
+        });
+
+    std::env::set_current_dir(&original_dir).unwrap();
+    assert!(result.is_ok(), "random failed: {:?}", result.err());
+    assert!(wrote_something, "random wrote no page");
+}
+
+/// `all` must give every quote its own file.
+///
+/// It used to name pages from `date_added`, which is no longer unique:
+/// quotes written on the same day silently overwrote each other. Three
+/// same-day quotes produced one file.
+#[test]
+fn test_run_cli_all_does_not_overwrite_same_day_quotes() {
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp_dir = TempDir::new().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_dir.path()).unwrap();
+
+    let path = temp_dir.path().join("same-day.json");
+    let mut file = File::create(&path).unwrap();
+    write!(
+        file,
+        r#"{{"quotes":[
+            {{"id":0,"quote_text":"First","author":"A","date_added":"2026-08-23T06:06:06Z","image_url":"https://e.com/a.jpg"}},
+            {{"id":1,"quote_text":"Second","author":"A","date_added":"2026-08-23T06:06:06Z","image_url":"https://e.com/a.jpg"}},
+            {{"id":2,"quote_text":"Third","author":"A","date_added":"2026-08-23T06:06:06Z","image_url":"https://e.com/a.jpg"}}
+        ]}}"#
+    )
+    .unwrap();
+
+    create_layout_template(temp_dir.path());
+    fs::create_dir_all("./docs").unwrap();
+
+    let result = wiserone::cli::run_cli_from(vec![
+        "wiserone".to_string(),
+        "all".to_string(),
+        path.to_string_lossy().to_string(),
+    ]);
+
+    let pages = fs::read_dir("./docs")
+        .unwrap()
+        .filter_map(Result::ok)
+        .filter(|e| {
+            e.file_name().to_string_lossy().starts_with("quote-")
+        })
+        .count();
+
+    std::env::set_current_dir(&original_dir).unwrap();
+
+    assert!(result.is_ok(), "all failed: {:?}", result.err());
+    assert_eq!(
+        pages, 3,
+        "three quotes written on one day must produce three pages"
+    );
 }

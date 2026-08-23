@@ -107,32 +107,61 @@ jobs:
 
       # Run tests with coverage.
       #
-      # The threshold is 60, not 100. Measured coverage is 60.64%, and
-      # the shortfall is structural rather than a matter of writing more
-      # tests:
+      # The threshold is 95. It used to be 60, on the reasoning that the
+      # shortfall was structural — that cli.rs, lib.rs, loggers.rs and
+      # macros.rs were "reached only through the compiled binary, which
+      # the tests spawn as a subprocess, so none of these lines can ever
+      # be counted". That was wrong on every count:
       #
-      #   src/cli.rs   0/47   |  reached only through the compiled
-      #   src/lib.rs   0/15   |  binary, which the tests spawn as a
-      #   src/main.rs  0/5    |  subprocess — tarpaulin instruments the
-      #   src/loggers  0/6    |  test binary, not its children, so none
-      #   src/macros   0/3    |  of these lines can ever be counted
+      #   macros.rs  a macro body is attributed to its expansion site,
+      #              so the forty tests in tests/test_macros.rs credited
+      #              an integration target. Unit tests in the file fixed
+      #              it: 0/11 -> full.
+      #   lib.rs     `run` read std::env::args_os(), unusable under a
+      #              test harness. Extracted `run_with`: 0/15 -> 19/21.
+      #   cli.rs     `run_cli_from` was always callable in-process;
+      #              nothing drove it: 0/47 -> 48/57.
+      #   loggers.rs one call: 0/6 -> 6/7.
       #
-      # The library modules that are exercised in-process do score
-      # well: html.rs 94/101, sitemap.rs 37/39, quotes.rs 36/58.
+      # Measured 95.94% (331/345). What remains uncovered is genuinely
+      # unreachable in-process: the clap `Error::exit` branch in lib.rs
+      # terminates the process, and a handful of cli.rs lines sit inside
+      # multi-line `println!` expansions that tarpaulin attributes oddly.
       #
-      # A `--fail-under 100` gate cannot pass on this layout, so it
-      # asserts nothing except that the job fails. 60 is set just below
-      # the current figure so it acts as a ratchet against regression;
-      # raise it as coverage genuinely improves.
+      # `--follow-exec` matters on Linux. tarpaulin drives the test
+      # binary under ptrace and, without it, does not descend into
+      # processes those tests spawn — so everything reached only through
+      # the compiled binary (main.rs, and the `run`/`run_cli` wrappers
+      # that own the clap `Error::exit` handling) counted as zero. That
+      # is what the original 60% comment was describing, and it is a
+      # flag, not a law: macOS measured 95.94% while Linux CI measured
+      # 90.67% on the same commit.
       #
-      # To make cli.rs measurable, `run_cli_from` would need to parse
-      # its arguments before touching the filesystem, so the error paths
-      # could be driven in-process without writing into ./docs.
+      # The floor is 92, not 95, and the gap is not untested code.
+      # After --follow-exec, Linux measures 92.42% against macOS's
+      # 95.94% on the same commit. What remains uncovered there is:
+      #
+      #   * multi-line `macro_log!` and `println!` arguments, where
+      #     tarpaulin attributes continuation lines to no executed
+      #     region (cli.rs 112/115/132/145, lib.rs 115/118);
+      #   * `macro_rules!` header lines (macros.rs 22/24/52);
+      #   * the env_logger format closure, which only runs if a record
+      #     is emitted after this process installed the logger.
+      #
+      # The dead arm that used to sit in this list — a catch-all in
+      # `read_quotes_from_file` that `validate_file_path` had already
+      # made unreachable — was deleted rather than excluded. What is
+      # left is instrumentation artefacts; reaching 95 on Linux would
+      # mean reflowing macro arguments onto single lines to please the
+      # instrumenter, which is fitting the code to the tool.
+      #
+      # This is a ratchet. Raise it as coverage improves; do not lower
+      # it to make a red build green.
       - name: 🧪 Run test suite with coverage
         if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           echo "::group::Running tests with coverage analysis"
-          cargo tarpaulin --workspace --all-features --out Xml --output-dir coverage/ --fail-under 60 --verbose --timeout 300
+          cargo tarpaulin --workspace --all-features --follow-exec --out Xml --output-dir coverage/ --fail-under 92 --verbose --timeout 300
           echo "::endgroup::"
           echo "✅ Tests passed the coverage floor"
 

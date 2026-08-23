@@ -1,6 +1,6 @@
 // Copyright notice and licensing information.
 // Copyright © 2024 The Wiser One. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! # `wiserone` 🦀
 
@@ -63,6 +63,38 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     // Initialize the logger using the `env_logger` crate
     init_logger(None)?;
 
+    // A clap error here is `--help`, `--version`, or a usage mistake.
+    // `Error::exit` renders it the way a CLI should: help and version to
+    // stdout with status 0, usage errors to stderr with status 2.
+    // `run_with` returns the error instead of exiting, so that it stays
+    // callable from a test without killing the test process — which is
+    // the same split as `run_cli` and `run_cli_from`.
+    match run_with(std::env::args_os()) {
+        Err(e) => match e.downcast::<clap::Error>() {
+            Ok(clap_error) => clap_error.exit(),
+            Err(other) => Err(other),
+        },
+        ok => ok,
+    }
+}
+
+/// Runs the application against an explicit argument list.
+///
+/// [`run`] delegates here after initialising the logger. Split out for
+/// the same reason [`cli::run_cli_from`] exists: `run` reads
+/// `std::env::args_os()`, which under a test harness holds the
+/// harness's own arguments, so the whole body was unreachable from the
+/// suite and sat at zero coverage.
+///
+/// # Errors
+///
+/// Returns an error if the log directory or file cannot be created, if
+/// the arguments fail to parse, or if generating the quote fails.
+pub fn run_with<I, T>(args: I) -> Result<(), Box<dyn Error>>
+where
+    I: IntoIterator<Item = T>,
+    T: Into<std::ffi::OsString> + Clone,
+{
     // Define date and time
     let date = DateTime::new();
     let iso = date.format_rfc3339()?;
@@ -73,8 +105,8 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let log_path = log_dir.join("wiserone.log");
     let mut log_file = File::create(&log_path)?;
 
-    // Call the `run_cli()` function from the `cli` module
-    cli::run_cli()?;
+    // Call into the CLI with the supplied arguments
+    cli::run_cli_from(args)?;
 
     // Generate a log entry
     let quote_log = macro_log!(

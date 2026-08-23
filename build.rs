@@ -1,7 +1,7 @@
 // Copyright notice and licensing information.
 // These lines indicate the copyright of the software and its licensing
 // terms. Copyright © 2024 WiserOne. All rights reserved.
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! This is the main function for the build script.
 //!
