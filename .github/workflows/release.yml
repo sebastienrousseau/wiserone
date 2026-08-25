@@ -81,7 +81,6 @@ jobs:
     # Set up the job environment variables.
     env:
       BUILD_ID: ${{ github.run_id }}
-      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_API_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       OS: ${{ matrix.os }}
       TARGET: ${{ matrix.target }}
@@ -291,6 +290,11 @@ jobs:
       (github.event_name == 'push' || inputs.publish)
       && needs.guard.outputs.published == 'false'
     runs-on: ubuntu-latest
+    permissions:
+      # Lets the job mint the OIDC identity token that crates.io exchanges
+      # for a short-lived publish token. Without this the auth step fails.
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -301,10 +305,23 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
+      # Trusted publishing: exchanges this job's GitHub OIDC identity for a
+      # temporary crates.io token, scoped to this crate and revoked by the
+      # action's post step when the job ends. No stored secret, so nothing
+      # to rotate and nothing to leak.
+      #
+      # This requires a matching trusted publisher on crates.io for the
+      # wiserone crate: repository sebastienrousseau/wiserone, workflow
+      # release.yml. If that is absent the step fails with "no matching
+      # trusted publishing config".
+      - name: Authenticate with crates.io
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
       # No --no-verify: the packaged crate is built before upload, so a
       # release that cannot compile from its own tarball fails here rather
       # than after it is public and immutable.
       - name: Publish library to crates.io
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_API_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish --locked
