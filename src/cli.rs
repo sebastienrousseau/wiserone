@@ -106,13 +106,11 @@ where
     let date = format!("{}_{}_{}", year, month, day);
 
     // Generate a log entry
-    let ascii_art_log = Log::build(
-        LogLevel::INFO,
-        "ASCII art generation event started.",
-    )
-    .time(&iso)
-    .component("process")
-    .format(LogFormat::CLF);
+    let msg = "ASCII art generation event started.";
+    let ascii_art_log = Log::build(LogLevel::INFO, msg)
+        .time(&iso)
+        .component("process")
+        .format(LogFormat::CLF);
 
     match generate_ascii_art("The Wiser One") {
         Ok(ascii_art) => println!("{}", ascii_art),
