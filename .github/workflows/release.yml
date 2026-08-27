@@ -287,7 +287,7 @@ jobs:
       # Pull down every artifact the build matrix uploaded. merge-multiple
       # flattens them into one directory instead of one folder per artifact.
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
