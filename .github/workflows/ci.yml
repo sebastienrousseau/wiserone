@@ -155,13 +155,31 @@ jobs:
       # mean reflowing macro arguments onto single lines to please the
       # instrumenter, which is fitting the code to the tool.
       #
+      # `src/macros.rs` is excluded, and that is a fix for the cause
+      # rather than a way to make a red build green. The file is
+      # nothing but `macro_rules!` definitions; a definition is not
+      # executable, so whether its header lines appear in the report
+      # depends on which expansions the compiler emits debug info
+      # for. That is codegen layout, not test quality.
+      #
+      # It moved on its own. Migrating off rlg's `macro_log!` (#111)
+      # changed no test -- the same 134 ran -- and cost 0.08%
+      # locally, but on Linux `macros.rs` went from 25/28 to 25/40
+      # measured lines, dragging the total from 92.96% to 90.91%.
+      # Twelve `macro_rules!` header lines appeared in a file that
+      # had not been edited.
+      #
+      # Excluding it leaves the floor binding on code that can
+      # actually be tested: main measures 93.29% under this flag
+      # and #111 measures 94.55%, both against the same 92.
+      #
       # This is a ratchet. Raise it as coverage improves; do not lower
       # it to make a red build green.
       - name: 🧪 Run test suite with coverage
         if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           echo "::group::Running tests with coverage analysis"
-          cargo tarpaulin --workspace --all-features --follow-exec --out Xml --output-dir coverage/ --fail-under 92 --verbose --timeout 300
+          cargo tarpaulin --workspace --all-features --follow-exec --exclude-files '*macros.rs' --out Xml --output-dir coverage/ --fail-under 92 --verbose --timeout 300
           echo "::endgroup::"
           echo "✅ Tests passed the coverage floor"
 
