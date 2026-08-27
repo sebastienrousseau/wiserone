@@ -213,13 +213,12 @@ pub fn generate_html_file_in(
     // Iterate over sorted filenames and log each one
     for filename in &filenames {
         // Write the log to both the console and the file
-        let file_log = Log::build(
-            LogLevel::INFO,
-            &format!("The HTML File is created at `{}`.", filename),
-        )
-        .time(&iso)
-        .component("process")
-        .format(LogFormat::CLF);
+        let msg =
+            format!("The HTML File is created at `{}`.", filename);
+        let file_log = Log::build(LogLevel::INFO, &msg)
+            .time(&iso)
+            .component("process")
+            .format(LogFormat::CLF);
         writeln!(log_file, "{}", file_log)?;
 
         // Assuming year, month, and day are already defined correctly
@@ -240,29 +239,25 @@ pub fn generate_html_file_in(
             fs::write(index_path, content.as_bytes())?;
 
             // Write the log to both the console and the file
-            let file_log = Log::build(
-                LogLevel::INFO,
-                &format!(
-                    "index.html updated with content from {}",
-                    today_file_path.display()
-                ),
-            )
-            .time(&iso)
-            .component("process")
-            .format(LogFormat::CLF);
+            let msg = format!(
+                "index.html updated with content from {}",
+                today_file_path.display()
+            );
+            let file_log = Log::build(LogLevel::INFO, &msg)
+                .time(&iso)
+                .component("process")
+                .format(LogFormat::CLF);
             writeln!(log_file, "{}", file_log)?;
         } else {
             // Write the log to both the console and the file
-            let file_log = Log::build(
-                LogLevel::INFO,
-                &format!(
-                    "No file found at {}",
-                    today_file_path.display()
-                ),
-            )
-            .time(&iso)
-            .component("process")
-            .format(LogFormat::CLF);
+            let msg = format!(
+                "No file found at {}",
+                today_file_path.display()
+            );
+            let file_log = Log::build(LogLevel::INFO, &msg)
+                .time(&iso)
+                .component("process")
+                .format(LogFormat::CLF);
             writeln!(log_file, "{}", file_log)?;
         }
     }

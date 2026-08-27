@@ -109,13 +109,11 @@ where
     cli::run_cli_from(args)?;
 
     // Generate a log entry
-    let quote_log = Log::build(
-        LogLevel::INFO,
-        "Quote HTML file generated successfully.",
-    )
-    .time(&iso)
-    .component("process")
-    .format(LogFormat::CLF);
+    let msg = "Quote HTML file generated successfully.";
+    let quote_log = Log::build(LogLevel::INFO, msg)
+        .time(&iso)
+        .component("process")
+        .format(LogFormat::CLF);
 
     // Write the log to both the console and the file
     writeln!(log_file, "{}", quote_log)?;
