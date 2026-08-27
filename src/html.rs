@@ -4,16 +4,15 @@
 
 use crate::quotes::{slug, Quote};
 use dtt::datetime::DateTime;
+use rlg::log::Log;
 use rlg::log_format::LogFormat;
 use rlg::log_level::LogLevel;
-use rlg::macro_log;
 use std::{
     error::Error,
     fs::{self, File},
     io::Write,
     path::Path,
 };
-use uuid::Uuid;
 
 /// The directory where HTML files are generated.
 const OUTPUT_DIR: &str = "./docs";
@@ -213,17 +212,14 @@ pub fn generate_html_file_in(
 
     // Iterate over sorted filenames and log each one
     for filename in &filenames {
-        let uuid = Uuid::new_v4();
-
         // Write the log to both the console and the file
-        let file_log = macro_log!(
-            &uuid.to_string(),
-            &iso,
-            &LogLevel::INFO,
-            "process",
+        let file_log = Log::build(
+            LogLevel::INFO,
             &format!("The HTML File is created at `{}`.", filename),
-            &LogFormat::CLF
-        );
+        )
+        .time(&iso)
+        .component("process")
+        .format(LogFormat::CLF);
         writeln!(log_file, "{}", file_log)?;
 
         // Assuming year, month, and day are already defined correctly
@@ -244,31 +240,29 @@ pub fn generate_html_file_in(
             fs::write(index_path, content.as_bytes())?;
 
             // Write the log to both the console and the file
-            let file_log = macro_log!(
-                &Uuid::new_v4().to_string(),
-                &iso,
-                &LogLevel::INFO,
-                "process",
+            let file_log = Log::build(
+                LogLevel::INFO,
                 &format!(
                     "index.html updated with content from {}",
                     today_file_path.display()
                 ),
-                &LogFormat::CLF
-            );
+            )
+            .time(&iso)
+            .component("process")
+            .format(LogFormat::CLF);
             writeln!(log_file, "{}", file_log)?;
         } else {
             // Write the log to both the console and the file
-            let file_log = macro_log!(
-                &Uuid::new_v4().to_string(),
-                &iso,
-                &LogLevel::INFO,
-                "process",
+            let file_log = Log::build(
+                LogLevel::INFO,
                 &format!(
                     "No file found at {}",
                     today_file_path.display()
                 ),
-                &LogFormat::CLF
-            );
+            )
+            .time(&iso)
+            .component("process")
+            .format(LogFormat::CLF);
             writeln!(log_file, "{}", file_log)?;
         }
     }

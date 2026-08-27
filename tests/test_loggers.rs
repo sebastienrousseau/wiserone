@@ -7,24 +7,23 @@
 #[cfg(test)]
 mod tests {
 
+    use rlg::log::Log;
     use rlg::log_format::LogFormat;
     use rlg::log_level::LogLevel;
-    use rlg::macro_log;
 
     #[test]
     fn test_logging() {
         // Create a log entry
-        let log_entry = macro_log!(
-            "session_id",
-            "time",
-            &LogLevel::INFO,
-            "component",
-            "Log message",
-            &LogFormat::CLF
-        );
+        // rlg 0.0.12 assigns a monotonic u64 session id at build time; the
+        // override is used here so the assertion stays deterministic.
+        let log_entry = Log::build(LogLevel::INFO, "Log message")
+            .session_id(42)
+            .time("time")
+            .component("component")
+            .format(LogFormat::CLF);
 
         // Define expected values
-        let expected_session_id = "session_id";
+        let expected_session_id = 42;
         let expected_time = "time";
         let expected_level = LogLevel::INFO;
         let expected_component = "component";
