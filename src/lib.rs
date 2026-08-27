@@ -22,9 +22,9 @@ use std::io::Write;
 use std::path::Path;
 
 use dtt::datetime::DateTime;
+use rlg::log::Log;
 use rlg::log_format::LogFormat;
 use rlg::log_level::LogLevel;
-use rlg::macro_log;
 
 use crate::loggers::init_logger;
 
@@ -109,14 +109,11 @@ where
     cli::run_cli_from(args)?;
 
     // Generate a log entry
-    let quote_log = macro_log!(
-        "id",
-        &iso,
-        &LogLevel::INFO,
-        "process",
-        "Quote HTML file generated successfully.",
-        &LogFormat::CLF
-    );
+    let msg = "Quote HTML file generated successfully.";
+    let quote_log = Log::build(LogLevel::INFO, msg)
+        .time(&iso)
+        .component("process")
+        .format(LogFormat::CLF);
 
     // Write the log to both the console and the file
     writeln!(log_file, "{}", quote_log)?;

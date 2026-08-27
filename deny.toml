@@ -27,6 +27,10 @@ allow = [
     "Unlicense",
     "Unicode-DFS-2016",
     "Unicode-3.0",
+    # `foldhash`, reached transitively through
+    # rlg -> config -> yaml-rust2 -> hashlink -> hashbrown.
+    # Zlib is permissive, OSI-approved and FSF Free/Libre.
+    "Zlib",
 ]
 # How closely detected license text must match the canonical SPDX text.
 confidence-threshold = 0.8

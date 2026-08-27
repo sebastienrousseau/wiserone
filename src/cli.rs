@@ -9,9 +9,9 @@ use std::io::Write;
 use std::path::Path;
 
 use dtt::datetime::DateTime;
+use rlg::log::Log;
 use rlg::log_format::LogFormat;
 use rlg::log_level::LogLevel;
-use rlg::macro_log;
 
 use crate::ascii::generate_ascii_art;
 use crate::html::generate_html_file;
@@ -106,14 +106,11 @@ where
     let date = format!("{}_{}_{}", year, month, day);
 
     // Generate a log entry
-    let ascii_art_log = macro_log!(
-        "id",
-        &iso,
-        &LogLevel::INFO,
-        "process",
-        "ASCII art generation event started.",
-        &LogFormat::CLF
-    );
+    let msg = "ASCII art generation event started.";
+    let ascii_art_log = Log::build(LogLevel::INFO, msg)
+        .time(&iso)
+        .component("process")
+        .format(LogFormat::CLF);
 
     match generate_ascii_art("The Wiser One") {
         Ok(ascii_art) => println!("{}", ascii_art),
