@@ -30,7 +30,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BASELINE = ROOT / "complexity-baseline.json"
-PATHS = ["src", "examples", "benches", "tests", "build.rs", "xtask/src"]
+PATHS = ["src", "examples", "benches", "tests", "build.rs", "xtask/src", "fuzz/fuzz_targets"]
 CEILINGS = {"cyclomatic": 10, "cognitive": 15, "halstead": 30, "sloc": 60}
 FILE_SLOC = 500
 
