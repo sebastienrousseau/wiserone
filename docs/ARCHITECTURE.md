@@ -40,7 +40,7 @@ and *returns* the error, so the whole pipeline can be driven in-process.
 `quotes/quotes.json` is an ordered pool. Each entry carries:
 
 | Field | Meaning |
-|---|---|
+| --- | --- |
 | `id` | Position in the pool. **This is what selection indexes.** |
 | `pillar` | Thematic block, e.g. `elimination`, `mortality` |
 | `quote_text` | The line itself |
@@ -104,7 +104,7 @@ two quotes shared a day.
 The same corpus exists in three repositories:
 
 | Repository | Path | Consumed by |
-|---|---|---|
+| --- | --- | --- |
 | `wiserone.github.io` | `_data/quotes/quotes.json` | the website; published at [`/quotes.json`](https://wiserone.com/quotes.json) |
 | `wiserone` (this crate) | `quotes/quotes.json` | the CLI |
 | `WiserOneApp` | `sources/resources/quotes.json` | the macOS menu-bar app |
@@ -117,7 +117,7 @@ silent divergence has already happened once — see
 ## Module reference
 
 | Module | Responsibility |
-|---|---|
+| --- | --- |
 | `quotes` | Pool loading (JSON/CSV), validation, selection, `slug`, `current_day_number` |
 | `cli` | Clap command definitions and dispatch for `random`, `daily`, `all` |
 | `html` | Template filling, filename and template validation, file output |

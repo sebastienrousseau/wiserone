@@ -136,6 +136,23 @@ jobs:
               await close(issue, `Superseded by #${current.number}, which the nightly check now keeps up to date.`);
             }
 
+  # External links in the documentation. Not on PRs: third-party hosts
+  # fail transiently, and that must not block a merge. A failure here is
+  # a real dead link to fix.
+  external-links:
+    name: 🔗 External links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check external links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --no-progress --max-retries 3 --timeout 30 --accept '200..=299,403,429' './**/*.md' --exclude-path target --exclude-path cloudcdn
+          fail: true
+
   # Beta/nightly compiler testing
   nightly-compiler:
     name: 🚀 Nightly Rust Compiler Testing
