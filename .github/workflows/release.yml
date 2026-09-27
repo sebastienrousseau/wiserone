@@ -327,7 +327,7 @@ jobs:
           cat SHA256SUMS
 
       # Notes follow the portfolio's release format: hand-written
-      # Highlights from doc/releases, GitHub's generated change list, the
+      # Highlights from docs/releases, GitHub's generated change list, the
       # checksums above and the compare link. See scripts/release_notes.py.
       - name: Compose release notes
         env:

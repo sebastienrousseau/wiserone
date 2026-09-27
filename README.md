@@ -53,7 +53,7 @@
 | Cargo (crates.io) | `cargo install wiserone --locked` |
 | Cargo (from source) | `cargo install --locked --path .` |
 
-Requires Rust **1.75.0** or later. See [`doc/POLICIES.md`](doc/POLICIES.md).
+Requires Rust **1.75.0** or later. See [`docs/POLICIES.md`](docs/POLICIES.md).
 
 ## Quick Start
 
@@ -103,7 +103,7 @@ Two consequences worth knowing:
 - **Order is load-bearing.** Reordering or renumbering shifts which
   quote every future day shows.
 
-The reasoning is in [ADR 0001](doc/adr/0001-quote-pool-and-rotation.md).
+The reasoning is in [ADR 0001](docs/adr/0001-quote-pool-and-rotation.md).
 
 ## The corpus
 
@@ -193,7 +193,7 @@ The corpus lives in three repositories and the website's copy is
 canonical. `verify-corpus.sh` fetches
 [`wiserone.com/quotes.json`](https://wiserone.com/quotes.json) and fails
 on any divergence in content or order. See
-[`doc/TESTING.md`](doc/TESTING.md).
+[`docs/TESTING.md`](docs/TESTING.md).
 
 ## Security
 
@@ -211,12 +211,12 @@ Both rejection paths are covered by tests. Report vulnerabilities via
 
 | Document | Covers |
 |---|---|
-| [`doc/ARCHITECTURE.md`](doc/ARCHITECTURE.md) | Crate layout, the pool, selection, page generation |
-| [`doc/USER-GUIDE.md`](doc/USER-GUIDE.md) | Commands, corpus format, troubleshooting |
-| [`doc/TESTING.md`](doc/TESTING.md) | Suite layout, coverage policy, measurement traps |
-| [`doc/POLICIES.md`](doc/POLICIES.md) | Versioning, MSRV, platforms, coverage, corpus changes |
-| [`doc/adr/0001-quote-pool-and-rotation.md`](doc/adr/0001-quote-pool-and-rotation.md) | Why quotes are a pool, not a calendar |
-| [`doc/adr/0002-testable-entry-points.md`](doc/adr/0002-testable-entry-points.md) | Why entry points come in pairs |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Crate layout, the pool, selection, page generation |
+| [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md) | Commands, corpus format, troubleshooting |
+| [`docs/TESTING.md`](docs/TESTING.md) | Suite layout, coverage policy, measurement traps |
+| [`docs/POLICIES.md`](docs/POLICIES.md) | Versioning, MSRV, platforms, coverage, corpus changes |
+| [`docs/adr/0001-quote-pool-and-rotation.md`](docs/adr/0001-quote-pool-and-rotation.md) | Why quotes are a pool, not a calendar |
+| [`docs/adr/0002-testable-entry-points.md`](docs/adr/0002-testable-entry-points.md) | Why entry points come in pairs |
 | [API docs](https://docs.rs/wiserone) | Generated reference |
 
 ## License
