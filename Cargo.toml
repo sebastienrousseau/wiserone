@@ -31,6 +31,14 @@ name = "benchmark"
 harness = false
 path = "benches/criterion.rs"
 
+# Without an explicit entry Cargo auto-discovers this file with the
+# default libtest harness, which ignores criterion_main! and runs
+# nothing, so these benchmarks had never been measured.
+[[bench]]
+name = "performance_suite"
+harness = false
+path = "benches/performance_suite.rs"
+
 [profile.bench]
 debug = true
 
