@@ -29,7 +29,7 @@ cargo install --locked --path .
 ## Commands
 
 | Command | Selects | Writes |
-|---|---|---|
+| --- | --- | --- |
 | `wiserone daily <file>` | The quote of the day, matching [wiserone.com](https://wiserone.com) | `docs/YYYY_MM_DD.html` + `docs/index.html` |
 | `wiserone random <file>` | Any quote at random | `docs/YYYY_MM_DD.html` + `docs/index.html` |
 | `wiserone all <file>` | Every quote | `docs/quote-NNNN.html` per quote |
@@ -108,7 +108,7 @@ println!("{} — {}", today.quote_text, today.author);
 ## Troubleshooting
 
 | Symptom | Cause |
-|---|---|
+| --- | --- |
 | `Only .json and .csv files are supported` | Wrong extension; the check runs before the file is read |
 | `Path contains directory traversal sequence` | The path contains `..` |
 | `Template path is not a file` | `_layouts/quote.html` is missing or is a directory |

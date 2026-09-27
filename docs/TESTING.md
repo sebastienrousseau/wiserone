@@ -27,7 +27,7 @@ cargo tarpaulin --follow-exec --fail-under 92   # coverage gate
 ## What each file covers
 
 | File | Covers |
-|---|---|
+| --- | --- |
 | `tests/test_corpus.rs` | The shipped corpus: parses, ≥100 entries, ids contiguous from zero, no duplicate text, no slug collisions, JSON ≡ CSV, daily selection deterministic and wrapping, slugs matching live URLs |
 | `tests/test_coverage_gaps.rs` | `run_with` end to end, the logger, every `QuoteError` variant and conversion, filename and template validation including path traversal, legacy CSV without ids |
 | `tests/test_cli.rs` | Command dispatch for `random`, `daily` and `all`, including that same-day quotes produce distinct pages |

@@ -1,0 +1,26 @@
+// Markdown lint for the repository's own documents (docs-lint CI job).
+{
+  "globs": [
+    "*.md",
+    "docs/**/*.md",
+    ".github/**/*.md",
+    "!.git/**",
+    "!target/**",
+    "!cloudcdn/**"
+  ],
+  "config": {
+    "default": true,
+    // Prose is wrapped by hand; tables and URLs cannot be.
+    "MD013": false,
+    // Release notes and guides repeat section names by design.
+    "MD024": false,
+    // The README template requires HTML for the centred header.
+    "MD033": false,
+    // Files open with an SPDX licence comment, not a heading.
+    "MD041": false,
+    // The README template's Contents groups are bold labels, not headings.
+    "MD036": false,
+    // Tables whose last cell is a sentence cannot be column-aligned.
+    "MD060": { "style": "any" }
+  }
+}

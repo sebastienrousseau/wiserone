@@ -1,7 +1,7 @@
 # Wiserone Development Makefile
 # Enforces same quality standards as CI pipeline
 
-.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools assets complexity
+.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools assets complexity install uninstall
 
 # Default target
 all: check fmt-check lint test coverage security docs bench
@@ -195,3 +195,26 @@ assets: ## Generate manpages and shell completions into target/assets
 # Per-function complexity ceilings against complexity-baseline.json
 complexity: ## Check per-function complexity ceilings (needs rust-code-analysis-cli)
 	@python3 scripts/complexity_check.py
+
+# Unix install contract: honours PREFIX (default /usr/local) and DESTDIR.
+PREFIX ?= /usr/local
+BINDIR := $(DESTDIR)$(PREFIX)/bin
+MANDIR := $(DESTDIR)$(PREFIX)/share/man/man1
+BASHDIR := $(DESTDIR)$(PREFIX)/share/bash-completion/completions
+ZSHDIR := $(DESTDIR)$(PREFIX)/share/zsh/site-functions
+FISHDIR := $(DESTDIR)$(PREFIX)/share/fish/vendor_completions.d
+
+install: assets ## Install binary, manpages and completions (PREFIX, DESTDIR)
+	@cargo build --locked --release --quiet
+	@install -d "$(BINDIR)" "$(MANDIR)" "$(BASHDIR)" "$(ZSHDIR)" "$(FISHDIR)"
+	@install -m 755 target/release/wiserone "$(BINDIR)/wiserone"
+	@install -m 644 target/assets/man/*.1 "$(MANDIR)/"
+	@install -m 644 target/assets/completions/wiserone.bash "$(BASHDIR)/wiserone"
+	@install -m 644 target/assets/completions/_wiserone "$(ZSHDIR)/_wiserone"
+	@install -m 644 target/assets/completions/wiserone.fish "$(FISHDIR)/wiserone.fish"
+	@echo "installed wiserone into $(DESTDIR)$(PREFIX)"
+
+uninstall: ## Remove what `make install` installed (PREFIX, DESTDIR)
+	@rm -f "$(BINDIR)/wiserone" "$(MANDIR)"/wiserone*.1 \
+		"$(BASHDIR)/wiserone" "$(ZSHDIR)/_wiserone" "$(FISHDIR)/wiserone.fish"
+	@echo "removed wiserone from $(DESTDIR)$(PREFIX)"

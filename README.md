@@ -79,7 +79,11 @@ a signed build-provenance attestation:
 gh attestation verify wiserone-v0.0.8-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
 ```
 
-From source: `cargo install --locked --path .`
+From source, with manpages and shell completions:
+
+```bash
+make install                  # PREFIX=/usr/local; honours DESTDIR
+```
 
 ---
 
@@ -139,6 +143,7 @@ the two diverge.
 | Output | One HTML page per quote, `index.html`, `sitemap.xml` | Stable |
 | Library | `read_quotes_from_file`, `select_daily_quote`, `wiserone!` | Stable |
 | Distribution | 20 pre-built targets, manpages, completions, SBOM, provenance | Since 0.0.8 |
+| Install | `make install` with `PREFIX` and `DESTDIR` | Since 0.0.8 |
 
 ---
 
@@ -313,6 +318,7 @@ make lint            # clippy, zero warnings
 make coverage        # tarpaulin, 92% floor
 make complexity      # per-function complexity ceilings
 make assets          # manpages and completions
+make install         # binary, manpages, completions (PREFIX, DESTDIR)
 ./scripts/verify-corpus.sh
 ```
 
@@ -329,8 +335,9 @@ reproduces it, and describes the test layout and the release process.
   `.json` or `.csv`.
 - **Supply chain:** `cargo audit` and `cargo deny` run on every change;
   CodeQL scans the Rust, Python and workflow code; secret scanning and
-  push protection are on; OpenSSF Scorecard reports the repository's
-  posture. Releases are cut from signed tags and ship checksums, an SBOM
+  push protection are on; a fuzz target exercises corpus parsing,
+  selection and slugs on every change; OpenSSF Scorecard reports the
+  repository's posture. Releases are cut from signed tags and ship checksums, an SBOM
   and provenance attestations.
 
 Both validation paths are covered by tests.

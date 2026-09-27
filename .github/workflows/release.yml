@@ -373,19 +373,30 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Generate checksums
-        run: |
-          cd dist
-          sha256sum ./*.tar.gz ./*.cdx.json > SHA256SUMS
-          cat SHA256SUMS
-
       # Verify with: gh attestation verify <asset> -R sebastienrousseau/wiserone
       - name: Attest build provenance
+        id: attest
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
           subject-path: |
             dist/*.tar.gz
             dist/*.cdx.json
+
+      # The same attestation as a release asset, so it can be verified
+      # offline and so OpenSSF Scorecard's Signed-Releases check sees
+      # provenance.
+      - name: Attach the provenance bundle
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: cp "${BUNDLE}" "dist/wiserone-v${VERSION}.intoto.jsonl"
+
+      # Every asset except SHA256SUMS itself, the bundle included.
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum ./*.tar.gz ./*.cdx.json ./*.intoto.jsonl > SHA256SUMS
+          cat SHA256SUMS
 
       # Notes follow the portfolio's release format: hand-written
       # Highlights from docs/releases, GitHub's generated change list, the
@@ -411,7 +422,7 @@ jobs:
             --verify-tag \
             --title "$(python3 scripts/release_notes.py --tag "v${VERSION}" --title)" \
             --notes-file release-notes.md \
-            dist/*.tar.gz dist/*.cdx.json dist/SHA256SUMS
+            dist/*.tar.gz dist/*.cdx.json dist/*.intoto.jsonl dist/SHA256SUMS
 
   # Publish to crates.io, but only when this version is not already there.
   crate:

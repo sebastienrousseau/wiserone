@@ -13,24 +13,28 @@ The CI pipeline consists of multiple workflow files designed to enforce strict q
 ## 🎯 Zero-Tolerance Policies
 
 ### 1. Zero-Warning Policy
+
 - **Enforcement**: `RUSTFLAGS="-Dwarnings"` globally set
 - **Scope**: All compiler warnings treated as errors
 - **Tools**: Rustc, Clippy, Rustdoc
 - **No Bypassing**: No `#[allow()]` attributes without justification
 
 ### 2. Code Formatting Policy
+
 - **Tool**: `rustfmt` with project-specific configuration
 - **Enforcement**: `cargo fmt --check` must pass
 - **Failure Action**: CI blocks merge until fixed
 - **Configuration**: See `rustfmt.toml` for formatting rules
 
 ### 3. Test Coverage Policy
+
 - **Requirement**: 100% test coverage
 - **Tool**: `cargo-tarpaulin`
 - **Enforcement**: `--fail-under 100` flag
 - **No Exceptions**: All code paths must be tested
 
 ### 4. Security Policy
+
 - **Vulnerability Scanning**: `cargo audit` must pass
 - **License Compliance**: `cargo deny` checks licenses and bans
 - **No Bypassing**: Security steps must NOT use `|| true`
@@ -39,6 +43,7 @@ The CI pipeline consists of multiple workflow files designed to enforce strict q
 ## 🔧 CI Pipeline Architecture
 
 ### Pre-flight Checks (Fast Feedback)
+
 ```mermaid
 graph TD
     A[Checkout] --> B[Setup Rust]
@@ -54,24 +59,27 @@ graph TD
 **Fail Fast**: Any failure blocks subsequent jobs
 
 ### Test Matrix (Cross-Platform)
+
 - **Platforms**: Ubuntu Latest, macOS Latest
 - **Toolchains**: Stable, Nightly
 - **Timeout**: 10 minutes per job
 - **Strategy**: `fail-fast: true`
 
 | Platform | Toolchain | Coverage | Purpose |
-|----------|-----------|----------|---------|
+| ---------- | ----------- | ---------- | --------- |
 | Ubuntu | Stable | Yes | Primary coverage analysis |
 | Ubuntu | Nightly | No | Future compatibility |
 | macOS | Stable | No | Platform compatibility |
 | macOS | Nightly | No | Future + platform compatibility |
 
 ### Security Gates
+
 - **Vulnerability Audit**: `cargo audit`
 - **License Compliance**: `cargo deny check`
 - **No Overrides**: Security failures cannot be bypassed
 
 ### Quality Gates
+
 - **Documentation**: Generate docs with `RUSTDOCFLAGS="-Dwarnings"`
 - **Doc Tests**: All examples in documentation must pass
 - **Benchmarks**: Performance regression detection
@@ -79,12 +87,14 @@ graph TD
 ## 🌙 Nightly Jobs
 
 ### Automated Maintenance
+
 - **Schedule**: Daily at 2 AM UTC
 - **Dependency Updates**: Check and report outdated dependencies
 - **Issue Creation**: Automatic GitHub issues for maintenance
 - **Extended Testing**: Long-running and stress tests
 
 ### Nightly Compiler Testing
+
 - **Purpose**: Early warning for future Rust versions
 - **Allow Failure**: `continue-on-error: true` for experimental features
 - **Enhanced Lints**: Additional clippy rules with nightly
@@ -92,6 +102,7 @@ graph TD
 ## 🛡️ Branch Protection
 
 ### Required Status Checks
+
 The following CI jobs must pass before merge:
 
 1. **🔍 Pre-flight Checks**
@@ -102,6 +113,7 @@ The following CI jobs must pass before merge:
 6. **🎯 CI Gate** (Overall status)
 
 ### Protection Rules
+
 - **Required Reviews**: 1 approving review
 - **Dismiss Stale Reviews**: Yes
 - **Require Up-to-date Branches**: Yes
@@ -112,6 +124,7 @@ The following CI jobs must pass before merge:
 ## 🚀 Local Development
 
 ### Quick Commands
+
 ```bash
 # Install tools
 make install-tools
@@ -127,6 +140,7 @@ make fmt-check lint test coverage security docs bench
 ```
 
 ### Development Workflow
+
 1. **Before Coding**: Run `make dev-setup`
 2. **During Development**: Use `make quick-check`
 3. **Before Commit**: Run `make ci-local`
@@ -135,11 +149,13 @@ make fmt-check lint test coverage security docs bench
 ## 📊 Performance Requirements
 
 ### Build Times
+
 - **Pre-flight Checks**: < 10 minutes
 - **Test Matrix**: < 10 minutes per job
 - **Total CI Time**: < 25 minutes (parallel execution)
 
 ### Optimization Strategies
+
 - **Dependency Caching**: `Swatinem/rust-cache@v2`
 - **Fail Fast**: Early termination on first failure
 - **Parallel Execution**: Matrix jobs run simultaneously
@@ -150,6 +166,7 @@ make fmt-check lint test coverage security docs bench
 ### Common Issues
 
 #### "Formatting check failed"
+
 ```bash
 # Fix locally
 make fmt
@@ -159,6 +176,7 @@ make fmt-check
 ```
 
 #### "Clippy lints failed"
+
 ```bash
 # See specific issues
 cargo clippy --workspace --all-targets --all-features --no-deps -- -D warnings
@@ -168,6 +186,7 @@ make lint
 ```
 
 #### "Coverage below 100%"
+
 ```bash
 # Generate detailed report
 make coverage
@@ -176,6 +195,7 @@ make coverage
 ```
 
 #### "Security audit failed"
+
 ```bash
 # Check vulnerabilities
 cargo audit
@@ -189,11 +209,13 @@ cargo deny check
 ### CI Debugging
 
 #### Check Status
+
 - Visit GitHub Actions tab in repository
 - Look for red X marks indicating failures
 - Click on failed job for detailed logs
 
 #### Local Reproduction
+
 ```bash
 # Reproduce CI environment
 make clean
@@ -207,6 +229,7 @@ cargo +nightly test
 ## 🔧 Configuration Files
 
 ### Key Configuration
+
 - **`Cargo.toml`**: Project metadata and dependencies
 - **`rustfmt.toml`**: Formatting rules (72 char width, etc.)
 - **`deny.toml`**: License and security policies
@@ -215,6 +238,7 @@ cargo +nightly test
 - **`Makefile`**: Local development commands
 
 ### Customization
+
 To modify CI behavior:
 
 1. **Timeouts**: Adjust `timeout-minutes` in workflow files
@@ -225,16 +249,19 @@ To modify CI behavior:
 ## 📈 Metrics & Monitoring
 
 ### CI Health Metrics
+
 - **Success Rate**: Target > 95%
 - **Average Duration**: Target < 20 minutes
 - **Flaky Test Rate**: Target < 1%
 
 ### Quality Metrics
+
 - **Test Coverage**: Enforced at 100%
 - **Security Vulnerabilities**: Zero tolerance
 - **Code Quality**: Zero warnings policy
 
 ### Performance Tracking
+
 - **Build Times**: Monitored via nightly jobs
 - **Binary Size**: Tracked for regressions
 - **Benchmark Results**: Historical comparison
@@ -242,16 +269,19 @@ To modify CI behavior:
 ## 🎯 Enforcement Strategy
 
 ### Developer Experience
+
 - **Fast Feedback**: Pre-flight checks complete in < 10 minutes
 - **Clear Errors**: Detailed failure messages with fix suggestions
 - **Local Testing**: `make ci-local` mirrors CI exactly
 
 ### Quality Assurance
+
 - **No Compromises**: Zero-warning and 100% coverage policies
 - **Automated Updates**: Nightly dependency maintenance
 - **Security First**: All security checks must pass
 
 ### Continuous Improvement
+
 - **Regular Reviews**: Monthly CI policy reviews
 - **Tool Updates**: Automated dependency updates
 - **Performance Optimization**: Ongoing build time improvements
@@ -261,7 +291,7 @@ To modify CI behavior:
 ## ⚡ Quick Reference
 
 | Command | Purpose | Timeout |
-|---------|---------|---------|
+| --------- | --------- | --------- |
 | `make fmt-check` | Verify formatting | 2 min |
 | `make lint` | Clippy with zero warnings | 5 min |
 | `make test` | Full test suite | 10 min |

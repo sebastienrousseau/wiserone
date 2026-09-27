@@ -26,7 +26,7 @@ ways to make wiserone better. If you have ideas, suggestions, or questions
 about wiserone, we'd love to hear them. Here's how you can provide
 feedback:
 
-- Click [here][2] to submit a new feedback.
+- [Open a new issue][2] to submit feedback.
 - Use a descriptive title that clearly summarizes your feedback.
 - Provide a detailed description of the issue or suggestion.
 - Be patient while we review and respond to your feedback.
@@ -36,7 +36,7 @@ feedback:
 If you encounter a bug while using wiserone, please let us know so we can
 fix it. Here's how you can submit a bug report:
 
-- Click [here][2] to submit a new issue.
+- [Open a new issue][2] to report the bug.
 - Use a descriptive title that clearly summarizes the bug.
 - Provide a detailed description of the issue, including steps to
   reproduce it.
@@ -78,4 +78,4 @@ contribute to wiserone. Thank you for your interest and involvement in our
 project!
 
 [1]: https://github.com/sebastienrousseau/wiserone
-[2]: https://github.com/sebastienrousseau/wiserone/issues/newHTTP/2 416
+[2]: https://github.com/sebastienrousseau/wiserone/issues/new

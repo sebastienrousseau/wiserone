@@ -41,10 +41,31 @@ Each row is a CI job; the command is what it runs.
 | Release scripts | `shellcheck scripts/release_*.sh` |
 | README template | `python3 scripts/validate_readme.py` |
 | Corpus matches wiserone.com | `./scripts/verify-corpus.sh` |
+| Spelling, Markdown, internal links | `codespell`, `npx markdownlint-cli2`, `lychee --offline --include-fragments './**/*.md'` |
+| Fuzz seed replay | `cd fuzz && cargo +nightly fuzz run parse_corpus corpus/parse_corpus seeds/parse_corpus -- -runs=0` |
 | Benchmarks compile and run | `cargo bench --workspace --all-features` |
 
 `make ci-local` runs the Rust gates in sequence. `make help` lists every
-target.
+target. External links are checked nightly rather than on each PR, so a
+flaky third-party host cannot block a merge.
+
+`cargo-semver-checks` is deliberately not a gate yet: Cargo treats every
+0.0.x bump as a major version, so it runs no checks against 0.0.x
+releases. It becomes useful from 0.1.0.
+
+## Fuzzing
+
+`fuzz/` holds a `cargo-fuzz` target, `parse_corpus`, that feeds arbitrary
+bytes to the corpus parser, daily selection (including negative and
+extreme day numbers) and `slug`, and asserts the slug rule. Seeds live in
+`fuzz/seeds/parse_corpus/`; add any crashing input there so every CI run
+replays it. `fuzz/corpus/` is the fuzzer's working set and is not
+committed. Fuzzing needs a nightly toolchain:
+
+```bash
+cargo install cargo-fuzz --locked
+cd fuzz && cargo +nightly fuzz run parse_corpus corpus/parse_corpus seeds/parse_corpus
+```
 
 ## Complexity ceilings
 
@@ -75,6 +96,11 @@ Nothing below is committed; each is generated on demand.
 | SBOM | `cargo cyclonedx --format json --spec-version 1.5` |
 | API docs | `cargo doc --no-deps` |
 | The quote site | `cargo run -- daily ./quotes/quotes.json` (writes `docs/*.html`) |
+
+`make install` builds the release binary and installs it with its
+manpages and bash, zsh and fish completions under `PREFIX` (default
+`/usr/local`), staged under `DESTDIR` when set; `make uninstall` removes
+them.
 
 ## Releases
 

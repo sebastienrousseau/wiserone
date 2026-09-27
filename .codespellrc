@@ -1,0 +1,5 @@
+[codespell]
+skip = ./target,./fuzz/target,./fuzz/corpus,./fuzz/artifacts,./cloudcdn,./coverage,./docs/*.html,./docs/logs,./quotes,*.lock,./.git
+# "caf": tests/test_coverage_gaps.rs asserts slug("café") drops the
+# non-ASCII letter.
+ignore-words-list = caf

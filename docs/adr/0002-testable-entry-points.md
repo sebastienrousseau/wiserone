@@ -22,7 +22,7 @@ Two separate reasons, both fixable:
 Each entry point is a pair:
 
 | Outer | Inner |
-|---|---|
+| --- | --- |
 | `run()` | `run_with(args)` |
 | `run_cli()` | `run_cli_from(args)` |
 
