@@ -83,7 +83,8 @@ mod tests {
         if output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             assert!(
-                stdout.contains("0.0.6") || stdout.contains("wiserone"),
+                stdout.contains(env!("CARGO_PKG_VERSION"))
+                    || stdout.contains("wiserone"),
                 "Version output should contain version info"
             );
         }
