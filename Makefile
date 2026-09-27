@@ -1,7 +1,7 @@
 # Wiserone Development Makefile
 # Enforces same quality standards as CI pipeline
 
-.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools
+.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools assets
 
 # Default target
 all: check fmt-check lint test coverage security docs bench
@@ -187,3 +187,7 @@ stats: ## Show project statistics
 	@echo "  Rust files: $(shell find src tests -name '*.rs' | wc -l)"
 	@echo "  Dependencies: $(shell grep -c '=' Cargo.toml | head -1)"
 	@echo "  Test files: $(shell find tests -name '*.rs' | wc -l)"
+
+# Generated manpages and shell completions (not committed)
+assets: ## Generate manpages and shell completions into target/assets
+	@cargo run --locked --quiet --example gen_assets -- target/assets

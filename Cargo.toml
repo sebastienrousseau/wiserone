@@ -48,6 +48,8 @@ rlg = "0.0.12"
 # Ecosystem shared utilities
 
 [dev-dependencies]
+clap_complete = "4.5.67"
+clap_mangen = "0.2.32"
 criterion = "0.8.2"
 mockall = "0.15.0"
 tempfile = "3.14.0"
