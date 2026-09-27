@@ -2,9 +2,9 @@ name: 🚀 Comprehensive CI Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feat/v*"]
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, "feat/v*"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -56,6 +56,14 @@ jobs:
           cargo clippy --workspace --all-targets --all-features --no-deps -- -D warnings
           echo "::endgroup::"
           echo "✅ No linting issues found"
+
+      # Every doc/releases file must stay in the release-page format, and
+      # the release scripts must stay shellcheck-clean, so a broken release
+      # tool is caught on the PR rather than when a tag is pushed.
+      - name: 📝 Check release notes and scripts
+        run: |
+          python3 scripts/release_notes.py --check
+          shellcheck scripts/release_*.sh
 
       # Type checking in strict mode
       - name: 🔧 Type checking
