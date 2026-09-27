@@ -65,6 +65,11 @@ jobs:
           python3 scripts/release_notes.py --check
           shellcheck scripts/release_*.sh
 
+      # AGENTS.md §7.3: README headings in the template's order, no
+      # unresolved {{TOKENS}}.
+      - name: 📖 Check README against the template
+        run: python3 scripts/validate_readme.py
+
       # Type checking in strict mode
       - name: 🔧 Type checking
         run: |
@@ -324,6 +329,30 @@ jobs:
           echo "✅ Benchmarks completed"
 
   # Final gate - all jobs must pass
+  # The stated minimum toolchain is only true while CI proves it: build
+  # and test on exactly that version, with the committed lockfile.
+  msrv:
+    name: 🦀 MSRV (1.88.0)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Rust 1.88.0
+        uses: dtolnay/rust-toolchain@1.88.0
+
+      - name: Configure dependency cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: msrv
+
+      # Plain build and test: lints are the stable-toolchain jobs' concern.
+      - name: Build and test on the MSRV
+        env:
+          RUSTFLAGS: ""
+        run: cargo test --locked --workspace --all-features
+
   # Per-function complexity ceilings (AGENTS.md §0) against the committed
   # baseline, which may only shrink. See scripts/complexity_check.py.
   complexity:
@@ -353,7 +382,7 @@ jobs:
   ci-gate:
     name: 🎯 CI Gate
     runs-on: ubuntu-latest
-    needs: [preflight, test-matrix, security, docs, benchmarks, complexity]
+    needs: [preflight, test-matrix, security, docs, benchmarks, complexity, msrv]
     if: always()
     steps:
       - name: Check all jobs
@@ -376,6 +405,10 @@ jobs:
           fi
           if [[ "${{ needs.benchmarks.result }}" != "success" ]]; then
             echo "❌ Benchmarks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.msrv.result }}" != "success" ]]; then
+            echo "❌ MSRV build failed"
             exit 1
           fi
           if [[ "${{ needs.complexity.result }}" != "success" ]]; then
