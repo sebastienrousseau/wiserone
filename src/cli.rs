@@ -91,6 +91,18 @@ where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
+    let date = log_startup()?;
+
+    // Parse the command line arguments using the `clap` crate.
+    let command = Command::try_parse_from(args)?;
+    run_command(command, &date)
+}
+
+/// Prints the banner and writes the start-up log entry.
+///
+/// Returns today's date as `YYYY_MM_DD`, the file name used for a
+/// single generated page.
+fn log_startup() -> Result<String, Box<dyn Error>> {
     // Ensure log directory exists and open log file
     let log_dir = Path::new(OUTPUT_DIR).join("logs");
     fs::create_dir_all(&log_dir)?;
@@ -100,10 +112,7 @@ where
     // Define date and time
     let dt = DateTime::new();
     let iso = dt.format_rfc3339()?;
-    let year = dt.year();
-    let month = &iso[5..7];
-    let day = dt.day();
-    let date = format!("{}_{}_{}", year, month, day);
+    let date = format!("{}_{}_{}", dt.year(), &iso[5..7], dt.day());
 
     // Generate a log entry
     let msg = "ASCII art generation event started.";
@@ -119,63 +128,73 @@ where
 
     // Write the log to both the console and the file
     writeln!(log_file, "{}", ascii_art_log)?;
+    Ok(date)
+}
 
-    // Parse the command line arguments using the `clap` crate.
-    let command = Command::try_parse_from(args)?;
-
+/// Runs one parsed command. `date` names the page for single quotes.
+fn run_command(
+    command: Command,
+    date: &str,
+) -> Result<(), Box<dyn Error>> {
     match command {
         Command::Random { filename } => {
             println!(
                 "- info:wiserone: begin generating a random quote"
             );
-            // Construct the HTML filename using `iso`
-            let html_filename = format!("{}.html", date);
-
             // Read and parse quotes, then select a random quote
             let mut quotes = read_quotes_from_file(&filename)?;
             let quote = quotes.select_random_quote()?;
-            generate_html_file(&html_filename, quote)?;
-            generate_sitemap_file("https://wiserone.com/")?;
+            generate_page(&format!("{}.html", date), quote)
         }
         Command::Daily { filename } => {
             println!(
                 "- info:wiserone: begin generating the quote of the day"
             );
-            let html_filename = format!("{}.html", date);
             let quotes = read_quotes_from_file(&filename)?;
             let quote =
                 quotes.select_daily_quote(current_day_number())?;
-            generate_html_file(&html_filename, quote)?;
-            generate_sitemap_file("https://wiserone.com/")?;
+            generate_page(&format!("{}.html", date), quote)
         }
-        Command::All { filename } => {
-            println!("- info:wiserone: begin generating all quotes");
-            // Read and parse all quotes
-            let quotes = read_quotes_from_file(&filename)?;
+        Command::All { filename } => generate_all(&filename),
+    }
+}
 
-            // Generate an HTML file for each quote
-            for quote in quotes.select_all_quotes()? {
-                // Name by pool position, not by date. `date_added` used
-                // to be one-per-day and unique; in a pool it records the
-                // day a line was written, and six of the current 136
-                // share a date. Naming by it silently overwrote files.
-                let html_filename = match quote.id {
-                    Some(id) => format!("quote-{:04}.html", id),
-                    None => {
-                        let date_part = quote
-                            .date_added
-                            .split('T')
-                            .next()
-                            .unwrap_or("");
-                        format!("{}.html", date_part.replace('-', "_"))
-                    }
-                };
-                generate_html_file(&html_filename, quote)?;
-                generate_sitemap_file("https://wiserone.com/")?;
-            }
-            println!("- info:wiserone: end generating all quotes\n\n");
+/// Writes one quote's page, then refreshes the sitemap.
+fn generate_page(
+    html_filename: &str,
+    quote: &crate::quotes::Quote,
+) -> Result<(), Box<dyn Error>> {
+    generate_html_file(html_filename, quote)?;
+    generate_sitemap_file("https://wiserone.com/")
+}
+
+/// Writes a page for every quote in `filename`.
+fn generate_all(filename: &str) -> Result<(), Box<dyn Error>> {
+    println!("- info:wiserone: begin generating all quotes");
+    // Read and parse all quotes
+    let quotes = read_quotes_from_file(filename)?;
+
+    // Generate an HTML file for each quote
+    for quote in quotes.select_all_quotes()? {
+        generate_page(&all_quotes_filename(quote), quote)?;
+    }
+    println!("- info:wiserone: end generating all quotes\n\n");
+    Ok(())
+}
+
+/// The page name for `quote` when every quote is generated.
+///
+/// Name by pool position, not by date. `date_added` used to be
+/// one-per-day and unique; in a pool it records the day a line was
+/// written, and six of the current 136 share a date. Naming by it
+/// silently overwrote files.
+fn all_quotes_filename(quote: &crate::quotes::Quote) -> String {
+    match quote.id {
+        Some(id) => format!("quote-{:04}.html", id),
+        None => {
+            let date_part =
+                quote.date_added.split('T').next().unwrap_or("");
+            format!("{}.html", date_part.replace('-', "_"))
         }
     }
-
-    Ok(())
 }
