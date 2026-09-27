@@ -39,9 +39,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-      - name: Write CNAME file
-        run: echo 'docs.wiserone.com' > ./target/doc/CNAME
-
       # Publishes on every push to main. This guard was added when
       # wiserone.com was this repository's Pages domain and a stray
       # deploy could have taken the live site down. The domain is now
@@ -54,8 +51,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/doc
           publish_branch: gh-pages
-          cname: true
-          clean: true
+          # Writes the CNAME file; keep_files defaults to false, so every
+          # deploy replaces the branch contents.
+          cname: docs.wiserone.com
           commit_message: Deploy documentation at ${{ github.sha }}
-          commit_user_name: github-actions
-          commit_user_email: actions@users.noreply.github.com
+          user_name: github-actions
+          user_email: actions@users.noreply.github.com
