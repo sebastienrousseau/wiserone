@@ -1,7 +1,7 @@
 # Wiserone Development Makefile
 # Enforces same quality standards as CI pipeline
 
-.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools
+.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools assets complexity
 
 # Default target
 all: check fmt-check lint test coverage security docs bench
@@ -52,10 +52,10 @@ test: ## Run test suite
 	@echo "✅ All tests passed"
 
 # Coverage with 100% threshold
-coverage: ## Run tests with coverage (100% threshold)
-	@echo "📊 Running coverage analysis (100% threshold)..."
-	@cargo tarpaulin --workspace --all-features --out Html --output-dir coverage/ --fail-under 100 --verbose --timeout 300
-	@echo "✅ Coverage requirement met (100%)"
+coverage: ## Run tests with coverage (92% floor, as CI and docs/POLICIES.md)
+	@echo "📊 Running coverage analysis (92% floor)..."
+	@cargo tarpaulin --workspace --all-features --follow-exec --exclude-files '*macros.rs' --out Html --output-dir coverage/ --fail-under 92 --verbose --timeout 300
+	@echo "✅ Coverage floor met (92%)"
 	@echo "📄 Coverage report: coverage/tarpaulin-report.html"
 
 # Security scanning
@@ -187,3 +187,11 @@ stats: ## Show project statistics
 	@echo "  Rust files: $(shell find src tests -name '*.rs' | wc -l)"
 	@echo "  Dependencies: $(shell grep -c '=' Cargo.toml | head -1)"
 	@echo "  Test files: $(shell find tests -name '*.rs' | wc -l)"
+
+# Generated manpages and shell completions (not committed)
+assets: ## Generate manpages and shell completions into target/assets
+	@cargo run --locked --quiet --example gen_assets -- target/assets
+
+# Per-function complexity ceilings against complexity-baseline.json
+complexity: ## Check per-function complexity ceilings (needs rust-code-analysis-cli)
+	@python3 scripts/complexity_check.py

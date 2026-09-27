@@ -30,53 +30,61 @@
 use std::fs;
 use std::path::Path;
 
+/// Test sources to scan: every `.rs` file in `tests/` except this one.
+fn test_sources(tests_dir: &Path) -> Vec<(String, String)> {
+    let this_file = "test_docs_not_touched.rs";
+    let mut sources = Vec::new();
+    for entry in fs::read_dir(tests_dir).expect("read tests/") {
+        let path = entry.expect("dir entry").path();
+        let Some(name) = path.file_name().and_then(|s| s.to_str())
+        else {
+            continue;
+        };
+        if name != this_file
+            && path.extension().and_then(|s| s.to_str()) == Some("rs")
+        {
+            let source =
+                fs::read_to_string(&path).expect("read test source");
+            sources.push((name.to_owned(), source));
+        }
+    }
+    sources
+}
+
+/// Lines of `source` that clear, or may write, the project's `./docs`.
+fn offending_lines(name: &str, source: &str) -> Vec<String> {
+    // A file that relocates the process cwd resolves "./docs"
+    // inside its own temp dir, so only destructive calls matter.
+    let relocates_cwd = source.contains("set_current_dir");
+    let mut offenders = Vec::new();
+
+    for (lineno, line) in source.lines().enumerate() {
+        let code = line.trim_start();
+        let mentions_docs = !code.starts_with("//")
+            && (code.contains("\"./docs\"")
+                || code.contains("\"./docs/"));
+        let destructive = code.contains("remove_dir_all")
+            || code.contains("remove_dir")
+            || code.contains("remove_file");
+        if mentions_docs && (destructive || !relocates_cwd) {
+            offenders.push(format!(
+                "{}:{}: {}",
+                name,
+                lineno + 1,
+                line.trim()
+            ));
+        }
+    }
+    offenders
+}
+
 #[test]
 fn no_test_clears_the_projects_docs_dir() {
     let tests_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
-    let this_file = "test_docs_not_touched.rs";
-    let mut offenders = Vec::new();
-
-    for entry in fs::read_dir(&tests_dir).expect("read tests/") {
-        let path = entry.expect("dir entry").path();
-        let name = match path.file_name().and_then(|s| s.to_str()) {
-            Some(n) => n.to_owned(),
-            None => continue,
-        };
-        if name == this_file
-            || path.extension().and_then(|s| s.to_str()) != Some("rs")
-        {
-            continue;
-        }
-
-        let source =
-            fs::read_to_string(&path).expect("read test source");
-        // A file that relocates the process cwd resolves "./docs"
-        // inside its own temp dir, so only destructive calls matter.
-        let relocates_cwd = source.contains("set_current_dir");
-
-        for (lineno, line) in source.lines().enumerate() {
-            let code = line.trim_start();
-            if code.starts_with("//") {
-                continue;
-            }
-            let mentions_docs = code.contains("\"./docs\"")
-                || code.contains("\"./docs/");
-            if !mentions_docs {
-                continue;
-            }
-            let destructive = code.contains("remove_dir_all")
-                || code.contains("remove_dir")
-                || code.contains("remove_file");
-            if destructive || !relocates_cwd {
-                offenders.push(format!(
-                    "{}:{}: {}",
-                    name,
-                    lineno + 1,
-                    line.trim()
-                ));
-            }
-        }
-    }
+    let offenders: Vec<String> = test_sources(&tests_dir)
+        .iter()
+        .flat_map(|(name, source)| offending_lines(name, source))
+        .collect();
 
     assert!(
         offenders.is_empty(),

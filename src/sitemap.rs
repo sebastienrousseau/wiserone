@@ -48,54 +48,62 @@ pub fn generate_sitemap_file_in(
     base_url: &str,
     docs_dir: &Path,
 ) -> Result<(), Box<dyn Error>> {
-    let docs_path = docs_dir;
-    let mut urls = Vec::new();
+    let urls = html_urls(base_url, docs_dir)?;
+    let sitemap_xml = render_sitemap(&urls, &lastmod_now()?);
 
+    // Write the sitemap to a file
+    let mut file = fs::File::create(docs_dir.join("sitemap.xml"))?;
+    file.write_all(sitemap_xml.as_bytes())?;
+
+    Ok(())
+}
+
+/// The current date and time, as the sitemap's `lastmod` value.
+fn lastmod_now() -> Result<String, Box<dyn Error>> {
     // Obtain the current date and time in ISO 8601 format using dtt
     let dt = DateTime::new();
     let iso = dt.format_rfc3339()?;
-    let year_str = dt.year();
-    let month_str = &iso[5..7];
-    let day_str = dt.day();
-    let hour_str = dt.hour().to_string();
-    let minute_str = dt.minute().to_string();
-    let second_str = dt.second().to_string();
-    let offset = dt.offset();
 
     // Construct the ISO 8601 date and time string
-    let iso_8601 = format!(
+    Ok(format!(
         "{}-{}-{}T{}:{}:{}{}",
-        year_str,
-        month_str,
-        day_str,
-        hour_str,
-        minute_str,
-        second_str,
-        offset
-    );
+        dt.year(),
+        &iso[5..7],
+        dt.day(),
+        dt.hour(),
+        dt.minute(),
+        dt.second(),
+        dt.offset()
+    ))
+}
 
-    // Current date and time in ISO 8601 format using dtt
-    let current_iso_date = iso_8601;
-
-    // Collect HTML filenames
-    if docs_path.exists() {
-        for entry in fs::read_dir(docs_path)? {
-            let path = entry?.path();
-            if path.is_file()
-                && path.extension().and_then(|s| s.to_str())
-                    == Some("html")
-            {
-                // Safely extract the filename, skipping files with
-                // invalid names rather than panicking on them.
-                if let Some(file_name) =
-                    path.file_name().and_then(|n| n.to_str())
-                {
-                    urls.push(format!("{}{}", base_url, file_name));
-                }
-            }
+/// `{base_url}{file_name}` for every HTML file directly in `docs_dir`.
+fn html_urls(
+    base_url: &str,
+    docs_dir: &Path,
+) -> Result<Vec<String>, Box<dyn Error>> {
+    let mut urls = Vec::new();
+    if !docs_dir.exists() {
+        return Ok(urls);
+    }
+    for entry in fs::read_dir(docs_dir)? {
+        let path = entry?.path();
+        let is_html = path.is_file()
+            && path.extension().and_then(|s| s.to_str())
+                == Some("html");
+        // Safely extract the filename, skipping files with invalid
+        // names rather than panicking on them.
+        if let (true, Some(file_name)) =
+            (is_html, path.file_name().and_then(|n| n.to_str()))
+        {
+            urls.push(format!("{}{}", base_url, file_name));
         }
     }
+    Ok(urls)
+}
 
+/// The sitemap document listing `urls`, each with `lastmod`.
+fn render_sitemap(urls: &[String], lastmod: &str) -> String {
     // Start the XML string with namespaces
     let mut sitemap_xml =
         String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -111,19 +119,12 @@ pub fn generate_sitemap_file_in(
         sitemap_xml
             .push_str(&format!("  <url>\n    <loc>{}</loc>\n", url));
         sitemap_xml.push_str("    <changefreq>weekly</changefreq>\n");
-        sitemap_xml.push_str(&format!(
-            "    <lastmod>{}</lastmod>\n",
-            current_iso_date
-        ));
+        sitemap_xml
+            .push_str(&format!("    <lastmod>{}</lastmod>\n", lastmod));
         sitemap_xml.push_str("  </url>\n");
     }
 
     // Close the XML string
     sitemap_xml.push_str("</urlset>");
-
-    // Write the sitemap to a file
-    let mut file = fs::File::create(docs_path.join("sitemap.xml"))?;
-    file.write_all(sitemap_xml.as_bytes())?;
-
-    Ok(())
+    sitemap_xml
 }

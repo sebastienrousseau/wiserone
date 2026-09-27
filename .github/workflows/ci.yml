@@ -18,6 +18,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Read-only by default; a job that writes declares exactly what it needs.
+permissions:
+  contents: read
+
 jobs:
   # Pre-flight checks - fast feedback
   preflight:
@@ -26,17 +30,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
         with:
+          toolchain: stable
           components: rustfmt, clippy
 
       - name: Configure dependency cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
           shared-key: preflight
@@ -57,13 +62,18 @@ jobs:
           echo "::endgroup::"
           echo "✅ No linting issues found"
 
-      # Every doc/releases file must stay in the release-page format, and
+      # Every docs/releases file must stay in the release-page format, and
       # the release scripts must stay shellcheck-clean, so a broken release
       # tool is caught on the PR rather than when a tag is pushed.
       - name: 📝 Check release notes and scripts
         run: |
           python3 scripts/release_notes.py --check
           shellcheck scripts/release_*.sh
+
+      # AGENTS.md §7.3: README headings in the template's order, no
+      # unresolved {{TOKENS}}.
+      - name: 📖 Check README against the template
+        run: python3 scripts/validate_readme.py
 
       # Type checking in strict mode
       - name: 🔧 Type checking
@@ -92,16 +102,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
         with:
           toolchain: ${{ matrix.toolchain }}
           components: llvm-tools-preview
 
       - name: Configure dependency cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
           shared-key: test-${{ matrix.cache-key }}-${{ matrix.toolchain }}
@@ -215,7 +225,7 @@ jobs:
       # uploads, and flip this back if the report should be blocking.
       - name: Upload coverage to Codecov
         if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: coverage/cobertura.xml
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -229,13 +239,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: stable
 
       - name: Configure dependency cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
           shared-key: security
@@ -270,13 +282,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: stable
 
       - name: Configure dependency cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
           shared-key: docs
@@ -305,13 +319,15 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: stable
 
       - name: Configure dependency cache
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           cache-on-failure: true
           shared-key: benchmarks
@@ -324,10 +340,62 @@ jobs:
           echo "✅ Benchmarks completed"
 
   # Final gate - all jobs must pass
+  # The stated minimum toolchain is only true while CI proves it: build
+  # and test on exactly that version, with the committed lockfile.
+  msrv:
+    name: 🦀 MSRV (1.88.0)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Rust 1.88.0
+        uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
+        with:
+          toolchain: 1.88.0
+
+      - name: Configure dependency cache
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          shared-key: msrv
+
+      # Plain build and test: lints are the stable-toolchain jobs' concern.
+      - name: Build and test on the MSRV
+        env:
+          RUSTFLAGS: ""
+        run: cargo test --locked --workspace --all-features
+
+  # Per-function complexity ceilings (AGENTS.md §0) against the committed
+  # baseline, which may only shrink. See scripts/complexity_check.py.
+  complexity:
+    name: 📐 Complexity ceilings
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RCA_VERSION: "0.0.25"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Cache rust-code-analysis-cli
+        id: rca-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cargo/bin/rust-code-analysis-cli
+          key: rca-${{ runner.os }}-${{ env.RCA_VERSION }}
+
+      - name: Install rust-code-analysis-cli
+        if: steps.rca-cache.outputs.cache-hit != 'true'
+        run: cargo install rust-code-analysis-cli --version "${RCA_VERSION}" --locked
+
+      - name: 📐 Check complexity against the baseline
+        run: python3 scripts/complexity_check.py
+
   ci-gate:
     name: 🎯 CI Gate
     runs-on: ubuntu-latest
-    needs: [preflight, test-matrix, security, docs, benchmarks]
+    needs: [preflight, test-matrix, security, docs, benchmarks, complexity, msrv]
     if: always()
     steps:
       - name: Check all jobs
@@ -350,6 +418,14 @@ jobs:
           fi
           if [[ "${{ needs.benchmarks.result }}" != "success" ]]; then
             echo "❌ Benchmarks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.msrv.result }}" != "success" ]]; then
+            echo "❌ MSRV build failed"
+            exit 1
+          fi
+          if [[ "${{ needs.complexity.result }}" != "success" ]]; then
+            echo "❌ Complexity ceilings failed"
             exit 1
           fi
           echo "🎉 All CI checks passed successfully!"

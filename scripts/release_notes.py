@@ -13,7 +13,7 @@ Every release page follows one layout (the "Release Page Format" rule in
             ## Checksums                       SHA256SUMS of the assets
             **Full Changelog**: <compare URL>  generated
 
-Only the Highlights are written by hand, in doc/releases/vX.Y.Z.md; the
+Only the Highlights are written by hand, in docs/releases/vX.Y.Z.md; the
 rest comes from GitHub's generate-notes API, so the pull-request list and
 the compare link are never retyped. A tag with no pull requests before it
 (the first) gets its commits listed in the same shape instead.
@@ -21,7 +21,7 @@ the compare link are never retyped. A tag with no pull requests before it
 Usage:
   python3 scripts/release_notes.py --tag vX.Y.Z --title
   python3 scripts/release_notes.py --tag vX.Y.Z --sums dist/SHA256SUMS --out notes.md
-  python3 scripts/release_notes.py --check     # every doc/releases file
+  python3 scripts/release_notes.py --check     # every docs/releases file
 
 Needs `gh` authenticated (GH_TOKEN in CI) for everything but --title and
 --check.
@@ -39,7 +39,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PROJECT = "wiserone"
 REPO = "sebastienrousseau/wiserone"
-NOTES = ROOT / "doc" / "releases"
+NOTES = ROOT / "docs" / "releases"
 TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
 HEADING = "## Highlights ⭐️"
 BULLET = re.compile(r"^\* \*\*[^*]+\*\*: \S")
@@ -130,7 +130,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--title", action="store_true", help="print the release title and stop")
     parser.add_argument("--sums", type=Path, help="SHA256SUMS of the release assets")
     parser.add_argument("--out", type=Path, help="write the notes here instead of stdout")
-    parser.add_argument("--check", action="store_true", help="check every doc/releases file")
+    parser.add_argument("--check", action="store_true", help="check every docs/releases file")
     args = parser.parse_args(argv)
     if args.check:
         files = sorted(NOTES.glob("v*.md"))

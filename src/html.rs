@@ -139,15 +139,21 @@ pub fn generate_html_file_in(
     // Validate template exists before reading
     validate_template()?;
 
-    let mut layout = fs::read_to_string(TEMPLATE_PATH)?;
+    let layout =
+        render_page(quote, &fs::read_to_string(TEMPLATE_PATH)?);
 
-    // Define date and time
-    let dt = DateTime::new();
-    let iso = dt.format_rfc3339()?;
-    let year = dt.year();
-    let month = &iso[5..7];
-    let day = dt.day();
+    fs::create_dir_all(output_dir)?;
+    let path = output_dir.join(filename);
+    let mut file = File::create(&path)?;
+    file.write_all(layout.as_bytes())?;
 
+    log_and_refresh_index(output_dir)?;
+    println!("- info:wiserone: add file at `{}`", path.display());
+    Ok(())
+}
+
+/// Fills the page template's placeholders from `quote`.
+fn render_page(quote: &Quote, template: &str) -> String {
     // The canonical is the quote's own page on wiserone.com.
     //
     // This used to be `if is_today { index.html } else { <date>.html }`,
@@ -162,105 +168,118 @@ pub fn generate_html_file_in(
 
     println!("Prefix: {}", prefix);
 
-    // Replace the placeholders with values from the quote
-    layout = layout.replace("{{apple_touch_icon_sizes}}", "192x192");
-    layout = layout.replace("{{author}}", &quote.author);
-    layout = layout.replace("{{banner}}", &quote.image_url);
-    layout = layout.replace("{{cdn}}", "https://cloudcdn.pro");
-    layout = layout.replace("{{charset}}", "utf-8");
-    layout = layout.replace("{{description}}", "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit.");
-    layout = layout.replace("{{hreflang}}", "en");
-    layout = layout.replace("{{item_pub_date}}", &quote.date_added);
-    layout = layout.replace(
-        "{{date}}",
-        quote.date_added.split('T').next().unwrap_or(""),
-    );
-    layout = layout.replace(
-        "{{logo}}",
-        "https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg",
-    );
-    layout = layout.replace("{{measurementID}}", "G-4HKZ6N3QSC");
-    layout = layout.replace("{{name}}", "wiserone");
-    layout = layout.replace("{{title}}", &quote.quote_text);
-    layout = layout.replace("{{url}}", "https://wiserone.com");
-    layout = layout.replace("{{canonical}}", &prefix);
+    // Replace the placeholders with values from the quote. The order is
+    // the one the replacements have always run in.
+    let date = quote.date_added.split('T').next().unwrap_or("");
+    let replacements: [(&str, &str); 15] = [
+        ("{{apple_touch_icon_sizes}}", "192x192"),
+        ("{{author}}", &quote.author),
+        ("{{banner}}", &quote.image_url),
+        ("{{cdn}}", "https://cloudcdn.pro"),
+        ("{{charset}}", "utf-8"),
+        ("{{description}}", "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit."),
+        ("{{hreflang}}", "en"),
+        ("{{item_pub_date}}", &quote.date_added),
+        ("{{date}}", date),
+        ("{{logo}}", "https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg"),
+        ("{{measurementID}}", "G-4HKZ6N3QSC"),
+        ("{{name}}", "wiserone"),
+        ("{{title}}", &quote.quote_text),
+        ("{{url}}", "https://wiserone.com"),
+        ("{{canonical}}", &prefix),
+    ];
+    replacements
+        .iter()
+        .fold(template.to_owned(), |page, (key, value)| {
+            page.replace(key, value)
+        })
+}
 
-    fs::create_dir_all(output_dir)?;
-    let path = output_dir.join(filename);
-    let mut file = File::create(&path)?;
-    file.write_all(layout.as_bytes())?;
+/// Every entry in `output_dir` except `.DS_Store`, sorted alphabetically.
+fn sorted_entries(
+    output_dir: &Path,
+) -> Result<Vec<String>, Box<dyn Error>> {
+    let mut filenames: Vec<_> = fs::read_dir(output_dir)?
+        .filter_map(|entry| {
+            entry.ok().map(|e| e.path().to_string_lossy().into_owned())
+        })
+        .filter(|filename| !filename.ends_with(".DS_Store"))
+        .collect();
+    filenames.sort();
+    Ok(filenames)
+}
+
+/// Logs every file in `output_dir`, refreshing `index.html` from
+/// today's page after each one, as generation always has.
+fn log_and_refresh_index(
+    output_dir: &Path,
+) -> Result<(), Box<dyn Error>> {
+    // Define date and time
+    let dt = DateTime::new();
+    let iso = dt.format_rfc3339()?;
+    let today_formatted = format!(
+        "{year}_{month:02}_{day:02}",
+        year = dt.year(),
+        month = &iso[5..7],
+        day = dt.day()
+    );
 
     // Ensure log directory exists and open log file
     let log_dir = output_dir.join("logs");
     fs::create_dir_all(&log_dir)?;
     let log_path = log_dir.join("wiserone.log");
     let mut log_file = File::create(&log_path)?;
+    let filenames = sorted_entries(output_dir)?;
 
-    // Collect filenames into a vector, exclude .DS_Store, and sort them alphabetically
-    let mut filenames: Vec<_> = fs::read_dir(output_dir)?
-        .filter_map(|entry| {
-            entry.ok().map(|e| {
-                let path = e.path();
-                let path_str = path.to_string_lossy().into_owned();
-                path_str
-            })
-        })
-        .filter(|filename| !filename.ends_with(".DS_Store"))
-        .collect();
-
-    filenames.sort(); // Sort filenames alphabetically
+    // Create the file path for the current day's file
+    let today_file_path =
+        output_dir.join(format!("{}.html", today_formatted));
 
     // Iterate over sorted filenames and log each one
     for filename in &filenames {
-        // Write the log to both the console and the file
         let msg =
             format!("The HTML File is created at `{}`.", filename);
-        let file_log = Log::build(LogLevel::INFO, &msg)
-            .time(&iso)
-            .component("process")
-            .format(LogFormat::CLF);
-        writeln!(log_file, "{}", file_log)?;
-
-        // Assuming year, month, and day are already defined correctly
-        let today_formatted = format!(
-            "{year}_{month:02}_{day:02}",
-            year = year,
-            month = month,
-            day = day
-        );
-
-        // Create the file path for the current day's file if it doesn't already exist
-        let today_file_path =
-            output_dir.join(format!("{}.html", today_formatted));
-
-        if today_file_path.exists() {
-            let content = fs::read_to_string(&today_file_path)?;
-            let index_path = output_dir.join("index.html");
-            fs::write(index_path, content.as_bytes())?;
-
-            // Write the log to both the console and the file
-            let msg = format!(
-                "index.html updated with content from {}",
-                today_file_path.display()
-            );
-            let file_log = Log::build(LogLevel::INFO, &msg)
-                .time(&iso)
-                .component("process")
-                .format(LogFormat::CLF);
-            writeln!(log_file, "{}", file_log)?;
-        } else {
-            // Write the log to both the console and the file
-            let msg = format!(
-                "No file found at {}",
-                today_file_path.display()
-            );
-            let file_log = Log::build(LogLevel::INFO, &msg)
-                .time(&iso)
-                .component("process")
-                .format(LogFormat::CLF);
-            writeln!(log_file, "{}", file_log)?;
-        }
+        write_log(&mut log_file, &iso, &msg)?;
+        refresh_index(
+            output_dir,
+            &today_file_path,
+            &mut log_file,
+            &iso,
+        )?;
     }
-    println!("- info:wiserone: add file at `{}`", path.display());
+    Ok(())
+}
+
+/// Copies today's page to `index.html` when it exists, logging either way.
+fn refresh_index(
+    output_dir: &Path,
+    today_file_path: &Path,
+    log_file: &mut File,
+    iso: &str,
+) -> Result<(), Box<dyn Error>> {
+    let msg = if today_file_path.exists() {
+        let content = fs::read_to_string(today_file_path)?;
+        fs::write(output_dir.join("index.html"), content.as_bytes())?;
+        format!(
+            "index.html updated with content from {}",
+            today_file_path.display()
+        )
+    } else {
+        format!("No file found at {}", today_file_path.display())
+    };
+    write_log(log_file, iso, &msg)
+}
+
+/// Writes one CLF-formatted INFO entry to `log_file`.
+fn write_log(
+    log_file: &mut File,
+    iso: &str,
+    msg: &str,
+) -> Result<(), Box<dyn Error>> {
+    let entry = Log::build(LogLevel::INFO, msg)
+        .time(iso)
+        .component("process")
+        .format(LogFormat::CLF);
+    writeln!(log_file, "{}", entry)?;
     Ok(())
 }

@@ -10,19 +10,25 @@ on:
   release:
     types: [created]
 
+# Read-only by default; a job that writes declares exactly what it needs.
+permissions:
+  contents: read
+
 jobs:
   all:
     name: Document
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # push rustdoc to the gh-pages branch
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
-      - uses: hecrj/setup-rust-action@v2
+      - uses: dtolnay/rust-toolchain@02cb101ec7c40f2c49e1d9714d64511d8e1b74de # master
         with:
-          rust-version: nightly
+          toolchain: nightly
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate documentation for all features and publish it
         run: |
@@ -32,15 +38,12 @@ jobs:
             echo '<html><head><meta http-equiv="refresh" content="0; url=/wiserone/"></head><body></body></html>' > ./target/doc/index.html
 
       - name: Deploy
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: documentation
           path: target/doc
           if-no-files-found: error
           retention-days: 1
-
-      - name: Write CNAME file
-        run: echo 'docs.wiserone.com' > ./target/doc/CNAME
 
       # Publishes on every push to main. This guard was added when
       # wiserone.com was this repository's Pages domain and a stray
@@ -49,13 +52,14 @@ jobs:
       # sebastienrousseau/wiserone.github.io, so publishing rustdoc here
       # on push is exactly what is wanted.
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/doc
           publish_branch: gh-pages
-          cname: true
-          clean: true
+          # Writes the CNAME file; keep_files defaults to false, so every
+          # deploy replaces the branch contents.
+          cname: docs.wiserone.com
           commit_message: Deploy documentation at ${{ github.sha }}
-          commit_user_name: github-actions
-          commit_user_email: actions@users.noreply.github.com
+          user_name: github-actions
+          user_email: actions@users.noreply.github.com

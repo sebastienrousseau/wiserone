@@ -11,7 +11,7 @@
 #   - the tag targets the intended commit (--expect <sha>);
 #   - Cargo.toml and the Cargo.lock root package at that commit carry
 #     <VERSION>, and any README install snippet names it;
-#   - doc/releases/v<VERSION>.md holds Highlights in the release format;
+#   - docs/releases/v<VERSION>.md holds Highlights in the release format;
 #   - for an unpublished version, the crates.io dry-run archive contains
 #     the manifest, README and licences, and builds.
 #
@@ -128,11 +128,11 @@ main() {
   commit=$(check_tag "$tag" "$expect" "$mode")
   check_versions "$commit" "${tag#v}"
   python3 "$ROOT/scripts/release_notes.py" --check >/dev/null
-  python3 - "$ROOT" "$tag" <<'PY' || fail "doc/releases/$tag.md is missing or malformed"
+  python3 - "$ROOT" "$tag" <<'PY' || fail "docs/releases/$tag.md is missing or malformed"
 import sys; sys.path.insert(0, sys.argv[1] + "/scripts")
 import release_notes; release_notes.highlights(sys.argv[2])
 PY
-  ok "doc/releases/$tag.md holds the Highlights"
+  ok "docs/releases/$tag.md holds the Highlights"
   check_package "$commit" "${tag#v}"
   echo "[preflight] PASS: $tag"
 }
