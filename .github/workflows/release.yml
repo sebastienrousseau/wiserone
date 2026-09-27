@@ -257,6 +257,9 @@ jobs:
           archive="wiserone-v${VERSION}-${TARGET}.tar.gz"
           tar czf "target/package/${archive}" -C "target/${TARGET}/release" .
           echo "ARCHIVE=${archive}" >> "$GITHUB_ENV"
+        # Windows runners default to PowerShell, which cannot parse the
+        # variable assignment above; every other build step uses bash too.
+        shell: bash
 
       # Upload the binary for each target
       - name: Upload the binary
