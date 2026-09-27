@@ -12,7 +12,7 @@ name = "wiserone"
 readme = "README.md"
 repository = "https://github.com/sebastienrousseau/wiserone"
 rust-version = "1.75.0"
-version = "0.0.6"
+version = "0.0.7"
 include = [
     "/benches/**",
     "/build.rs",
