@@ -25,9 +25,6 @@ jobs:
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install cargo-edit
-        run: cargo install cargo-edit --locked
-
       - name: Configure dependency cache
         uses: Swatinem/rust-cache@v2
         with:
@@ -39,15 +36,16 @@ jobs:
         id: deps-check
         run: |
           echo "::group::Checking for outdated dependencies"
-          cargo update --dry-run 2>&1 | tee deps-report.txt
+          cargo update --dry-run --color never 2>&1 | tee deps-report.txt
 
-          # Check if there are any updates
-          if grep -q "Updating" deps-report.txt; then
-            echo "updates_available=true" >> $GITHUB_OUTPUT
+          # Match package lines only: "Updating crates.io index" also
+          # contains "Updating", which made every night report updates.
+          if grep -qE '^\s+(Updating|Adding|Removing) [A-Za-z0-9_-]+ v' deps-report.txt; then
+            echo "updates_available=true" >> "$GITHUB_OUTPUT"
             echo "📦 Dependency updates available:"
             cat deps-report.txt
           else
-            echo "updates_available=false" >> $GITHUB_OUTPUT
+            echo "updates_available=false" >> "$GITHUB_OUTPUT"
             echo "✅ All dependencies are up to date"
           fi
           echo "::endgroup::"
@@ -71,41 +69,63 @@ jobs:
           echo "✅ Tests pass with updated dependencies"
           echo "::endgroup::"
 
-      # Create issue for dependency updates if any found
-      - name: 📝 Create dependency update issue
-        if: steps.deps-check.outputs.updates_available == 'true'
+      # Keep ONE rolling issue instead of a new one every night: update it
+      # while updates are pending, close it (and any older duplicates)
+      # once the lockfile is current. Dependabot opens the actual PRs.
+      - name: 📝 Sync the dependency update issue
         uses: actions/github-script@v9
+        env:
+          UPDATES_AVAILABLE: ${{ steps.deps-check.outputs.updates_available }}
         with:
           script: |
             const fs = require('fs');
-            const depsReport = fs.readFileSync('deps-report.txt', 'utf8');
+            const { owner, repo } = context.repo;
+            const title = '🔄 Dependency updates available';
+            const pending = process.env.UPDATES_AVAILABLE === 'true';
 
-            const body = `## 🔄 Automated Dependency Update Check
+            const open = (await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', labels: 'automation', per_page: 100,
+            })).filter(i => !i.pull_request && i.title.startsWith('🔄 Dependency Update'))
+              .sort((a, b) => b.number - a.number);
 
-            The nightly dependency check found available updates:
+            const close = async (issue, reason) => {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: reason });
+              await github.rest.issues.update({ owner, repo, issue_number: issue.number, state: 'closed',
+                state_reason: pending ? 'not_planned' : 'completed' });
+            };
 
-            \`\`\`
-            ${depsReport}
-            \`\`\`
+            if (!pending) {
+              for (const issue of open) {
+                await close(issue, `The nightly check on ${new Date().toISOString().split('T')[0]} found the lockfile current. Closing.`);
+              }
+              return;
+            }
 
-            ### Actions Required:
-            - [ ] Review the dependency updates
-            - [ ] Test compatibility with updated dependencies
-            - [ ] Update Cargo.lock with \`cargo update\`
-            - [ ] Run full test suite
-            - [ ] Update documentation if APIs changed
+            const report = fs.readFileSync('deps-report.txt', 'utf8');
+            const body = [
+              '## 🔄 Automated Dependency Update Check',
+              '',
+              'The nightly `cargo update --dry-run` found semver-compatible updates:',
+              '',
+              '```', report.trim(), '```',
+              '',
+              'Dependabot opens pull requests for these; running `cargo update` on',
+              'the release branch applies them all at once. This issue is updated',
+              'each night and closed automatically once the lockfile is current.',
+              '',
+              `**Last checked:** ${new Date().toISOString()} ([run](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}))`,
+            ].join('\n');
 
-            This issue was automatically created by the nightly CI job.
-
-            **Generated on:** ${new Date().toISOString()}`;
-
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `🔄 Dependency Updates Available - ${new Date().toISOString().split('T')[0]}`,
-              body: body,
-              labels: ['dependencies', 'automation', 'maintenance']
-            });
+            const [current, ...duplicates] = open;
+            if (current) {
+              await github.rest.issues.update({ owner, repo, issue_number: current.number, title, body });
+            } else {
+              await github.rest.issues.create({ owner, repo, title, body,
+                labels: ['dependencies', 'automation', 'maintenance'] });
+            }
+            for (const issue of duplicates) {
+              await close(issue, `Superseded by #${current.number}, which the nightly check now keeps up to date.`);
+            }
 
   # Beta/nightly compiler testing
   nightly-compiler:
