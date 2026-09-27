@@ -10,7 +10,7 @@
 #     message line is exactly "wiserone v<VERSION>";
 #   - the tag targets the intended commit (--expect <sha>);
 #   - Cargo.toml and the Cargo.lock root package at that commit carry
-#     <VERSION>, and any README install snippet names it;
+#     <VERSION>, and any README install snippet and CITATION.cff name it;
 #   - docs/releases/v<VERSION>.md holds Highlights in the release format;
 #   - for an unpublished version, the crates.io dry-run archive contains
 #     the manifest, README and licences, and builds.
@@ -79,7 +79,10 @@ check_versions() {
   stale=$(git -C "$ROOT" show "$commit:README.md" \
     | grep -oE "$PROJECT = \"[0-9]+\.[0-9]+\.[0-9]+\"" | grep -v "\"$version\"" || true)
   [ -z "$stale" ] || fail "README at $commit has a stale install snippet: $stale"
-  ok "Cargo.toml, Cargo.lock and README carry $version"
+  local cff
+  cff=$(git -C "$ROOT" show "$commit:CITATION.cff" 2>/dev/null | sed -n 's/^version: //p')
+  [ -z "$cff" ] || [ "$cff" = "$version" ] || fail "CITATION.cff at $commit says $cff, not $version"
+  ok "Cargo.toml, Cargo.lock, README and CITATION.cff carry $version"
 }
 
 published() {
