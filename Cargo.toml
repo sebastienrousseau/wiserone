@@ -5,12 +5,6 @@ categories = ["development-tools", "command-line-utilities", "template-engine"]
 description = "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit."
 documentation = "https://lib.rs/crates/wiserone"
 edition = "2021"
-exclude = [
-    "/.git/*",
-    "/.github/*",
-    "/.gitignore",
-    "/.vscode/*"
-    ]
 homepage = "https://wiserone.com"
 keywords = ['Wisdom', 'Quotes','Inspiration', 'Insights', 'Reflection']
 license = "Apache-2.0 OR MIT"
@@ -104,7 +98,6 @@ future_incompatible = { level = "deny", priority = -1 }
 keyword_idents = { level = "deny", priority = -1 }
 macro_use_extern_crate = "deny"
 meta_variable_misuse = "deny"
-missing_fragment_specifier = "deny"
 noop_method_call = "deny"
 rust_2018_idioms = { level = "deny", priority = -1 }
 rust_2021_compatibility = { level = "deny", priority = -1 }
