@@ -324,10 +324,36 @@ jobs:
           echo "✅ Benchmarks completed"
 
   # Final gate - all jobs must pass
+  # Per-function complexity ceilings (AGENTS.md §0) against the committed
+  # baseline, which may only shrink. See scripts/complexity_check.py.
+  complexity:
+    name: 📐 Complexity ceilings
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RCA_VERSION: "0.0.25"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Cache rust-code-analysis-cli
+        id: rca-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/bin/rust-code-analysis-cli
+          key: rca-${{ runner.os }}-${{ env.RCA_VERSION }}
+
+      - name: Install rust-code-analysis-cli
+        if: steps.rca-cache.outputs.cache-hit != 'true'
+        run: cargo install rust-code-analysis-cli --version "${RCA_VERSION}" --locked
+
+      - name: 📐 Check complexity against the baseline
+        run: python3 scripts/complexity_check.py
+
   ci-gate:
     name: 🎯 CI Gate
     runs-on: ubuntu-latest
-    needs: [preflight, test-matrix, security, docs, benchmarks]
+    needs: [preflight, test-matrix, security, docs, benchmarks, complexity]
     if: always()
     steps:
       - name: Check all jobs
@@ -350,6 +376,10 @@ jobs:
           fi
           if [[ "${{ needs.benchmarks.result }}" != "success" ]]; then
             echo "❌ Benchmarks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.complexity.result }}" != "success" ]]; then
+            echo "❌ Complexity ceilings failed"
             exit 1
           fi
           echo "🎉 All CI checks passed successfully!"

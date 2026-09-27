@@ -1,7 +1,7 @@
 # Wiserone Development Makefile
 # Enforces same quality standards as CI pipeline
 
-.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools assets
+.PHONY: help check fmt fmt-check lint test coverage security docs bench clean all ci-local install-tools assets complexity
 
 # Default target
 all: check fmt-check lint test coverage security docs bench
@@ -191,3 +191,7 @@ stats: ## Show project statistics
 # Generated manpages and shell completions (not committed)
 assets: ## Generate manpages and shell completions into target/assets
 	@cargo run --locked --quiet --example gen_assets -- target/assets
+
+# Per-function complexity ceilings against complexity-baseline.json
+complexity: ## Check per-function complexity ceilings (needs rust-code-analysis-cli)
+	@python3 scripts/complexity_check.py
