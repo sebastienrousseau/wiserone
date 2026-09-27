@@ -34,6 +34,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Resolve version and publication state
         id: resolve
@@ -70,6 +72,25 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "published=${published}" >> "$GITHUB_OUTPUT"
 
+      # A release is cut only from a signed tag. Publishing from a
+      # dispatch on a branch would let gh create an unsigned tag.
+      - name: Refuse to publish without a tag
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        run: |
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            echo "::error::publish=true needs a run on a signed release tag"
+            exit 1
+          fi
+
+      # Blocking preflight (AGENTS.md "Release Preflight Is Blocking"):
+      # signed annotated tag with the right message on this commit,
+      # versions consistent, Highlights written, crate archive complete.
+      - name: Release preflight
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/release_preflight.sh "${GITHUB_REF_NAME}" --expect "${GITHUB_SHA}" --remote
+
   # Build the project for all the targets and generate artifacts.
   build:
     # This job builds the project for all the targets and generates a
@@ -84,6 +105,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       OS: ${{ matrix.os }}
       TARGET: ${{ matrix.target }}
+      VERSION: ${{ needs.guard.outputs.version }}
 
     strategy:
       fail-fast: false
@@ -232,16 +254,17 @@ jobs:
         id: package-binary
         run: |
           mkdir -p target/package
-          tar czf "target/package/${TARGET}.tar.gz" -C "target/${TARGET}/release" .
-          echo "${TARGET}.tar.gz=target/package/${TARGET}.tar.gz" >> "$GITHUB_ENV"
+          archive="wiserone-v${VERSION}-${TARGET}.tar.gz"
+          tar czf "target/package/${archive}" -C "target/${TARGET}/release" .
+          echo "ARCHIVE=${archive}" >> "$GITHUB_ENV"
 
       # Upload the binary for each target
       - name: Upload the binary
         id: upload-binary
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ env.TARGET }}.tar.gz
-          path: target/package/${{ env.TARGET }}.tar.gz
+          name: ${{ env.ARCHIVE }}
+          path: target/package/${{ env.ARCHIVE }}
 
   # A dispatch with publish=false never reaches the crate job, so the
   # trusted-publishing config would otherwise go untested until a real
@@ -283,6 +306,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       # Pull down every artifact the build matrix uploaded. merge-multiple
       # flattens them into one directory instead of one folder per artifact.
@@ -298,17 +323,30 @@ jobs:
           sha256sum ./*.tar.gz > SHA256SUMS
           cat SHA256SUMS
 
+      # Notes follow the portfolio's release format: hand-written
+      # Highlights from doc/releases, GitHub's generated change list, the
+      # checksums above and the compare link. See scripts/release_notes.py.
+      - name: Compose release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.guard.outputs.version }}
+        run: |
+          python3 scripts/release_notes.py --tag "v${VERSION}" \
+            --sums dist/SHA256SUMS --out release-notes.md
+          cat release-notes.md
+
       # gh is preinstalled on the runner, so this replaces the archived
       # actions/create-release@v1 without adding a third-party dependency.
-      - name: Create draft release
+      # --verify-tag refuses to create a tag: the signed one must exist.
+      - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.guard.outputs.version }}
         run: |
           gh release create "v${VERSION}" \
-            --title "The Wiser One 🦀 v${VERSION}" \
-            --generate-notes \
-            --draft \
+            --verify-tag \
+            --title "$(python3 scripts/release_notes.py --tag "v${VERSION}" --title)" \
+            --notes-file release-notes.md \
             dist/*.tar.gz dist/SHA256SUMS
 
   # Publish to crates.io, but only when this version is not already there.
@@ -354,3 +392,26 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish --locked
+
+  # Published-release audit (AGENTS.md "Published Release Audit"): read the
+  # tag, release page, assets and crates.io back from where they were
+  # published instead of trusting the jobs above.
+  audit:
+    name: ❯ Audit 🔎
+    needs: [guard, release, crate]
+    if: |
+      always()
+      && needs.release.result == 'success'
+      && needs.crate.result != 'failure'
+      && needs.crate.result != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v7
+
+      - name: Audit the published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/release_audit.sh "v${{ needs.guard.outputs.version }}" --expect "${GITHUB_SHA}"
