@@ -14,8 +14,8 @@
 ## Versioning
 
 [Semantic Versioning](https://semver.org). The crate is pre-1.0, so
-breaking changes may land in a minor release; they are called out in
-`CHANGELOG.md`.
+breaking changes may land in any 0.0.x release; they are called out in
+that release's Highlights in [`releases/`](releases/).
 
 Adding a field to the public `Quote` struct is a breaking change for
 code that constructs one with a struct literal. The `wiserone!` macro
@@ -26,7 +26,7 @@ macro.
 
 | Crate | MSRV | Why |
 |---|---|---|
-| `wiserone` | **1.75.0** | The lowest toolchain the crate builds and tests on. Raising it is a breaking change and needs a `CHANGELOG.md` entry. |
+| `wiserone` | **1.88.0** | The lowest toolchain the crate builds and tests on, enforced by the `MSRV` CI job. Raising it is a breaking change, named in that release's Highlights in [`releases/`](releases/). |
 
 ## Platform support
 
@@ -35,7 +35,8 @@ macro.
 | Tier 1 | `x86_64-unknown-linux-gnu`, `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc` |
 | Tier 2 | `aarch64-unknown-linux-gnu`, `x86_64-unknown-linux-musl` |
 
-Tier 1 is built and tested on every push. Tier 2 is built.
+Every tier is built for each release. CI tests on every push on Linux
+(`x86_64`) and macOS (`aarch64`); the other targets are built, not tested.
 
 ## Coverage
 
