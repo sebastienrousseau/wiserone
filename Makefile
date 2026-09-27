@@ -52,10 +52,10 @@ test: ## Run test suite
 	@echo "✅ All tests passed"
 
 # Coverage with 100% threshold
-coverage: ## Run tests with coverage (100% threshold)
-	@echo "📊 Running coverage analysis (100% threshold)..."
-	@cargo tarpaulin --workspace --all-features --out Html --output-dir coverage/ --fail-under 100 --verbose --timeout 300
-	@echo "✅ Coverage requirement met (100%)"
+coverage: ## Run tests with coverage (92% floor, as CI and docs/POLICIES.md)
+	@echo "📊 Running coverage analysis (92% floor)..."
+	@cargo tarpaulin --workspace --all-features --follow-exec --exclude-files '*macros.rs' --out Html --output-dir coverage/ --fail-under 92 --verbose --timeout 300
+	@echo "✅ Coverage floor met (92%)"
 	@echo "📄 Coverage report: coverage/tarpaulin-report.html"
 
 # Security scanning
