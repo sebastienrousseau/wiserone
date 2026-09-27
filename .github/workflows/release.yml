@@ -269,6 +269,49 @@ jobs:
           name: ${{ env.ARCHIVE }}
           path: target/package/${{ env.ARCHIVE }}
 
+  # Release extras that do not depend on the target: the manpages and
+  # shell completions generated from the CLI definition (never committed,
+  # so they cannot drift from --help), and a CycloneDX SBOM of the crate's
+  # dependency graph. Runs on dispatch dry-runs too, so it is exercised
+  # before a real release.
+  extras:
+    name: ❯ Manpages, completions and SBOM 📄
+    needs: guard
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.guard.outputs.version }}
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v7
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Generate manpages and completions
+        run: |
+          cargo run --locked --example gen_assets -- "target/assets"
+          tar czf "wiserone-v${VERSION}-man-completions.tar.gz" -C target/assets .
+          tar tzf "wiserone-v${VERSION}-man-completions.tar.gz"
+
+      - name: Generate SBOM
+        run: |
+          cargo install cargo-cyclonedx --locked
+          cargo cyclonedx --format json --spec-version 1.5 --override-filename sbom
+          mv sbom.json "wiserone-v${VERSION}.cdx.json"
+          jq -e '.bomFormat == "CycloneDX" and (.components | length) > 0' \
+            "wiserone-v${VERSION}.cdx.json"
+
+      - name: Upload extras
+        uses: actions/upload-artifact@v7
+        with:
+          name: extras
+          path: |
+            wiserone-v${{ env.VERSION }}-man-completions.tar.gz
+            wiserone-v${{ env.VERSION }}.cdx.json
+
   # A dispatch with publish=false never reaches the crate job, so the
   # trusted-publishing config would otherwise go untested until a real
   # release. This exercises the OIDC exchange on its own: it proves
@@ -301,11 +344,14 @@ jobs:
   # Publish the GitHub release with every built artifact attached.
   release:
     name: ❯ Release 🚀
-    needs: [guard, build]
+    needs: [guard, build, extras]
     if: github.event_name == 'push' || inputs.publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Build provenance: a signed SLSA attestation for every asset.
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout sources
         uses: actions/checkout@v7
@@ -323,8 +369,16 @@ jobs:
       - name: Generate checksums
         run: |
           cd dist
-          sha256sum ./*.tar.gz > SHA256SUMS
+          sha256sum ./*.tar.gz ./*.cdx.json > SHA256SUMS
           cat SHA256SUMS
+
+      # Verify with: gh attestation verify <asset> -R sebastienrousseau/wiserone
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.cdx.json
 
       # Notes follow the portfolio's release format: hand-written
       # Highlights from docs/releases, GitHub's generated change list, the
@@ -350,7 +404,7 @@ jobs:
             --verify-tag \
             --title "$(python3 scripts/release_notes.py --tag "v${VERSION}" --title)" \
             --notes-file release-notes.md \
-            dist/*.tar.gz dist/SHA256SUMS
+            dist/*.tar.gz dist/*.cdx.json dist/SHA256SUMS
 
   # Publish to crates.io, but only when this version is not already there.
   crate:
