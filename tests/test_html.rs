@@ -158,9 +158,9 @@ fn test_placeholder_replacement() {
     let file_path = temp_dir.path().join("docs/special_chars.html");
     let content = fs::read_to_string(&file_path).unwrap();
 
-    // Verify all placeholders were replaced
-    assert!(content.contains("Special <>&\" chars"));
-    assert!(content.contains("Test & Author"));
+    // Verify all placeholders were replaced, with HTML escaped
+    assert!(content.contains("Special &lt;&gt;&amp;&quot; chars"));
+    assert!(content.contains("Test &amp; Author"));
     assert!(content.contains("https://test.com/img.jpg"));
     assert!(content.contains("2024-12-25"));
 }
@@ -417,4 +417,38 @@ fn test_filename_edge_cases() {
     }
 
     std::env::set_current_dir(&original_dir).unwrap();
+}
+
+/// Corpus text is inserted into HTML attributes and text, so it must be
+/// escaped: a quote containing `"` or `<` must not be able to close an
+/// attribute or open a tag in the generated page.
+#[test]
+fn test_quote_fields_are_html_escaped() {
+    let _lock = DIR_MUTEX.lock().unwrap();
+    let temp_dir = TempDir::new().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_dir.path()).unwrap();
+    create_test_layout(temp_dir.path());
+    fs::create_dir_all("./docs").unwrap();
+
+    let quote = Quote {
+        quote_text: "\"><script>alert(1)</script>".to_string(),
+        author: "Tom & \"Jerry\"".to_string(),
+        image_url: "https://x.test/a.png\" onerror=\"alert(2)"
+            .to_string(),
+        ..create_test_quote()
+    };
+    let result = generate_html_file("escaped.html", &quote);
+    std::env::set_current_dir(&original_dir).unwrap();
+    assert!(result.is_ok());
+
+    let content =
+        fs::read_to_string(temp_dir.path().join("docs/escaped.html"))
+            .unwrap();
+    assert!(!content.contains("<script>"), "raw tag injected");
+    assert!(!content.contains("\" onerror=\""), "attribute escaped");
+    assert!(content
+        .contains("&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;"));
+    assert!(content.contains("Tom &amp; &quot;Jerry&quot;"));
+    assert!(content.contains("a.png&quot; onerror=&quot;alert(2)"));
 }

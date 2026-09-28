@@ -169,22 +169,29 @@ fn render_page(quote: &Quote, template: &str) -> String {
     println!("Prefix: {}", prefix);
 
     // Replace the placeholders with values from the quote. The order is
-    // the one the replacements have always run in.
-    let date = quote.date_added.split('T').next().unwrap_or("");
+    // the one the replacements have always run in. Corpus values are
+    // HTML-escaped: the template puts them in attributes and text, and a
+    // quote containing `"` or `<` must not be able to inject markup.
+    let author = escape_html(&quote.author);
+    let banner = escape_html(&quote.image_url);
+    let pub_date = escape_html(&quote.date_added);
+    let date =
+        escape_html(quote.date_added.split('T').next().unwrap_or(""));
+    let title = escape_html(&quote.quote_text);
     let replacements: [(&str, &str); 15] = [
         ("{{apple_touch_icon_sizes}}", "192x192"),
-        ("{{author}}", &quote.author),
-        ("{{banner}}", &quote.image_url),
+        ("{{author}}", &author),
+        ("{{banner}}", &banner),
         ("{{cdn}}", "https://cloudcdn.pro"),
         ("{{charset}}", "utf-8"),
         ("{{description}}", "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit."),
         ("{{hreflang}}", "en"),
-        ("{{item_pub_date}}", &quote.date_added),
-        ("{{date}}", date),
+        ("{{item_pub_date}}", &pub_date),
+        ("{{date}}", &date),
         ("{{logo}}", "https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg"),
         ("{{measurementID}}", "G-4HKZ6N3QSC"),
         ("{{name}}", "wiserone"),
-        ("{{title}}", &quote.quote_text),
+        ("{{title}}", &title),
         ("{{url}}", "https://wiserone.com"),
         ("{{canonical}}", &prefix),
     ];
@@ -193,6 +200,22 @@ fn render_page(quote: &Quote, template: &str) -> String {
         .fold(template.to_owned(), |page, (key, value)| {
             page.replace(key, value)
         })
+}
+
+/// Escapes the characters that are special in HTML text and in
+/// double-quoted attributes: `&`, `<`, `>` and `"`.
+fn escape_html(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for ch in text.chars() {
+        match ch {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '"' => out.push_str("&quot;"),
+            _ => out.push(ch),
+        }
+    }
+    out
 }
 
 /// Every entry in `output_dir` except `.DS_Store`, sorted alphabetically.
