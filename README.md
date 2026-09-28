@@ -16,6 +16,7 @@
   <a href="https://crates.io/crates/wiserone"><img src="https://img.shields.io/crates/v/wiserone.svg?style=for-the-badge&color=fc8d62&logo=rust" alt="Registry" /></a>
   <a href="https://docs.rs/wiserone"><img src="https://img.shields.io/docsrs/wiserone?style=for-the-badge&labelColor=555555&logo=docs.rs" alt="Docs" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/wiserone"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/wiserone?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" /></a>
+  <a href="https://www.bestpractices.dev/projects/14988"><img src="https://www.bestpractices.dev/projects/14988/badge" alt="OpenSSF Best Practices" /></a>
   <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=for-the-badge" alt="License: Apache-2.0 OR MIT" /></a>
   <a href="https://github.com/sebastienrousseau/wiserone/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/rust-1.88.0%2B-93450a.svg?style=for-the-badge&logo=rust" alt="Minimum toolchain: Rust 1.88.0" /></a>
 </p>
@@ -60,7 +61,7 @@
 
 ```toml
 [dependencies]
-wiserone = "0.0.8"
+wiserone = "0.0.9"
 ```
 
 ### As a command-line tool
@@ -76,7 +77,7 @@ completions for bash, zsh, fish, PowerShell and elvish. Each asset carries
 a signed build-provenance attestation:
 
 ```bash
-gh attestation verify wiserone-v0.0.8-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
+gh attestation verify wiserone-v0.0.9-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
 ```
 
 From source, with manpages and shell completions:
@@ -313,7 +314,7 @@ let quote = wiserone! {
 
 ```bash
 make help            # every target
-cargo test           # 140 tests
+cargo test           # 141 tests
 make lint            # clippy, zero warnings
 make coverage        # tarpaulin, 92% floor
 make complexity      # per-function complexity ceilings
@@ -340,7 +341,14 @@ reproduces it, and describes the test layout and the release process.
   repository's posture. Releases are cut from signed tags and ship checksums, an SBOM
   and provenance attestations.
 
-Both validation paths are covered by tests.
+- **Output escaping:** every corpus field is HTML-escaped before it is
+  placed in a page, so quote text cannot inject markup.
+
+Both validation paths and the escaping are covered by tests. The threat
+model, trust boundaries and known limitations are in the
+[security assurance case](docs/ASSURANCE.md), and the project's
+[OpenSSF Best Practices](https://www.bestpractices.dev/projects/14988)
+self-assessment is public.
 
 Report vulnerabilities according to [`SECURITY.md`](.github/SECURITY.md).
 
@@ -356,6 +364,8 @@ Report vulnerabilities according to [`SECURITY.md`](.github/SECURITY.md).
 | [`docs/TESTING.md`](docs/TESTING.md) | Suite layout, coverage policy, measurement traps |
 | [`docs/POLICIES.md`](docs/POLICIES.md) | Versioning, MSRV, platforms, coverage, corpus changes |
 | [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) | Measurements and how to reproduce them |
+| [`docs/ASSURANCE.md`](docs/ASSURANCE.md) | Security requirements, threat model, countermeasures |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution requirements, testing policy, code review |
 | [`docs/releases/`](docs/releases/) | Highlights of every release |
 | [`docs/adr/0001-quote-pool-and-rotation.md`](docs/adr/0001-quote-pool-and-rotation.md) | Why quotes are a pool, not a calendar |
 | [`docs/adr/0002-testable-entry-points.md`](docs/adr/0002-testable-entry-points.md) | Why entry points come in pairs |
