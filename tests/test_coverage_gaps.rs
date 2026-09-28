@@ -69,6 +69,57 @@ fn test_run_with_drives_the_whole_application() {
     assert!(log_written, "run_with wrote no log file");
 }
 
+/// The completion entry must be appended as the log's last line.
+///
+/// `run_with` used to open the log before running the CLI and write the
+/// completion entry through that handle afterwards. By then page
+/// generation had truncated and rewritten the file, so the stale handle
+/// wrote at offset 0, over the first entry, leaving a fragment of it
+/// behind on the next line.
+#[test]
+fn test_run_with_appends_its_entry_without_clobbering_the_log() {
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp = TempDir::new().unwrap();
+    let original = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp.path()).unwrap();
+
+    layout(temp.path());
+    let quotes = corpus(temp.path());
+    fs::create_dir_all("./docs").unwrap();
+
+    let result = wiserone::run_with(vec![
+        "wiserone".to_string(),
+        "daily".to_string(),
+        quotes,
+    ]);
+    let log = fs::read_to_string("./docs/logs/wiserone.log")
+        .unwrap_or_default();
+
+    std::env::set_current_dir(&original).unwrap();
+    assert!(result.is_ok(), "run_with failed: {:?}", result.err());
+    let lines: Vec<&str> =
+        log.lines().filter(|l| !l.is_empty()).collect();
+    assert!(lines.len() >= 2, "expected several log entries:\n{log}");
+    for line in &lines {
+        assert!(
+            line.starts_with("SessionID="),
+            "log has a partial entry {line:?}:\n{log}"
+        );
+    }
+    assert!(
+        lines
+            .last()
+            .unwrap()
+            .contains("Quote HTML file generated successfully."),
+        "completion entry is not the last line:\n{log}"
+    );
+    assert_eq!(
+        log.matches("generated successfully").count(),
+        1,
+        "completion entry must appear once:\n{log}"
+    );
+}
+
 #[test]
 fn test_run_with_propagates_a_bad_argument_list() {
     let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());

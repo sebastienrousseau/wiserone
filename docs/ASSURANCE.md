@@ -87,7 +87,7 @@ What a user can rely on:
 
 ## Verification
 
-CodeQL (Rust, Python, Actions), clippy with warnings as errors, 142 tests
+CodeQL (Rust, Python, Actions), clippy with warnings as errors, 143 tests
 with a 92% line-coverage floor, a fuzz target replayed on every change,
 and OpenSSF Scorecard. See [`../DEVELOPMENT.md`](../DEVELOPMENT.md).
 
