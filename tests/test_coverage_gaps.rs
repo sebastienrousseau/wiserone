@@ -1,3 +1,7 @@
+// Copyright notice and licensing information.
+// Copyright © 2024 The Wiser One. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! Tests for paths the suite never reached.
 //!
 //! Coverage sat at 73.75% with whole files at zero: `run`'s body was

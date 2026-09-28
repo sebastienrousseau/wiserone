@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright © 2024 The Wiser One. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 set -euo pipefail
 
 # Checks the corpus this crate ships against the pool wiserone.com
