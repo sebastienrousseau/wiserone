@@ -365,7 +365,8 @@ Report vulnerabilities according to [`SECURITY.md`](.github/SECURITY.md).
 | [`docs/POLICIES.md`](docs/POLICIES.md) | Versioning, MSRV, platforms, coverage, corpus changes |
 | [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) | Measurements and how to reproduce them |
 | [`docs/ASSURANCE.md`](docs/ASSURANCE.md) | Security requirements, threat model, countermeasures |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution requirements, testing policy, code review |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Contribution requirements, DCO, testing policy, code review |
+| [`ROADMAP.md`](ROADMAP.md) | Direction for the next twelve months |
 | [`docs/releases/`](docs/releases/) | Highlights of every release |
 | [`docs/adr/0001-quote-pool-and-rotation.md`](docs/adr/0001-quote-pool-and-rotation.md) | Why quotes are a pool, not a calendar |
 | [`docs/adr/0002-testable-entry-points.md`](docs/adr/0002-testable-entry-points.md) | Why entry points come in pairs |
