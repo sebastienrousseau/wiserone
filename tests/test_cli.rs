@@ -377,3 +377,53 @@ fn test_run_cli_all_does_not_overwrite_same_day_quotes() {
         "three quotes written on one day must produce three pages"
     );
 }
+
+/// `all` must leave the output directory complete: a page per quote,
+/// and a sitemap and log that list every page.
+///
+/// The sitemap and log used to be rebuilt after every page, which made
+/// `all` quadratic in the corpus size. They are now written once at the
+/// end, so this guards that the final refresh still covers everything.
+#[test]
+fn test_run_cli_all_sitemap_and_log_cover_every_page() {
+    const QUOTES: usize = 300;
+    let _lock = DIR_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
+    let temp_dir = TempDir::new().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_dir.path()).unwrap();
+
+    let entries: Vec<String> = (0..QUOTES)
+        .map(|i| {
+            format!(
+                r#"{{"id":{i},"quote_text":"Quote number {i}","author":"A","date_added":"2026-08-23T06:06:06Z","image_url":"https://e.com/a.jpg"}}"#
+            )
+        })
+        .collect();
+    let path = temp_dir.path().join("many.json");
+    fs::write(
+        &path,
+        format!(r#"{{"quotes":[{}]}}"#, entries.join(",")),
+    )
+    .unwrap();
+    create_layout_template(temp_dir.path());
+    fs::create_dir_all("./docs").unwrap();
+
+    let result = wiserone::cli::run_cli_from(vec![
+        "wiserone".to_string(),
+        "all".to_string(),
+        path.to_string_lossy().to_string(),
+    ]);
+    let sitemap =
+        fs::read_to_string("./docs/sitemap.xml").unwrap_or_default();
+    let log = fs::read_to_string("./docs/logs/wiserone.log")
+        .unwrap_or_default();
+    std::env::set_current_dir(&original_dir).unwrap();
+
+    assert!(result.is_ok(), "all failed: {:?}", result.err());
+    for i in [0, QUOTES / 2, QUOTES - 1] {
+        let page = format!("quote-{i:04}.html");
+        assert!(sitemap.contains(&page), "sitemap misses {page}");
+        assert!(log.contains(&page), "log misses {page}");
+    }
+    assert_eq!(sitemap.matches("<loc>").count(), QUOTES);
+}

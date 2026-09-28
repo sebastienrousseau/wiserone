@@ -14,7 +14,9 @@ use rlg::log_format::LogFormat;
 use rlg::log_level::LogLevel;
 
 use crate::ascii::generate_ascii_art;
-use crate::html::generate_html_file;
+use crate::html::{
+    generate_html_file, refresh_output_index, write_html_files,
+};
 use crate::quotes::{current_day_number, read_quotes_from_file};
 use crate::sitemap::generate_sitemap_file;
 
@@ -174,10 +176,14 @@ fn generate_all(filename: &str) -> Result<(), Box<dyn Error>> {
     // Read and parse all quotes
     let quotes = read_quotes_from_file(filename)?;
 
-    // Generate an HTML file for each quote
-    for quote in quotes.select_all_quotes()? {
-        generate_page(&all_quotes_filename(quote), quote)?;
-    }
+    // Write every page, then the sitemap, then refresh the log and
+    // index once: the order a per-page refresh ends in, so the output is
+    // the same. Refreshing after each page, as `generate_page` does, made
+    // this quadratic in the corpus size.
+    let all = quotes.select_all_quotes()?;
+    write_html_files(all.iter().map(|q| (all_quotes_filename(q), *q)))?;
+    generate_sitemap_file("https://wiserone.com/")?;
+    refresh_output_index()?;
     println!("- info:wiserone: end generating all quotes\n\n");
     Ok(())
 }
