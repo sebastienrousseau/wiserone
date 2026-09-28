@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["generate_html_file","generate_html_file_in"]};
+window.SIDEBAR_ITEMS = {"fn":["generate_html_file","generate_html_file_in","refresh_output_index","write_html_files"]};
