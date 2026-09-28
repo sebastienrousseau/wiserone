@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2024-2026 Sebastien Rousseau
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Auto-merge Dependabot's patch and minor updates once CI passes.
+#
+# wiserone is a free project kept on minimal maintenance, so routine
+# dependency updates should not wait on a person. This only *enables*
+# auto-merge: GitHub merges the PR when every required check passes
+# (the CI Gate on main), and never if one fails. Major updates are left
+# for a human to review.
+name: 🤖 Dependabot auto-merge
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  auto-merge:
+    name: Enable auto-merge for patch and minor updates
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Read the update metadata
+        id: meta
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+      - name: Enable auto-merge
+        if: steps.meta.outputs.update-type != 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.html_url }}
+          UPDATE: ${{ steps.meta.outputs.update-type }}
+        run: |
+          echo "Update type: ${UPDATE}; merging once the CI Gate passes."
+          gh pr merge --auto --squash "$PR"
+
+      - name: Leave major updates for review
+        if: steps.meta.outputs.update-type == 'version-update:semver-major'
+        env:
+          DEPS: ${{ steps.meta.outputs.dependency-names }}
+        run: echo "::notice::Major update (${DEPS}) needs a human review; not auto-merging."
