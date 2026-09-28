@@ -17,7 +17,7 @@
 
 // Import necessary dependencies
 use std::error::Error;
-use std::fs::{self, File};
+use std::fs;
 use std::io::Write;
 use std::path::Path;
 
@@ -99,23 +99,25 @@ where
     let date = DateTime::new();
     let iso = date.format_rfc3339()?;
 
-    // Ensure log directory exists and open log file
-    let log_dir = Path::new(OUTPUT_DIR).join("logs");
-    fs::create_dir_all(&log_dir)?;
-    let log_path = log_dir.join("wiserone.log");
-    let mut log_file = File::create(&log_path)?;
-
-    // Call into the CLI with the supplied arguments
+    // Call into the CLI with the supplied arguments. It rewrites the log
+    // as it generates pages, so the log is opened only afterwards: a
+    // handle opened before would be stale by now, and writing through it
+    // would overwrite the first entry instead of adding a new one.
     cli::run_cli_from(args)?;
 
-    // Generate a log entry
+    // Append the completion entry to the log the CLI left behind
+    let log_dir = Path::new(OUTPUT_DIR).join("logs");
+    fs::create_dir_all(&log_dir)?;
+    let mut log_file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_dir.join("wiserone.log"))?;
+
     let msg = "Quote HTML file generated successfully.";
     let quote_log = Log::build(LogLevel::INFO, msg)
         .time(&iso)
         .component("process")
         .format(LogFormat::CLF);
-
-    // Write the log to both the console and the file
     writeln!(log_file, "{}", quote_log)?;
 
     Ok(())
