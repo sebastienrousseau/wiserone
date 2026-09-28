@@ -92,6 +92,23 @@ standards it enforces, and how to run each one locally, are in
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat:`, `fix:`, `docs:`, ...), one logical change per commit.
 
+### Developer Certificate of Origin
+
+Every commit must be signed off under the
+[Developer Certificate of Origin 1.1](https://developercertificate.org/):
+by adding a `Signed-off-by:` line you certify that you wrote the change,
+or otherwise have the right to submit it under the project's licences
+(Apache-2.0 OR MIT). Sign off with `git commit -s`, using your real name
+and an email address you control:
+
+```text
+Signed-off-by: Jane Doe <jane@example.com>
+```
+
+A sign-off is a personal certification: nobody may add one on another
+person's behalf. Pull requests with unsigned commits are asked to amend
+them (`git commit --amend -s`, or `git rebase --signoff`) before merging.
+
 ### Testing Policy
 
 Tests are mandatory, not optional:

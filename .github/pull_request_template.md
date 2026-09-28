@@ -13,3 +13,5 @@
 - [ ] Changes to selected quotes, page file names or URLs are called out
       as breaking
 - [ ] Commits follow Conventional Commits
+- [ ] Every commit is signed off under the
+      [DCO](../CONTRIBUTING.md#developer-certificate-of-origin) (`git commit -s`)
