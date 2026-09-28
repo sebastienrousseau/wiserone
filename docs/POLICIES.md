@@ -67,6 +67,10 @@ the website at
   rotation index; shifting it changes which quote every future day
   shows, in this crate and in the app, silently.
 - `scripts/verify-corpus.sh` runs in CI and fails on divergence.
+- The weekly corpus-sync workflow mirrors the site's pool with
+  `scripts/sync_corpus.py` and opens a pull request that merges
+  automatically once the CI Gate passes. Mirror by hand with
+  `python3 scripts/sync_corpus.py`.
 
 ## Security
 

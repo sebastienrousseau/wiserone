@@ -102,6 +102,20 @@ manpages and bash, zsh and fish completions under `PREFIX` (default
 `/usr/local`), staged under `DESTDIR` when set; `make uninstall` removes
 them.
 
+## Automation
+
+wiserone is in maintenance mode ([ROADMAP.md](ROADMAP.md)); routine upkeep
+runs without a person:
+
+| Workflow | When | What it does |
+| :--- | :--- | :--- |
+| `dependabot-automerge.yml` | Each Dependabot PR | Enables auto-merge for patch and minor updates; GitHub merges once the CI Gate passes. Majors wait for review. |
+| `corpus-sync.yml` | Weekly, Monday 05:00 UTC | Runs `scripts/sync_corpus.py`; if the site's pool changed, `scripts/corpus_sync_pr.sh` commits it (GitHub-signed), opens a PR, enables auto-merge and dispatches CI. |
+| `nightly.yml` | Daily | Dependency check with one rolling issue, extended tests, external links. |
+
+Auto-merge never bypasses branch protection: a PR merges only when the
+required CI Gate passes, and one that fails waits for a person.
+
 ## Releases
 
 Work for the next version happens on `feat/v<next>`, with the version in
