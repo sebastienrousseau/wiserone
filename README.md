@@ -61,7 +61,7 @@
 
 ```toml
 [dependencies]
-wiserone = "0.0.9"
+wiserone = "0.0.10"
 ```
 
 ### As a command-line tool
@@ -77,7 +77,7 @@ completions for bash, zsh, fish, PowerShell and elvish. Each asset carries
 a signed build-provenance attestation:
 
 ```bash
-gh attestation verify wiserone-v0.0.9-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
+gh attestation verify wiserone-v0.0.10-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
 ```
 
 From source, with manpages and shell completions:
@@ -162,12 +162,14 @@ measure a different job.
 
 On an Apple A18 Pro with rustc 1.98.0 and the 136-quote corpus,
 `wiserone daily` takes **127 ms ± 26 ms** end to end (50 runs), and
-`wiserone all` writes all 136 pages in **1.2 s to 1.9 s**.
+`wiserone all` writes all 136 pages in **0.10 s to 0.14 s**, and
+1,000 pages in about 1.5 s.
 
 | Scenario | Result | Environment |
 | :--- | ---: | :--- |
 | `daily`, end to end | 127.3 ms ± 25.7 ms | A18 Pro, release build, hyperfine |
-| `all`, 136 pages | 1.2–1.9 s | A18 Pro, release build, 3 runs |
+| `all`, 136 pages | 0.10–0.14 s | A18 Pro, release build, 5 runs |
+| `all`, 1,000 pages | 1.47 s | A18 Pro, release build, 1 run |
 | Parse 1,000 quotes, JSON | 1.03 ms | A18 Pro, criterion median |
 | Render one page from the template | 30.6 µs | A18 Pro, criterion median |
 
@@ -300,9 +302,8 @@ let quote = wiserone! {
 
 - **You need your own paths.** The template, output directory and site
   URL are fixed; there are no flags to change them.
-- **You have a large corpus and use `all`.** Its cost grows faster than
-  the number of quotes, because each page re-lists and re-logs everything
-  already written. At 136 quotes it takes under two seconds.
+- **You have a very large corpus.** The whole corpus is read into memory
+  at once; the tool is meant for hundreds or a few thousand quotes.
 - **You want a calendar.** Quotes rotate through a pool by day number;
   a quote cannot be pinned to a date.
 - **You want a general static-site generator.** wiserone renders one
@@ -314,7 +315,7 @@ let quote = wiserone! {
 
 ```bash
 make help            # every target
-cargo test           # 141 tests
+cargo test           # 142 tests
 make lint            # clippy, zero warnings
 make coverage        # tarpaulin, 92% floor
 make complexity      # per-function complexity ceilings

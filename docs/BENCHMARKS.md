@@ -2,7 +2,8 @@
 
 # Benchmarks
 
-Numbers for wiserone 0.0.8, measured on 2026-09-27. They describe one
+Numbers for wiserone 0.0.8, measured on 2026-09-27, with `all`
+remeasured for 0.0.10 on 2026-09-28. They describe one
 machine and are a baseline for spotting regressions, not a promise.
 
 ## Environment
@@ -21,12 +22,22 @@ Wall-clock time of the release binary, run in a scratch directory holding
 | Command | Result | Method |
 | :--- | ---: | :--- |
 | `wiserone daily quotes/quotes.json` | 127.3 ms ± 25.7 ms | `hyperfine -N --warmup 5 --runs 50` |
-| `wiserone all quotes/quotes.json` (136 pages) | 1.2 s to 1.9 s | three runs, empty output directory each time |
+| `wiserone all quotes/quotes.json` (136 pages) | 0.10 s to 0.14 s | five runs, empty output directory each time |
+| `wiserone all`, 500 pages (synthetic) | 0.32 s | one run |
+| `wiserone all`, 1,000 pages (synthetic) | 1.47 s | one run |
 
-`all` grows faster than linearly with the corpus. After every page it
-re-lists the whole output directory, logs every file in it, refreshes
-`index.html` once per file and rewrites `sitemap.xml`, so the work per page
-grows with the number of pages already written.
+`all` scales linearly since 0.0.10. It used to refresh the log, index and
+sitemap after every page, rescanning the whole output directory each
+time, which made it quadratic: the same release builds measured
+
+| Pages | 0.0.9 | 0.0.10 |
+| ---: | ---: | ---: |
+| 136 | 0.84 s | 0.12 s |
+| 500 | 8.85 s | 0.32 s |
+| 1,000 | 36.65 s | 1.47 s |
+
+The generated pages, index, sitemap and logged events are identical
+between the two.
 
 ## Library operations
 

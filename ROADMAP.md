@@ -12,10 +12,8 @@ self-assessment.
 
 ## Correctness and performance
 
-- **Make `all` linear.** Today every page re-lists, re-logs and re-copies
-  everything already written, so the run grows with the square of the
-  corpus. Refresh `index.html`, the log and `sitemap.xml` once per run.
-  This changes the log output, so it will be called out as breaking.
+- ~~**Make `all` linear.**~~ Done in 0.0.10: the log, index and sitemap
+  are refreshed once per run, with identical output.
 - **Bound input size.** Refuse corpora above a documented size instead of
   reading any file fully into memory.
 - **Refuse a symlinked output directory,** so pages cannot be written
