@@ -21,6 +21,11 @@
   <a href="https://github.com/sebastienrousseau/wiserone/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/rust-1.88.0%2B-93450a.svg?style=for-the-badge&logo=rust" alt="Minimum toolchain: Rust 1.88.0" /></a>
 </p>
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sebastienrousseau/wiserone/main/docs/img/wiserone-home-dark.webp" />
+  <img src="https://raw.githubusercontent.com/sebastienrousseau/wiserone/main/docs/img/wiserone-home-light.webp" alt="The wiserone.com homepage: the date, the quote of the day 'The work nobody inspects is where your standards actually live.' attributed to The Wiser One, over a misty forest." />
+</picture>
+
 ---
 
 ## Contents
@@ -61,7 +66,7 @@
 
 ```toml
 [dependencies]
-wiserone = "0.0.10"
+wiserone = "0.0.11"
 ```
 
 ### As a command-line tool
@@ -77,7 +82,7 @@ completions for bash, zsh, fish, PowerShell and elvish. Each asset carries
 a signed build-provenance attestation:
 
 ```bash
-gh attestation verify wiserone-v0.0.10-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
+gh attestation verify wiserone-v0.0.11-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
 ```
 
 From source, with manpages and shell completions:

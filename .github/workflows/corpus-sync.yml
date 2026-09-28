@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2024-2026 Sebastien Rousseau
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Weekly: mirror wiserone.com's quote pool into quotes/.
+#
+# The website's pool is canonical. When it changes, this opens a pull
+# request with the regenerated quotes.json and quotes.csv and enables
+# auto-merge, so the copy stays current without anyone mirroring it by
+# hand. The corpus tests (tests/test_corpus.rs) still gate the merge:
+# a pool that breaks an invariant (contiguous ids, no duplicates, unique
+# slugs) fails CI and waits for a human.
+name: 📚 Corpus sync
+
+on:
+  schedule:
+    - cron: "0 5 * * 1" # weekly, Monday 05:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: corpus-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Mirror the wiserone.com pool
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write # dispatch ci.yml for the sync PR
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Regenerate the corpus from wiserone.com
+        run: python3 scripts/sync_corpus.py
+
+      - name: Open or refresh the sync pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/corpus_sync_pr.sh

@@ -5,6 +5,9 @@ on:
     branches: [main, develop, "feat/v*"]
   pull_request:
     branches: [main, develop, "feat/v*"]
+  # Lets automation run CI on a PR it opened with GITHUB_TOKEN (which does
+  # not trigger pull_request workflows); see scripts/corpus_sync_pr.sh.
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -68,7 +71,7 @@ jobs:
       - name: 📝 Check release notes and scripts
         run: |
           python3 scripts/release_notes.py --check
-          shellcheck scripts/release_*.sh
+          shellcheck scripts/release_*.sh scripts/corpus_sync_pr.sh
 
       # AGENTS.md §7.3: README headings in the template's order, no
       # unresolved {{TOKENS}}.

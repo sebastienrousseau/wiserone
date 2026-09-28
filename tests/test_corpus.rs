@@ -142,13 +142,27 @@ fn test_daily_selection_is_deterministic_and_wraps() {
 
 #[test]
 fn test_daily_selection_matches_the_website() {
-    // 2026-08-23 as date.toordinal(); the site served this line that day.
+    // The site shows the quote at `day_number % pool_length`, ordered by
+    // id, and scripts/verify-corpus.sh keeps this pool identical to the
+    // site's. So agreeing on the rule is agreeing on the quote. The rule
+    // is asserted, not one day's text: when the site grows its pool,
+    // every day's pick moves on both sides, and a pinned quote would
+    // fail although the two still agree.
     let quotes = corpus();
-    let quote = quotes.select_daily_quote(739_851).unwrap();
-    assert_eq!(
-        quote.quote_text,
-        "If nobody's upset about what you cut, you didn't cut enough."
-    );
+    for day in [739_851_i64, 740_000, 740_365] {
+        let expected_id = day.rem_euclid(quotes.quotes.len() as i64);
+        let quote = quotes.select_daily_quote(day).unwrap();
+        assert_eq!(quote.id, Some(expected_id as usize), "day {day}");
+    }
+
+    // 2026-08-23 as date.toordinal(); the site served this line that day,
+    // from the 136-quote pool.
+    if quotes.quotes.len() == 136 {
+        assert_eq!(
+            quotes.select_daily_quote(739_851).unwrap().quote_text,
+            "If nobody's upset about what you cut, you didn't cut enough."
+        );
+    }
 }
 
 #[test]
