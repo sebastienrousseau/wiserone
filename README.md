@@ -66,7 +66,7 @@
 
 ```toml
 [dependencies]
-wiserone = "0.0.11"
+wiserone = "0.0.12"
 ```
 
 ### As a command-line tool
@@ -82,7 +82,7 @@ completions for bash, zsh, fish, PowerShell and elvish. Each asset carries
 a signed build-provenance attestation:
 
 ```bash
-gh attestation verify wiserone-v0.0.11-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
+gh attestation verify wiserone-v0.0.12-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
 ```
 
 From source, with manpages and shell completions:
@@ -320,7 +320,7 @@ let quote = wiserone! {
 
 ```bash
 make help            # every target
-cargo test           # 142 tests
+cargo test           # 143 tests
 make lint            # clippy, zero warnings
 make coverage        # tarpaulin, 92% floor
 make complexity      # per-function complexity ceilings

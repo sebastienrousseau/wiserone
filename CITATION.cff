@@ -5,7 +5,7 @@ abstract: >-
   A command-line tool and Rust library that selects the quote of the day
   from an ordered pool, identically to wiserone.com, and renders it to HTML.
 type: software
-version: 0.0.11
+version: 0.0.12
 date-released: 2026-09-28
 authors:
   - family-names: Rousseau

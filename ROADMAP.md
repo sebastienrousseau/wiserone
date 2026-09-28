@@ -38,6 +38,8 @@ as possible.
 
 ## Done
 
+- The run log is appended to cleanly; its first entry is no longer
+  overwritten (0.0.12).
 - `wiserone all` scales linearly (0.0.10).
 - HTML-escaped page output, security assurance case, and the OpenSSF Best
   Practices passing badge (0.0.9).
