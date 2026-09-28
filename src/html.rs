@@ -133,6 +133,56 @@ pub fn generate_html_file_in(
     quote: &Quote,
     output_dir: &Path,
 ) -> Result<(), Box<dyn Error>> {
+    let path = write_page_in(filename, quote, output_dir)?;
+    log_and_refresh_index(output_dir)?;
+    println!("- info:wiserone: add file at `{}`", path.display());
+    Ok(())
+}
+
+/// Writes a page for each `(filename, quote)` pair into `./docs`,
+/// without refreshing the log or `index.html`.
+///
+/// Use it to generate many pages, then call [`refresh_output_index`] once.
+/// [`generate_html_file`] refreshes after every page, which rescans the
+/// whole directory each time; batching makes the work linear in the
+/// number of pages for the same final result, because every refresh
+/// rewrites the log and index from the whole directory.
+///
+/// # Errors
+///
+/// Returns an error if any filename fails validation, the template is
+/// missing, or a file cannot be written. Pages written before the error
+/// are kept.
+pub fn write_html_files<'a, I>(pages: I) -> Result<(), Box<dyn Error>>
+where
+    I: IntoIterator<Item = (String, &'a Quote)>,
+{
+    let output_dir = Path::new(OUTPUT_DIR);
+    for (filename, quote) in pages {
+        let path = write_page_in(&filename, quote, output_dir)?;
+        println!("- info:wiserone: add file at `{}`", path.display());
+    }
+    Ok(())
+}
+
+/// Logs every file in `./docs` and copies today's page, if any, to
+/// `index.html`: the refresh [`generate_html_file`] runs after each page.
+///
+/// # Errors
+///
+/// Returns an error if the directory or the log cannot be written.
+pub fn refresh_output_index() -> Result<(), Box<dyn Error>> {
+    log_and_refresh_index(Path::new(OUTPUT_DIR))
+}
+
+/// Validates `filename`, renders `quote` and writes the page into
+/// `output_dir`, returning the path written. Does not touch the log or
+/// `index.html`.
+fn write_page_in(
+    filename: &str,
+    quote: &Quote,
+    output_dir: &Path,
+) -> Result<std::path::PathBuf, Box<dyn Error>> {
     // Validate filename to prevent path traversal
     validate_filename(filename)?;
 
@@ -146,10 +196,7 @@ pub fn generate_html_file_in(
     let path = output_dir.join(filename);
     let mut file = File::create(&path)?;
     file.write_all(layout.as_bytes())?;
-
-    log_and_refresh_index(output_dir)?;
-    println!("- info:wiserone: add file at `{}`", path.display());
-    Ok(())
+    Ok(path)
 }
 
 /// Fills the page template's placeholders from `quote`.
