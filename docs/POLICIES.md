@@ -17,6 +17,9 @@
 breaking changes may land in any 0.0.x release; they are called out in
 that release's Highlights in [`releases/`](releases/).
 
+Versions advance strictly by 0.0.1 (0.0.8, 0.0.9, 0.0.10, ...), and 0.1.0
+follows 0.0.999. Each release is cut from a signed tag `v<VERSION>`.
+
 Adding a field to the public `Quote` struct is a breaking change for
 code that constructs one with a struct literal. The `wiserone!` macro
 defaults new fields, so macro call sites are unaffected — prefer the
