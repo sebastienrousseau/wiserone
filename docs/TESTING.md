@@ -17,7 +17,7 @@ that made earlier coverage numbers misleading.
 ## Running the suite
 
 ```shell
-cargo test                     # 140 tests
+cargo test                     # 141 tests
 cargo fmt --check              # formatting gate
 cargo clippy --all-targets --all-features   # lint gate, -D warnings in CI
 cargo tarpaulin --follow-exec --fail-under 92   # coverage gate

@@ -4,7 +4,19 @@ We take the security of our software products and services seriously, which incl
 
 ## Contact Information
 
-To report a security vulnerability, please use the following email address: <contact@wiserone.com>.
+To report a security vulnerability privately, use either channel:
+
+- GitHub private vulnerability reporting:
+  <https://github.com/sebastienrousseau/wiserone/security/advisories/new>
+- Email: <contact@wiserone.com>
+
+Do not open a public issue for a vulnerability.
+
+## Supported Versions
+
+Security fixes are made in the latest release only. wiserone is pre-1.0
+and versions advance by 0.0.1, so upgrading to the newest release is the
+supported way to receive a fix.
 
 We accept reports in the following languages:English or French.
 
@@ -29,9 +41,23 @@ We aim to acknowledge receipt of your vulnerability report within 48 hours and w
 
 Once we've resolved a reported security issue, we may disclose it publicly. We will coordinate the disclosure with the person who reported the issue to ensure that they are credited for their discovery.
 
+## Response Process
+
+1. **Acknowledge** the report within 48 hours.
+2. **Triage** within 14 days: confirm the issue, assess severity, and
+   agree on a disclosure timeline with the reporter.
+3. **Fix** on a private branch or GitHub security advisory, with a
+   regression test, and run the full CI gate.
+4. **Release** a patched version, and publish a GitHub security advisory
+   (with a CVE where applicable) that names the fixed version.
+5. **Disclose** in the release's Highlights, coordinated with the
+   reporter.
+
 ## Acknowledgments
 
-We will publicly thank security researchers who follow this responsible disclosure policy, recognizing their contributions in our 'Hall of Fame' or 'Thank You' page.
+Unless they prefer to stay anonymous, reporters are credited by name in
+the GitHub security advisory and in the Highlights of the release that
+fixes the issue.
 
 ## Safe Harbour
 

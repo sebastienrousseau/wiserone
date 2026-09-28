@@ -1,3 +1,7 @@
+// Copyright notice and licensing information.
+// Copyright © 2024 The Wiser One. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 //! Guards the corpus this crate ships.
 //!
 //! Every other test in this suite builds its own fixture, so nothing
