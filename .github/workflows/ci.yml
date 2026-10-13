@@ -401,17 +401,17 @@ jobs:
   # The stated minimum toolchain is only true while CI proves it: build
   # and test on exactly that version, with the committed lockfile.
   msrv:
-    name: 🦀 MSRV (1.88.0)
+    name: 🦀 MSRV (1.89.0)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install Rust 1.88.0
+      - name: Install Rust 1.89.0
         uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master
         with:
-          toolchain: 1.88.0
+          toolchain: 1.89.0
 
       - name: Configure dependency cache
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2

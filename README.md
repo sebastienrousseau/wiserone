@@ -18,7 +18,7 @@
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/wiserone"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/wiserone?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" /></a>
   <a href="https://www.bestpractices.dev/projects/14988"><img src="https://www.bestpractices.dev/projects/14988/badge" alt="OpenSSF Best Practices" /></a>
   <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=for-the-badge" alt="License: Apache-2.0 OR MIT" /></a>
-  <a href="https://github.com/sebastienrousseau/wiserone/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/rust-1.88.0%2B-93450a.svg?style=for-the-badge&logo=rust" alt="Minimum toolchain: Rust 1.88.0" /></a>
+  <a href="https://github.com/sebastienrousseau/wiserone/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/rust-1.89.0%2B-93450a.svg?style=for-the-badge&logo=rust" alt="Minimum toolchain: Rust 1.89.0" /></a>
 </p>
 
 <picture>
@@ -95,7 +95,7 @@ make install                  # PREFIX=/usr/local; honours DESTDIR
 
 ## Requirements
 
-- **Rust 1.88.0** or later (the MSRV, built and tested in CI; see
+- **Rust 1.89.0** or later (the MSRV, built and tested in CI; see
   [`docs/POLICIES.md`](docs/POLICIES.md)).
 - Generating pages needs the template `_layouts/quote.html` and a corpus
   file, both in this repository, relative to the working directory.
@@ -389,7 +389,7 @@ Report vulnerabilities according to [`SECURITY.md`](.github/SECURITY.md).
   which quote `daily` selects on a given day, page file names, and the
   canonical URL scheme. A change to any of them is treated as breaking
   even when no API signature moves, and is called out the same way.
-- **Minimum toolchain.** The MSRV is 1.88.0, built and tested in CI.
+- **Minimum toolchain.** The MSRV is 1.89.0, built and tested in CI.
   Raising it is a breaking change, recorded in the release Highlights and
   in [`docs/POLICIES.md`](docs/POLICIES.md).
 

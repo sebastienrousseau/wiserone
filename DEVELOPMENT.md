@@ -10,7 +10,7 @@ a release is cut.
 
 | Tool | Version | Used for |
 | :--- | :--- | :--- |
-| Rust | 1.88.0 minimum (MSRV), stable for development | building and testing |
+| Rust | 1.89.0 minimum (MSRV), stable for development | building and testing |
 | `rustfmt`, `clippy` | with the toolchain | formatting and lints |
 | `cargo-tarpaulin` | latest | coverage |
 | `cargo-audit`, `cargo-deny` | latest | advisories, licences, bans |
@@ -33,7 +33,7 @@ Each row is a CI job; the command is what it runs.
 | Formatting | `cargo fmt --all -- --check` |
 | Lints | `cargo clippy --workspace --all-targets --all-features --no-deps -- -D warnings` |
 | Tests | `cargo test --workspace --all-features` |
-| MSRV | `cargo +1.88.0 test --locked` |
+| MSRV | `cargo +1.89.0 test --locked` |
 | Coverage (92% floor) | `make coverage` |
 | Advisories and licences | `cargo audit` and `cargo deny check` |
 | Complexity ceilings | `make complexity` |
