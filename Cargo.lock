@@ -1417,7 +1417,7 @@ dependencies = [
 
 [[package]]
 name = "wiserone"
-version = "0.0.12"
+version = "0.0.14"
 dependencies = [
  "clap",
  "clap_complete",

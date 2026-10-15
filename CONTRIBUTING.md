@@ -86,7 +86,7 @@ standards it enforces, and how to run each one locally, are in
 - **No unsafe code:** the crate is `#![forbid(unsafe_code)]`.
 - **Complexity:** every function stays within cyclomatic 10, cognitive
   15, Halstead difficulty 30 and 60 lines (`make complexity`).
-- **Minimum Rust:** changes must build and pass on Rust 1.88.0.
+- **Minimum Rust:** changes must build and pass on Rust 1.89.0.
 - **Documentation:** public items are documented; Markdown passes
   markdownlint and codespell.
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org/)

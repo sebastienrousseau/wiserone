@@ -11,6 +11,8 @@
 #   - the tag targets the intended commit (--expect <sha>);
 #   - Cargo.toml and the Cargo.lock root package at that commit carry
 #     <VERSION>, and any README install snippet and CITATION.cff name it;
+#   - every statement of the MSRV (CI job, README, CONTRIBUTING,
+#     DEVELOPMENT, docs/POLICIES.md) names `rust-version` from Cargo.toml;
 #   - docs/releases/v<VERSION>.md holds Highlights in the release format;
 #   - for an unpublished version, the crates.io dry-run archive contains
 #     the manifest, README and licences, and builds.
@@ -21,6 +23,7 @@
 #
 # Usage:
 #   scripts/release_preflight.sh <tag> [--expect <sha>] [--remote]
+#   scripts/release_preflight.sh --msrv [<rev>]   # only the MSRV check
 set -euo pipefail
 shopt -s inherit_errexit
 
@@ -85,6 +88,35 @@ check_versions() {
   ok "Cargo.toml, Cargo.lock, README and CITATION.cff carry $version"
 }
 
+# Every statement of the MSRV at <commit> must name the floor in
+# Cargo.toml. Each pattern must still match, so a reworded statement
+# fails here instead of dropping out of the check.
+check_msrv() {
+  local commit=$1 msrv file pattern found v
+  msrv=$(git -C "$ROOT" show "$commit:Cargo.toml" | sed -n 's/^rust-version = "\(.*\)"/\1/p' | head -1)
+  [ -n "$msrv" ] || fail "Cargo.toml at $commit has no rust-version"
+  while IFS='|' read -r file pattern; do
+    found=$(git -C "$ROOT" show "$commit:$file" | grep -oE "$pattern" || true)
+    [ -n "$found" ] || fail "$file at $commit has no MSRV statement matching $pattern"
+    while read -r v; do
+      [ "$v" = "$msrv" ] || fail "$file at $commit states MSRV $v, Cargo.toml says $msrv"
+    done < <(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' <<<"$found")
+  done <<'SITES'
+.github/workflows/ci.yml|MSRV \([0-9.]+\)
+.github/workflows/ci.yml|Install Rust [0-9.]+
+.github/workflows/ci.yml|toolchain: [0-9]+\.[0-9.]+
+README.md|rust-[0-9.]+%2B
+README.md|Minimum toolchain: Rust [0-9.]+
+README.md|\*\*Rust [0-9.]+\*\* or later
+README.md|The MSRV is [0-9]+\.[0-9]+\.[0-9]+
+CONTRIBUTING.md|pass on Rust [0-9]+\.[0-9]+\.[0-9]+
+DEVELOPMENT.md|\| Rust \| [0-9.]+ minimum
+DEVELOPMENT.md|cargo \+[0-9.]+ test
+docs/POLICIES.md|\| `wiserone` \| \*\*[0-9.]+\*\*
+SITES
+  ok "every MSRV statement names $msrv"
+}
+
 published() {
   [ "$(curl -sS -o /dev/null -w '%{http_code}' -A "$PROJECT-preflight ($REPO)" \
     "https://crates.io/api/v1/crates/$PROJECT/$1")" = 200 ]
@@ -118,6 +150,10 @@ check_package() {
 
 main() {
   local tag=${1:-} expect="" mode=local
+  if [ "$tag" = --msrv ]; then
+    check_msrv "$(git -C "$ROOT" rev-parse "${2:-HEAD}^{commit}")"
+    return
+  fi
   [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "usage: $0 <vX.Y.Z> [--expect <sha>] [--remote]"
   shift
   while [ $# -gt 0 ]; do
@@ -130,6 +166,7 @@ main() {
   local commit
   commit=$(check_tag "$tag" "$expect" "$mode")
   check_versions "$commit" "${tag#v}"
+  check_msrv "$commit"
   python3 "$ROOT/scripts/release_notes.py" --check >/dev/null
   python3 - "$ROOT" "$tag" <<'PY' || fail "docs/releases/$tag.md is missing or malformed"
 import sys; sys.path.insert(0, sys.argv[1] + "/scripts")

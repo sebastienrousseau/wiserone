@@ -29,7 +29,7 @@ macro.
 
 | Crate | MSRV | Why |
 | --- | --- | --- |
-| `wiserone` | **1.88.0** | The lowest toolchain the crate builds and tests on, enforced by the `MSRV` CI job. Raising it is a breaking change, named in that release's Highlights in [`releases/`](releases/). |
+| `wiserone` | **1.89.0** | One floor shared with the maintainer's other Rust crates, raised from 1.88.0 in 0.0.14; the dependencies alone need 1.88.0. Enforced by the `MSRV` CI job, which builds and tests on exactly that toolchain. Raising it is a breaking change, named in that release's Highlights in [`releases/`](releases/). |
 
 ## Platform support
 
