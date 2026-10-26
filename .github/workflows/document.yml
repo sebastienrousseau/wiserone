@@ -63,3 +63,15 @@ jobs:
           commit_message: Deploy documentation at ${{ github.sha }}
           user_name: github-actions
           user_email: actions@users.noreply.github.com
+
+  # Deploys the gh-pages branch just published, with GitHub Actions
+  # (see pages.yml).
+  pages:
+    name: Deploy Pages
+    needs: all
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
