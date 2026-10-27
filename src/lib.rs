@@ -34,6 +34,9 @@ const OUTPUT_DIR: &str = "./docs";
 /// The `ascii` module contains functions for generating ASCII art.
 pub mod ascii;
 
+/// Renders text with the bundled FIGlet `standard` font.
+mod figlet;
+
 /// The `cli` module contains functions for processing command-line
 /// input.
 pub mod cli;
