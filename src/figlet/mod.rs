@@ -308,23 +308,22 @@ impl Layout<'_> {
     }
 
     fn row_overlap(&self, left: &[char], right: &[char]) -> usize {
-        let left_len =
-            left.iter().rposition(|c| *c != ' ').map_or(0, |i| i + 1);
-        let left_edge = left_len.saturating_sub(1);
-        let ch1 = if left_len == 0 { '\0' } else { left[left_edge] };
-        let right_edge =
-            right.iter().position(|c| *c != ' ').unwrap_or(right.len());
-        let ch2 = right.get(right_edge).copied().unwrap_or('\0');
-        let mut amount = isize_of(right_edge) + isize_of(left.len())
-            - 1
-            - isize_of(left_edge);
-        if ch1 == '\0'
+        let left_len = trimmed_len(left);
+        let right_edge = leading_blanks(right);
+        let Some(last) = left_len.checked_sub(1) else {
+            return right_edge + left.len();
+        };
+        let joins = self.edges_join(left[last], right.get(right_edge));
+        right_edge + left.len() - left_len + usize::from(joins)
+    }
+
+    /// Whether two rows' facing edge characters may share a column.
+    fn edges_join(&self, ch1: char, ch2: Option<&char>) -> bool {
+        ch1 == '\0'
             || ch1 == ' '
-            || (ch2 != '\0' && self.smush(ch1, ch2).is_some())
-        {
-            amount += 1;
-        }
-        usize::try_from(amount.max(0)).unwrap_or(0)
+            || ch2.is_some_and(|&c| {
+                c != '\0' && self.smush(ch1, c).is_some()
+            })
     }
 
     fn join(
@@ -483,6 +482,16 @@ fn big_x(left: char, right: char) -> Option<char> {
         ('>', '<') => Some('X'),
         _ => None,
     }
+}
+
+/// The row's length without trailing blanks.
+fn trimmed_len(row: &[char]) -> usize {
+    row.iter().rposition(|c| *c != ' ').map_or(0, |i| i + 1)
+}
+
+/// The number of blanks before the row's first visible character.
+fn leading_blanks(row: &[char]) -> usize {
+    row.iter().position(|c| *c != ' ').unwrap_or(row.len())
 }
 
 fn isize_of(n: usize) -> isize {
