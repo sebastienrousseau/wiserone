@@ -2,7 +2,7 @@
 // Copyright © 2024 The Wiser One. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use figlet_rs::FIGlet;
+use crate::figlet::FIGlet;
 use std::error::Error;
 use std::fmt;
 
