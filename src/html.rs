@@ -225,19 +225,28 @@ fn render_page(quote: &Quote, template: &str) -> String {
     let date =
         escape_html(quote.date_added.split('T').next().unwrap_or(""));
     let title = escape_html(&quote.quote_text);
-    let replacements: [(&str, &str); 15] = [
+    let pillar =
+        escape_html(quote.pillar.as_deref().unwrap_or("wisdom"));
+    let id = quote.id.map_or_else(|| "0".to_owned(), |n| n.to_string());
+    let replacements: [(&str, &str); 21] = [
         ("{{apple_touch_icon_sizes}}", "192x192"),
         ("{{author}}", &author),
         ("{{banner}}", &banner),
         ("{{cdn}}", "https://cloudcdn.pro"),
         ("{{charset}}", "utf-8"),
+        ("{{copyright}}", "2026"),
         ("{{description}}", "Daily nuggets of wisdom in a clean, minimalist design, inspiring deeper thought and personal growth with every visit."),
         ("{{hreflang}}", "en"),
+        ("{{id}}", &id),
         ("{{item_pub_date}}", &pub_date),
         ("{{date}}", &date),
+        ("{{language}}", "en-GB"),
         ("{{logo}}", "https://cloudcdn.pro/clients/wiserone/v1/logos/wiserone.svg"),
         ("{{measurementID}}", "G-4HKZ6N3QSC"),
         ("{{name}}", "wiserone"),
+        ("{{pillar}}", &pillar),
+        ("{{subtitle}}", "Insights from The Wiser One: Pearls of Wisdom"),
+        ("{{theme-color}}", "22, 22, 26"),
         ("{{title}}", &title),
         ("{{url}}", "https://wiserone.com"),
         ("{{canonical}}", &prefix),

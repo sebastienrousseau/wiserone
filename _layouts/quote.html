@@ -1,474 +1,681 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="{{language}}">
 
 <head>
   <meta charset="{{charset}}" />
   <meta itemprop="datePublished" content="{{item_pub_date}}" id="date">
   <meta itemprop="dateModified" content="{{item_pub_date}}" id="last-modified">
 
-  <title>Insights from The Wiser One: Pearls of Wisdom</title>
+  <title>{{title}} — {{subtitle}}</title>
   <meta content="{{author}}" name="author">
   <meta content="{{description}}" name="description">
-  <meta content="wiserone, wisdom, inspiration, motivation, positivity, resilience, mindfulness, success, happiness, quotes, life-lessons" name="keywords">
-  <meta content="{{url}}" name="permalink">
+  <meta content="wiserone, wisdom, {{pillar}}, inspiration, philosophy, mindfulness, quotes" name="keywords">
+  <meta content="{{canonical}}" name="permalink">
   <meta content="general" name="rating">
   <meta content="no-referrer" name="referrer">
-  <meta content="7 days" name="revisit-after">
   <meta content="index, follow" name="robots">
   <meta content="telephone=no" name="format-detection">
-  <meta content="en-GB" name="language">
-  <meta content="0,102,204" name="theme-color">
-  <meta content="width=device-width,initial-scale=1,shrink-to-fit=no" name="viewport">
-  <meta content="{{logo}}" name="og:image">
-  <meta content="{{title}}" name="og:image:alt">
-  <meta content="161.8" name="og:image:height">
-  <meta content="161.8" name="og:image:width">
-  <meta content="en_GB" name="og:locale">
-  <meta content="{{title}}" name="og:title">
-  <meta content="website" name="og:type">
-  <meta content="{{url}}" name="og:url">
+  <meta content="{{language}}" name="language">
+  <meta content="#fbfaf7" name="theme-color" media="(prefers-color-scheme: light)">
+  <meta content="#0d0d0f" name="theme-color" media="(prefers-color-scheme: dark)">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="{{logo}}" property="og:image">
+  <meta content="{{title}}" property="og:image:alt">
+  <meta content="630" property="og:image:height">
+  <meta content="1200" property="og:image:width">
+  <meta content="en_GB" property="og:locale">
+  <meta content="{{title}}" property="og:title">
+  <meta content="{{description}}" property="og:description">
+  <meta content="article" property="og:type">
+  <meta content="{{canonical}}" property="og:url">
   <meta content="ARIA, fullKeyboardControl, noFlashingHazard" name="accessibility">
-  <meta content="portrait" name="apple_mobile_web_app_orientations">
-  <meta content="192x192" name="apple_touch_icon_sizes">
   <meta content="yes" name="apple-mobile-web-app-capable">
-  <meta content="black" name="apple-mobile-web-app-status-bar-inset">
   <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
   <meta content="{{title}}" name="apple-mobile-web-app-title">
-  <meta content="yes" name="apple-touch-fullscreen">
 
   <!-- # Start Content Security Policy Meta Tags -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' *.google-analytics.com https://cdn.jsdelivr.net unpkg.com www.googletagmanager.com x.clarity.ms https://www.googletagmanager.com https://www.google.com https://www.gstatic.com;
-        frame-src 'self' https://www.google.com;
-        connect-src 'self' www.googletagmanager.com https://region1.google-analytics.com;
+        script-src 'self' 'unsafe-inline' *.google-analytics.com www.googletagmanager.com https://www.googletagmanager.com;
+        connect-src 'self' https://wiserone.com www.googletagmanager.com https://region1.google-analytics.com;
         img-src 'self' data: https: cloudcdn.pro www.googletagmanager.com;
-        style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
-        font-src 'self' https://fonts.gstatic.com;
+        style-src 'self' 'unsafe-inline';
+        font-src 'self';
         media-src 'self';" />
   <!-- # End Content Security Policy Meta Tags -->
 
-  <meta content="rgb(255, 39, 34)" name="msapplication-navbutton-color">
-  <meta content="summary" name="twitter:card">
+  <meta content="summary_large_image" name="twitter:card">
   <meta content="@wwdseb" name="twitter:creator">
   <meta content="{{title}}" name="twitter:title">
   <meta content="{{description}}" name="twitter:description">
-  <meta content="{{url}}" name="twitter:url">
+  <meta content="{{canonical}}" name="twitter:url">
   <meta content="{{logo}}" name="twitter:image">
   <meta content="{{title}}" name="twitter:image:alt">
-  <meta content="161.8" name="twitter:image:height">
-  <meta content="161.8" name="twitter:image:width">
+  <meta content="630" name="twitter:image:height">
+  <meta content="1200" name="twitter:image:width">
 
   <!-- # Start Links -->
+  <link rel="preconnect" href="{{cdn}}" crossorigin />
+  <link rel="dns-prefetch" href="{{cdn}}" />
   <link rel="alternate" href="{{url}}" hreflang="{{hreflang}}" />
-  <link rel="preload" as="image" href="{{banner}}">
+  <link rel="alternate" type="application/rss+xml" title="The Wiser One RSS" href="{{url}}/rss.xml" />
+  <link rel="preload" as="image" href="{{banner}}" fetchpriority="high" />
   <link rel="canonical" href="{{canonical}}" />
-  <link rel="icon" type="image/x-icon" href="{{cdn}}/{{name}}/images/favicon.ico" sizes="16x16 32x32" />
-  <link as="style" crossorigin="anonymous"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
-    onload="this.onload=null;this.rel='stylesheet'" rel="preload" />
-  <link rel="apple-touch-icon" href="{{cdn}}/{{name}}/images/icons/{{apple_touch_icon_sizes}}.png"
-    sizes="{{apple_touch_icon_sizes}}" />
+  <link rel="icon" type="image/x-icon" href="{{cdn}}/clients/{{name}}/v1/favicon.ico" sizes="16x16 32x32" />
+  <link rel="apple-touch-icon" href="{{cdn}}/clients/{{name}}/v1/icons/{{apple_touch_icon_sizes}}.png" sizes="{{apple_touch_icon_sizes}}" />
+  <link rel="manifest" href="/manifest.json" />
   <!-- # End Links -->
+
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("wiserone-theme");
+        if (stored === "dark" || stored === "light") {
+          document.documentElement.setAttribute("data-theme", stored);
+        }
+      } catch (e) { /* storage unavailable */ }
+    })();
+  </script>
 
   <!-- # Start Styles -->
   <style>
-    @keyframes dropDown {
-      from {
-        transform: translateY(-.618rem)
-      }
-
-      to {
-        transform: translateY(0)
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0
-      }
-
-      to {
-        opacity: 1
-      }
-    }
-
-    .blur-light {
-      backdrop-filter: saturate(180%) blur(20px);
-      background-color: rgba(255, 255, 255, .618)
-    }
-
-    .card {
-      overflow: hidden
-    }
-
-    .drop-down {
-      animation: 1.618s dropDown
-    }
-
-    .fade-in {
-      animation: 3s fadeIn
-    }
-
-    * {
-      font-weight: 300
-    }
-
-    pre {
-      background: #f9f9f9;
-      border: 1px solid #ddd;
-      border-left: 3px solid var(--theme-color);
-      color: #666;
-      display: block;
-      font-family: monospace;
-      font-size: 15px;
-      line-height: 1.618;
-      margin-bottom: 1.618em;
-      max-width: 100%;
-      overflow: auto;
-      padding: 1em 1.618em;
-      page-break-inside: avoid;
-      word-wrap: break-word
-    }
-
-    .zoom-in {
-      transition: transform .618s cubic-bezier(.618, 1, .618, 1)
-    }
-
-    .zoom-in:hover {
-      transform: scale(1.0618)
-    }
-
-    .content .container {
-      padding: 30px 20px;
-      box-shadow: 2px 15px 20px #1f1f1f10, -2px -8px 20px #1f1f1f1a
-    }
-
-    .container .rollers {
-      flex: 0 0 230px
-    }
-
-    .container .start-roller {
-      left: 0;
-      top: 0;
-      background-image: linear-gradient(to right, #fff 30%, transparent)
-    }
-
-    .container .end-roller,
-    .container .start-roller {
-      height: 100%;
-      width: 40px;
-      position: absolute;
-      z-index: 1
-    }
-
-    .container .end-roller {
-      right: 0;
-      top: 0;
-      background-image: linear-gradient(to left, #fff 30%, transparent)
-    }
-
-    .container .rollers .wrapper {
-      position: relative;
-      width: 1400px;
-      height: 100px;
-      margin: 0 0 20px;
-      flex: 0 0 auto
-    }
-
-    .container .rollers .wrapper .items-container {
-      display: flex;
-      align-items: center;
-      position: absolute;
-      width: 200%;
-      height: 100%;
-      animation-duration: 16s;
-      animation-iteration-count: infinite;
-      animation-timing-function: linear
-    }
-
-    .container .rollers .wrapper .items-container.roll-LL {
-      animation-name: roll
-    }
-
-    @keyframes roll {
-      from {
-        left: 0
-      }
-
-      to {
-        left: -100%
-      }
-    }
-
-    .container .rollers .wrapper .items-container .item {
-      flex: 1 1 200px;
-      min-width: 0;
-      margin: 20px
-    }
-
-    .container .rollers .wrapper .items-container .item .company {
-      filter: grayscale(100%);
-      opacity: .2;
-      width: 100%;
-      object-fit: contain
-    }
-
-    .container .rollers .wrapper .items-container .item .company:hover {
-      filter: grayscale(0);
-      opacity: 1;
-      cursor: not-allowed
-    }
-
-    .container img {
-      vertical-align: middle
-    }
-
     :root {
-      --theme-color:rgb({
-          {
-          theme-color
-        }
-      })
+      --theme-color: rgb({{theme-color}});
+      --paper: #fbfaf7;
+      --ink: #16161a;
+      --ink-muted: #414141;
+      --rule: rgba(22, 22, 26, 0.14);
+      --pill-bg: rgba(22, 22, 26, 0.05);
+      --focus-ring: #005fcc;
+      --measure: 44rem;
+      --pad: clamp(1.5rem, 5vw, 5rem);
+      --font-serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+      --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #0d0d0f;
+        --ink: #ece9e3;
+        --ink-muted: #bcbcbc;
+        --rule: rgba(236, 233, 227, 0.16);
+        --pill-bg: rgba(236, 233, 227, 0.06);
+        --focus-ring: #66b2ff;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --paper: #0d0d0f;
+      --ink: #ece9e3;
+      --ink-muted: #bcbcbc;
+      --rule: rgba(236, 233, 227, 0.16);
+      --pill-bg: rgba(236, 233, 227, 0.06);
+      --focus-ring: #66b2ff;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      z-index: -2;
+      background-image: var(--page-bg, none);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    body::after {
+      z-index: -1;
+      background: var(--paper);
+      opacity: 0.86;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .quote-stage {
+        animation: stageReveal 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      @keyframes stageReveal {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
     }
 
     a {
-      color: var(--theme-color);
-      text-decoration: none
-    }
-
-    a:hover {
-      text-decoration: underline
-    }
-
-    .active,
-    .article-info,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    strong {
-      font-weight: 400
-    }
-
-    .article-info,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      color: var(--theme-color)
-    }
-
-    .text-theme {
-      color: #000;
-    }
-
-    a.arrow {
+      color: inherit;
       text-decoration: none;
     }
 
-    .arrow {
-      position: fixed;
-      /* Adjust the top value to prevent overlap with the h1 */
-      top: calc(50% - 50px);
-      /* Example: move the arrow up by 50px from the center */
-      transform: translateY(-50%);
-      font-size: 48px;
-      /* This will make the arrows larger */
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0.75rem 1rem;
+      z-index: 100;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .skip-link:focus {
+      left: 0;
+    }
+
+    /* Header & Wayfinding */
+    .site-header {
+      padding-block: clamp(1.5rem, 4vh, 2.5rem);
+      padding-inline: var(--pad);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      min-height: 44px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .brand-logo {
+      width: 24px;
+      height: 24px;
+      display: block;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: clamp(1rem, 2.5vw, 2.25rem);
+      flex-wrap: wrap;
+    }
+
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: clamp(1rem, 2.5vw, 2.25rem);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-link,
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 44px;
+      padding: 0.25rem 0;
+      background: none;
+      border: 0;
       cursor: pointer;
-      color: #000;
-      /* Adjust color as needed */
-      text-decoration: none;
-      z-index: 10;
-      /* Ensure arrows are above other elements */
+      color: var(--ink-muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 150ms ease;
     }
 
-    .arrow-left {
-      left: 10px;
-      margin-top: 54px;
+    .nav-link:hover,
+    .nav-btn:hover {
+      color: var(--ink);
     }
 
-    .arrow-right {
-      right: 10px;
-      margin-top: 54px;
+    .nav-link[aria-current="page"] {
+      color: var(--ink);
+      text-decoration: underline;
+      text-underline-offset: 0.5rem;
+      text-decoration-thickness: 1.5px;
     }
 
-    /* To add some space around the h1 to prevent overlap */
-    h1 {
-      padding-left: 60px;
-      padding-right: 60px;
-      margin: 0 auto;
-      /* Center the h1 */
-      width: 100vw;
-      max-width: 1000px;
-      vertical-align: middle;
+    .kbd-badge {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      padding: 0.1rem 0.35rem;
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      color: var(--ink-muted);
     }
 
-    h1::before {
-      content: "\201C";
-      /* Unicode code for the left single quotation mark */
-      font-size: 48px;
-      /* Adjust the font size as needed */
-      margin-right: 8px;
-      /* Adjust the spacing between the quotation mark and text as needed */
-      font-family: "Times New Roman", Times, serif;
-      vertical-align: middle;
+    .theme-toggle .mode-to-light { display: none; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .theme-toggle .mode-to-dark { display: none; }
+      :root:not([data-theme="light"]) .theme-toggle .mode-to-light { display: inline; }
+    }
+    :root[data-theme="dark"] .theme-toggle .mode-to-dark { display: none; }
+    :root[data-theme="dark"] .theme-toggle .mode-to-light { display: inline; }
+    :root[data-theme="light"] .theme-toggle .mode-to-dark { display: inline; }
+    :root[data-theme="light"] .theme-toggle .mode-to-light { display: none; }
+
+    /* Main Quote Stage */
+    main {
+      padding-inline: var(--pad);
+      padding-block: clamp(2rem, 8vh, 6rem);
+      max-width: calc(var(--measure) + var(--pad) * 2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    h1::after {
-      content: "\201D";
-      /* Unicode code for the left single quotation mark */
-      font-size: 48px;
-      /* Adjust the font size as needed */
-      margin-right: 8px;
-      /* Adjust the spacing between the quotation mark and text as needed */
-      font-family: "Times New Roman", Times, serif;
-      vertical-align: middle;
+    .quote-figure {
+      margin: 0;
+    }
+
+    .quote-eyebrow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 0 0 clamp(1.5rem, 4vh, 2.5rem);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .pillar-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.6rem;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      background: var(--pill-bg);
+      font-size: 0.6875rem;
+      letter-spacing: 0.14em;
+      color: var(--ink);
+    }
+
+    blockquote {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    blockquote h1 {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: clamp(1.75rem, 1.1rem + 2.4vw, 3rem);
+      line-height: 1.28;
+      letter-spacing: -0.014em;
+      color: var(--ink);
+      text-wrap: balance;
+    }
+
+    .quote-attribution {
+      margin: clamp(1.5rem, 3.5vh, 2.25rem) 0 0;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    /* Quiet Action & Wayfinding Bar */
+    .quote-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.625rem;
+      margin-top: clamp(2rem, 4vh, 2.75rem);
+    }
+
+    .action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-height: 44px;
+      padding: 0.5rem 0.95rem;
+      background: var(--pill-bg);
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      color: var(--ink-muted);
+      font-family: inherit;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+    }
+
+    .action-pill:hover {
+      color: var(--ink);
+      border-color: var(--ink-muted);
+    }
+
+    /* Command Palette Modal */
+    .search-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 13, 15, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: clamp(3rem, 10vh, 6rem) 1rem 1rem;
+    }
+
+    .search-backdrop[aria-hidden="false"] {
+      display: flex;
+    }
+
+    .search-dialog {
+      width: 100%;
+      max-width: 36rem;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+    }
+
+    .search-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .search-input {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.9375rem;
+    }
+
+    .search-input::placeholder {
+      color: var(--ink-muted);
+    }
+
+    .search-results {
+      list-style: none;
+      margin: 0;
+      padding: 0.5rem 0;
+      max-height: 20rem;
+      overflow-y: auto;
+    }
+
+    .search-results li a {
+      display: block;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      color: var(--ink);
+      border-left: 2px solid transparent;
+    }
+
+    .search-results li a:hover,
+    .search-results li a:focus {
+      background: var(--pill-bg);
+      border-left-color: var(--ink);
+    }
+
+    .search-meta {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.6875rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Footer */
+    .site-footer {
+      padding-inline: var(--pad);
+      padding-block: clamp(2rem, 5vh, 3.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .site-footer p {
+      margin: 0;
+    }
+
+    .site-footer a {
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 1px;
+    }
+
+    .site-footer a:hover {
+      color: var(--ink);
+      border-bottom-color: currentColor;
+    }
+
+    @media (max-width: 44rem) {
+      .kbd-badge { display: none; }
     }
   </style>
   <!-- # End Styles -->
 </head>
 
-<body id="page-top" itemscope itemtype="http://schema.org/WebPage"
-  class="fw-light text-center bg-white text-start fs-6 fade-in"
-  style="background: url({{banner}}) no-repeat center center fixed; background-size: cover;">
+<body id="page-top" itemscope itemtype="https://schema.org/WebPage" style="--page-bg: url('{{banner}}');">
+  <a class="skip-link" href="#main">Skip to quote</a>
 
-  <!-- Content centred vertically and horizontally -->
-  <div class="position-absolute top-50 start-50 translate-middle text-center py-3">
-    <span id="imageLogo" class="visually-hidden">Image of a Multicoloured Stylized Tree of Life Logo</span>
-    <a href="index.html">
-      <img alt="{{title}}" class="img-fluid" aria-labelledby="imageLogo" height="100vh" loading="lazy" src="{{logo}}"
-        title="Image of a Multicoloured Stylized Tree of Life Logo" width="100vw" />
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="The Wiser One — Home">
+      <img class="brand-logo" src="{{logo}}" alt="" width="24" height="24" decoding="async" />
+      <span>The Wiser One</span>
     </a>
-    <h1 class="position-relative fs-2 text-theme">{{title}}</h1>
-    <p class="position-relative fs-4">{{author}}
-      <br />
-      <span class="position-relative fs-6">{{date}}</span>
-    </p>
 
-    <!-- Left arrow for previous day -->
-    <a id="prevDay" class="arrow arrow-left">&#8592;</a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="nav-menu">
+        <li><a class="nav-link" href="index.html" aria-current="page">Today</a></li>
+        <li><a class="nav-link" href="{{url}}/archive.html">Archive</a></li>
+        <li><a class="nav-link" href="{{url}}/about.html">About</a></li>
+      </ul>
+      <button class="nav-btn" id="searchTrigger" type="button" aria-label="Search quotes (Command K)" aria-expanded="false" aria-controls="searchModal">
+        <span>Search</span>
+        <kbd class="kbd-badge">⌘K</kbd>
+      </button>
+      <button class="nav-btn theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">
+        <span class="mode-to-dark">Dark mode</span>
+        <span class="mode-to-light">Light mode</span>
+      </button>
+    </nav>
+  </header>
 
-    <!-- Right arrow for next day -->
-    <a id="nextDay" class="arrow arrow-right">&#8594;</a>
+  <main id="main" class="quote-stage">
+    <figure class="quote-figure">
+      <div class="quote-eyebrow">
+        <time datetime="{{item_pub_date}}">{{date}}</time>
+        <span aria-hidden="true">&middot;</span>
+        <a class="pillar-badge" href="{{url}}/archive.html#{{pillar}}" title="Browse pillar: {{pillar}}">{{pillar}}</a>
+      </div>
 
+      <blockquote cite="{{canonical}}">
+        <h1 itemprop="headline">{{title}}</h1>
+      </blockquote>
+
+      <figcaption class="quote-attribution">
+        &mdash; <span itemprop="author">{{author}}</span>
+      </figcaption>
+    </figure>
+
+    <nav class="quote-actions" aria-label="Quote actions">
+      <a id="prevDay" class="action-pill" href="index.html" aria-label="Previous quote">&larr; Prev</a>
+      <button id="copyQuoteBtn" class="action-pill" type="button" data-quote="{{title}}" data-author="{{author}}" data-url="{{canonical}}">
+        <span id="copyLabel">Copy quote</span>
+      </button>
+      <a id="randomQuoteBtn" class="action-pill" href="{{url}}/archive.html" aria-label="Explore archive">Explore &rarr;</a>
+      <a id="nextDay" class="action-pill" href="index.html" aria-label="Next quote">Next &rarr;</a>
+    </nav>
+  </main>
+
+  <div class="search-backdrop" id="searchModal" role="dialog" aria-modal="true" aria-label="Search quotes" aria-hidden="true">
+    <div class="search-dialog">
+      <div class="search-header">
+        <input class="search-input" id="searchInput" type="search" placeholder="Search quotes or pillars (e.g. elimination)…" autocomplete="off" />
+        <button class="nav-btn" id="searchClose" type="button" aria-label="Close search"><kbd class="kbd-badge">ESC</kbd></button>
+      </div>
+      <ul class="search-results" id="searchResults" role="listbox" aria-label="Matching quotes">
+        <li>
+          <a href="{{canonical}}">
+            {{title}}
+            <span class="search-meta">{{pillar}} &middot; #{{id}}</span>
+          </a>
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <script async crossorigin="anonymous"
-    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
-  <script
-    type="application/ld+json">{"@context":"http://schema.org/","@type":"BlogPosting","headline":"{{title}}","datePublished":"{{item_pub_date}}","dateModified":"{{item_pub_date}}","description":"{{description}}","image":{"@type":"ImageObject","height":"2048","width":"2048","url":"{{logo}}"},"mainEntityOfPage":{"@type":"WebPage","@id":"{{id}}","name":"{{subtitle}}"},"author":"{{author}}","copyrightHolder":{"@type":"Person","@id":"{{author}}"},"copyrightYear":"{{copyright}}","creator":{"@type":"Person","@id":"{{author}}"},"inLanguage":"{{language}}","name":"{{name}}","publisher":{"@type":"Person","@id":"{{author}}"}}</script>
+  <footer class="site-footer">
+    <p>&copy; {{copyright}} <a href="https://sebastienrousseau.com/" rel="author">Sebastien Rousseau</a> &middot; {{author}} &middot; <a href="https://static-site-generator.com/">SSG</a></p>
+    <p><a href="{{canonical}}">Permalink</a> &middot; <a href="{{url}}/rss.xml">RSS</a></p>
+  </footer>
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"{{title}}","datePublished":"{{item_pub_date}}","dateModified":"{{item_pub_date}}","description":"{{description}}","image":{"@type":"ImageObject","height":2048,"width":2048,"url":"{{logo}}"},"mainEntityOfPage":{"@type":"WebPage","@id":"{{canonical}}","name":"{{subtitle}}"},"identifier":"{{id}}","keywords":"{{pillar}}","author":{"@type":"Person","name":"{{author}}"},"copyrightHolder":{"@type":"Person","name":"Sebastien Rousseau","url":"https://sebastienrousseau.com/"},"copyrightYear":"{{copyright}}","creator":{"@type":"Person","name":"{{author}}"},"inLanguage":"{{language}}","name":"{{name}}","publisher":{"@type":"Person","name":"Sebastien Rousseau","url":"https://sebastienrousseau.com/"}}</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id={{measurementID}}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', '{{measurementID}}');
   </script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      let currentDate, startDate, endDate;
+      var currentId = parseInt("{{id}}", 10);
+      var poolSize = 136;
+      var prevLink = document.getElementById("prevDay");
+      var nextLink = document.getElementById("nextDay");
 
-      /**
-       * Parses a date from a given filename.
-       * @param {string} fileName - The filename to parse the date from.
-       * @returns {Date|null} A Date object if parsing is successful, null otherwise.
-       */
-      function parseDateFromFileName(fileName) {
-        const dateParts = fileName.split('_');
-        let year, month, day;
+      if (!isNaN(currentId) && prevLink && nextLink) {
+        var prevId = (currentId - 1 + poolSize) % poolSize;
+        var nextId = (currentId + 1) % poolSize;
+        var pad = function (n) { return ("0000" + n).slice(-4); };
+        prevLink.href = "quote-" + pad(prevId) + ".html";
+        nextLink.href = "quote-" + pad(nextId) + ".html";
+      }
 
-        if (dateParts.length !== 3) {
-          const today = new Date();
-          year = today.getFullYear();
-          month = today.getMonth();
-          day = today.getDate();
-        } else {
-          year = parseInt(dateParts[0], 10);
-          month = parseInt(dateParts[1], 10) - 1;
-          day = parseInt(dateParts[2], 10);
+      var toggle = document.getElementById("themeToggle");
+      function toggleTheme() {
+        var root = document.documentElement;
+        var current = root.getAttribute("data-theme");
+        if (!current) {
+          current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         }
+        var next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("wiserone-theme", next); } catch (e) { /* ignore */ }
+      }
+      if (toggle) toggle.addEventListener("click", toggleTheme);
 
-        return isNaN(year) || isNaN(month) || isNaN(day) ? null : new Date(year, month, day);
+      var copyBtn = document.getElementById("copyQuoteBtn");
+      var copyLabel = document.getElementById("copyLabel");
+      function copyCurrentQuote() {
+        if (!copyBtn || !navigator.clipboard) return;
+        var text = "\u201C" + copyBtn.getAttribute("data-quote") + "\u201D \u2014 " +
+          copyBtn.getAttribute("data-author") + " (" + copyBtn.getAttribute("data-url") + ")";
+        navigator.clipboard.writeText(text).then(function () {
+          if (copyLabel) {
+            copyLabel.textContent = "Copied \u2713";
+            setTimeout(function () { copyLabel.textContent = "Copy quote"; }, 1800);
+          }
+        });
+      }
+      if (copyBtn) copyBtn.addEventListener("click", copyCurrentQuote);
+
+      var modal = document.getElementById("searchModal");
+      var trigger = document.getElementById("searchTrigger");
+      var closeBtn = document.getElementById("searchClose");
+      var input = document.getElementById("searchInput");
+
+      function openSearch() {
+        if (!modal) return;
+        modal.setAttribute("aria-hidden", "false");
+        if (trigger) trigger.setAttribute("aria-expanded", "true");
+        if (input) input.focus();
       }
 
-      /**
-       * Adjusts a given date by a specified number of days.
-       * @param {Date} date - The original date.
-       * @param {number} days - The number of days to adjust the date by.
-       * @returns {Date} A new date adjusted by the specified number of days.
-       */
-      function adjustDate(date, days) {
-        const newDate = new Date(date);
-        newDate.setDate(newDate.getDate() + days);
-        return newDate;
+      function closeSearch() {
+        if (!modal) return;
+        modal.setAttribute("aria-hidden", "true");
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
+        if (trigger) trigger.focus();
       }
 
-      /**
-       * Formats a Date object into a string with the format "YYYY_MM_DD.html".
-       * @param {Date} date - The date to format.
-       * @returns {string} The formatted date string.
-       */
-      function getFormattedDate(date) {
-        const y = date.getFullYear();
-        const m = ('0' + (date.getMonth() + 1)).slice(-2);
-        const d = ('0' + date.getDate()).slice(-2);
-        return `${y}_${m}_${d}.html`;
+      if (trigger) trigger.addEventListener("click", openSearch);
+      if (closeBtn) closeBtn.addEventListener("click", closeSearch);
+      if (modal) {
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) closeSearch();
+        });
       }
 
-      /**
-       * Updates the navigation arrow links based on the current date.
-       * This function parses the current date from the file name, calculates the
-       * previous and next dates, and updates the links and visibility of the
-       * navigation arrows accordingly.
-       */
-      function updateArrowLinks() {
-        const filePath = window.location.href;
-        const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-        currentDate = parseDateFromFileName(fileName);
-
-        if (!currentDate) return; // Exit if date parsing failed
-
-        startDate = new Date(2024, 0, 1);
-        endDate = new Date(2024, 0, 31);
-
-        const prevDayArrow = document.getElementById('prevDay');
-        const nextDayArrow = document.getElementById('nextDay');
-
-        if (!prevDayArrow || !nextDayArrow) {
-          console.error('Navigation arrows not found in the DOM.');
+      document.addEventListener("keydown", function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+          e.preventDefault();
+          if (modal && modal.getAttribute("aria-hidden") === "false") {
+            closeSearch();
+          } else {
+            openSearch();
+          }
           return;
         }
-
-        prevDayArrow.setAttribute('aria-label', 'Previous Day');
-        prevDayArrow.tabIndex = 0;
-
-        nextDayArrow.setAttribute('aria-label', 'Next Day');
-        nextDayArrow.tabIndex = 0;
-
-        if (currentDate.getTime() === startDate.getTime()) {
-          prevDayArrow.style.visibility = 'hidden';
-        } else {
-          prevDayArrow.href = fileName === 'index' ? 'index.html' : getFormattedDate(adjustDate(currentDate, -1));
-          prevDayArrow.style.visibility = 'visible';
+        if (e.key === "Escape" && modal && modal.getAttribute("aria-hidden") === "false") {
+          closeSearch();
+          return;
         }
-
-        if (currentDate.getTime() === endDate.getTime()) {
-          nextDayArrow.style.visibility = 'hidden';
-        } else {
-          nextDayArrow.href = fileName === 'index' ? getFormattedDate(adjustDate(currentDate, 1)) : getFormattedDate(adjustDate(currentDate, 1));
-          nextDayArrow.style.visibility = 'visible';
-        }
-      }
-
-      updateArrowLinks();
+        if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+        if (e.key === "ArrowLeft" && prevLink) prevLink.click();
+        if (e.key === "ArrowRight" && nextLink) nextLink.click();
+        if (e.key.toLowerCase() === "c" && !e.metaKey && !e.ctrlKey) copyCurrentQuote();
+        if (e.key.toLowerCase() === "d" && !e.metaKey && !e.ctrlKey) toggleTheme();
+      });
     });
   </script>
 </body>
