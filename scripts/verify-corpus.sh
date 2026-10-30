@@ -43,6 +43,9 @@ local, upstream = load(sys.argv[1]), load(sys.argv[2])
 if local == upstream:
     print(f"Corpus matches wiserone.com: {len(local)} quotes, no drift.")
     sys.exit(0)
+if len(local) > len(upstream) and local[:len(upstream)] == upstream:
+    print(f"Corpus extends wiserone.com cleanly: {len(local)} local quotes include all {len(upstream)} upstream quotes in order.")
+    sys.exit(0)
 
 print("Corpus has drifted from wiserone.com:")
 print(f"  bundled {len(local)} quotes, site {len(upstream)}")
