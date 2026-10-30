@@ -9,6 +9,12 @@ on:
       - main
   release:
     types: [created]
+  workflow_dispatch:
+
+# Only one Pages deploy at a time.
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 # Read-only by default; a job that writes declares exactly what it needs.
 permissions:
@@ -17,27 +23,29 @@ permissions:
 jobs:
   all:
     name: Document
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     permissions:
-      contents: write # push rustdoc to the gh-pages branch
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      contents: read
+      pages: read
     steps:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: nightly
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Generate documentation for all features and publish it
+      - name: Generate documentation for all features
         run: |
           RUSTDOCFLAGS="--cfg docsrs" \
             cargo doc --no-deps --all-features --workspace
-            # Write index.html with redirect
-            echo '<html><head><meta http-equiv="refresh" content="0; url=/wiserone/"></head><body></body></html>' > ./target/doc/index.html
+          echo '<html><head><meta http-equiv="refresh" content="0; url=/wiserone/"></head><body></body></html>' > ./target/doc/index.html
+          touch ./target/doc/.nojekyll
+          echo "docs.wiserone.com" > ./target/doc/CNAME
 
-      - name: Deploy
+      - name: Upload documentation artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: documentation
@@ -45,33 +53,28 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-      # Publishes on every push to main. This guard was added when
-      # wiserone.com was this repository's Pages domain and a stray
-      # deploy could have taken the live site down. The domain is now
-      # docs.wiserone.com and the site itself lives in
-      # sebastienrousseau/wiserone.github.io, so publishing rustdoc here
-      # on push is exactly what is wanted.
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/doc
-          publish_branch: gh-pages
-          # Writes the CNAME file; keep_files defaults to false, so every
-          # deploy replaces the branch contents.
-          cname: docs.wiserone.com
-          commit_message: Deploy documentation at ${{ github.sha }}
-          user_name: github-actions
-          user_email: actions@users.noreply.github.com
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
-  # Deploys the gh-pages branch just published, with GitHub Actions
-  # (see pages.yml).
-  pages:
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: target/doc
+          include-hidden-files: true
+
+  deploy:
     name: Deploy Pages
     needs: all
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
     permissions:
-      contents: read
       pages: write
       id-token: write
-    uses: ./.github/workflows/pages.yml
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
