@@ -66,7 +66,7 @@
 
 ```toml
 [dependencies]
-wiserone = "0.0.15"
+wiserone = "0.0.16"
 ```
 
 ### As a command-line tool
@@ -82,7 +82,7 @@ completions for bash, zsh, fish, PowerShell and elvish. Each asset carries
 a signed build-provenance attestation:
 
 ```bash
-gh attestation verify wiserone-v0.0.15-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
+gh attestation verify wiserone-v0.0.16-x86_64-unknown-linux-gnu.tar.gz -R sebastienrousseau/wiserone
 ```
 
 From source, with manpages and shell completions:
@@ -134,7 +134,7 @@ the two diverge.
 | :--- | :--- | :--- |
 | `wiserone` crate | CLI and library: load, select and render quotes | Generate quote pages, or pick today's quote in Rust code |
 | [wiserone.com](https://wiserone.com) | The site, and the canonical corpus at [`quotes.json`](https://wiserone.com/quotes.json) | Read the daily quote |
-| `quotes/quotes.json`, `quotes/quotes.csv` | The mirrored corpus, 136 quotes | Input to every command |
+| `quotes/quotes.json`, `quotes/quotes.csv` | The mirrored corpus, 228 quotes | Input to every command |
 | `scripts/verify-corpus.sh` | Compares the mirror with the website | Catch drift before it ships |
 
 ---
