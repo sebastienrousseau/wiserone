@@ -452,3 +452,35 @@ fn test_quote_fields_are_html_escaped() {
     assert!(content.contains("Tom &amp; &quot;Jerry&quot;"));
     assert!(content.contains("a.png&quot; onerror=&quot;alert(2)"));
 }
+
+/// Real repository `_layouts/quote.html` and `index.html` must render with
+/// zero unreplaced `{{...}}` placeholders and include semantic landmarks.
+#[test]
+fn test_real_quote_layout_has_no_unreplaced_placeholders() {
+    let _lock = DIR_MUTEX.lock().unwrap();
+    let temp_dir = TempDir::new().unwrap();
+    let repo_root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let index_html =
+        fs::read_to_string(repo_root.join("index.html")).unwrap();
+    assert!(!index_html.contains("{{"));
+    assert!(index_html.contains("https://sebastienrousseau.com/"));
+
+    let quote = Quote {
+        id: Some(7),
+        pillar: Some("elimination".to_string()),
+        ..create_test_quote()
+    };
+    let result = wiserone::html::generate_html_file_in(
+        "real_layout.html",
+        &quote,
+        temp_dir.path(),
+    );
+    assert!(result.is_ok());
+
+    let rendered =
+        fs::read_to_string(temp_dir.path().join("real_layout.html"))
+            .unwrap();
+    assert!(!rendered.contains("{{"), "unreplaced placeholder");
+    assert!(rendered.contains("elimination"));
+    assert!(rendered.contains("https://sebastienrousseau.com/"));
+}
