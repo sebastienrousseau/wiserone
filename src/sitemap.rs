@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use dtt::datetime::DateTime;
+use oxml::{Document, EmptyElement, Indent, Newline, SerialiseOptions};
 use std::error::Error;
 use std::fs;
 use std::io::Write;
@@ -104,27 +105,51 @@ fn html_urls(
 
 /// The sitemap document listing `urls`, each with `lastmod`.
 fn render_sitemap(urls: &[String], lastmod: &str) -> String {
-    // Start the XML string with namespaces
-    let mut sitemap_xml =
-        String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-    sitemap_xml += "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" ";
-    sitemap_xml += "xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\" ";
-    sitemap_xml += "xmlns:xhtml=\"http://www.w3.org/1999/xhtml\" ";
-    sitemap_xml += "xmlns:mobile=\"http://www.google.com/schemas/sitemap-mobile/1.0\" ";
-    sitemap_xml += "xmlns:image=\"http://www.google.com/schemas/sitemap-image/1.1\" ";
-    sitemap_xml += "xmlns:video=\"http://www.google.com/schemas/sitemap-video/1.1\">\n";
-
-    // Add URLs to the sitemap with changefreq and dynamic lastmod
-    for url in urls {
-        sitemap_xml
-            .push_str(&format!("  <url>\n    <loc>{}</loc>\n", url));
-        sitemap_xml.push_str("    <changefreq>weekly</changefreq>\n");
-        sitemap_xml
-            .push_str(&format!("    <lastmod>{}</lastmod>\n", lastmod));
-        sitemap_xml.push_str("  </url>\n");
+    const SITEMAP_NS: &str =
+        "http://www.sitemaps.org/schemas/sitemap/0.9";
+    let mut doc = Document::empty();
+    let Ok(urlset) =
+        doc.append_element(doc.root(), Some(SITEMAP_NS), "urlset")
+    else {
+        return String::new();
+    };
+    let _ = doc.declare_namespace(urlset, None, SITEMAP_NS);
+    for (prefix, uri) in [
+        ("news", "http://www.google.com/schemas/sitemap-news/0.9"),
+        ("xhtml", "http://www.w3.org/1999/xhtml"),
+        ("mobile", "http://www.google.com/schemas/sitemap-mobile/1.0"),
+        ("image", "http://www.google.com/schemas/sitemap-image/1.1"),
+        ("video", "http://www.google.com/schemas/sitemap-video/1.1"),
+    ] {
+        let _ = doc.declare_namespace(urlset, Some(prefix), uri);
     }
 
-    // Close the XML string
-    sitemap_xml.push_str("</urlset>");
+    for url in urls {
+        let Ok(url_node) =
+            doc.append_element(urlset, Some(SITEMAP_NS), "url")
+        else {
+            continue;
+        };
+        for (tag, val) in [
+            ("loc", url.as_str()),
+            ("changefreq", "weekly"),
+            ("lastmod", lastmod),
+        ] {
+            if let Ok(elem) =
+                doc.append_element(url_node, Some(SITEMAP_NS), tag)
+            {
+                let _ = doc.append_text(elem, val);
+            }
+        }
+    }
+
+    let options = SerialiseOptions {
+        indent: Some(Indent::Spaces(2)),
+        empty_elements: EmptyElement::Expanded,
+        newline: Newline::Lf,
+    };
+    let mut sitemap_xml =
+        String::from("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    let _ = doc.write_xml_with(&mut sitemap_xml, options);
     sitemap_xml
 }
