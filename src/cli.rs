@@ -15,7 +15,8 @@ use rlg::log_level::LogLevel;
 
 use crate::ascii::generate_ascii_art;
 use crate::html::{
-    generate_html_file, refresh_output_index, write_html_files,
+    date_stem, generate_html_file, refresh_output_index,
+    write_html_files,
 };
 use crate::quotes::{current_day_number, read_quotes_from_file};
 use crate::sitemap::generate_sitemap_file;
@@ -114,7 +115,7 @@ fn log_startup() -> Result<String, Box<dyn Error>> {
     // Define date and time
     let dt = DateTime::new();
     let iso = dt.format_rfc3339()?;
-    let date = format!("{}_{}_{}", dt.year(), &iso[5..7], dt.day());
+    let date = date_stem(&iso);
 
     // Generate a log entry
     let msg = "ASCII art generation event started.";

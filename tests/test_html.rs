@@ -9,7 +9,7 @@ use std::io::Write;
 use std::path::Path;
 use std::sync::Mutex;
 use tempfile::TempDir;
-use wiserone::html::generate_html_file;
+use wiserone::html::{date_stem, generate_html_file};
 use wiserone::quotes::Quote;
 
 /// Mutex to serialize tests that change the process-wide current directory.
@@ -295,20 +295,10 @@ fn test_index_html_creation() {
     create_test_layout(temp_dir.path());
     fs::create_dir_all("./docs").unwrap();
 
-    // Create a file with today's date format
+    // Create a file named the way the CLI names today's page
     use dtt::datetime::DateTime;
-    let dt = DateTime::new();
-    let iso = dt.format_rfc3339().expect("rfc3339");
-    let year = dt.year();
-    let month = &iso[5..7];
-    let day = dt.day();
-
-    let today_filename = format!(
-        "{}_{:02}_{}.html",
-        year,
-        month.parse::<u32>().unwrap(),
-        day
-    );
+    let iso = DateTime::new().format_rfc3339().expect("rfc3339");
+    let today_filename = format!("{}.html", date_stem(&iso));
     let test_content = "Today's content";
 
     let today_file =
@@ -323,13 +313,11 @@ fn test_index_html_creation() {
 
     assert!(result.is_ok());
 
-    // Check if index.html was created with today's content
-    let _index_file = temp_dir.path().join("docs/index.html");
-    if today_file.exists() {
-        // The function may or may not create index.html depending on date formatting
-        // This tests the logic path
-        assert!(result.is_ok());
-    }
+    // index.html mirrors today's page, whatever the day of the month
+    let index =
+        fs::read_to_string(temp_dir.path().join("docs/index.html"))
+            .expect("index.html was not written");
+    assert_eq!(index, test_content);
 }
 
 /// Property-based test for template substitution
@@ -483,4 +471,13 @@ fn test_real_quote_layout_has_no_unreplaced_placeholders() {
     assert!(!rendered.contains("{{"), "unreplaced placeholder");
     assert!(rendered.contains("elimination"));
     assert!(rendered.contains("https://sebastienrousseau.com/"));
+}
+
+/// The day's page stem is zero-padded, so the page the CLI writes and
+/// the page the index refresh looks for have the same name on days 1-9.
+#[test]
+fn test_date_stem_zero_pads_single_digit_days() {
+    assert_eq!(date_stem("2026-11-01T02:10:09Z"), "2026_11_01");
+    assert_eq!(date_stem("2026-08-16T00:00:00+01:00"), "2026_08_16");
+    assert_eq!(date_stem("2026-11"), "2026_11");
 }

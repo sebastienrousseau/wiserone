@@ -187,14 +187,14 @@ fn test_date_formatting() {
     let year = dt.year();
     let month = &iso[5..7];
     let day = dt.day();
-    let formatted_date = format!("{}_{}_{}", year, month, day);
+    let formatted_date = wiserone::html::date_stem(&iso);
 
-    // Verify format matches YYYY_MM_DD pattern
+    // Verify format matches YYYY_MM_DD pattern, day zero-padded
     let parts: Vec<&str> = formatted_date.split('_').collect();
     assert_eq!(parts.len(), 3);
-    assert_eq!(parts[0].len(), 4); // YYYY
-    assert_eq!(parts[1].len(), 2); // MM
-    assert_eq!(parts[2], day.to_string()); // DD
+    assert_eq!(parts[0], year.to_string()); // YYYY
+    assert_eq!(parts[1], month); // MM
+    assert_eq!(parts[2], format!("{day:02}")); // DD
 }
 
 /// Test quote date parsing and filename generation
