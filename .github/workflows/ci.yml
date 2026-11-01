@@ -306,6 +306,14 @@ jobs:
           echo "::endgroup::"
           echo "✅ Documentation generated successfully"
 
+      # The deploy (document.yml) adds canonicals, robots.txt and a
+      # sitemap with scripts/docs_seo.py; run it here so a PR that
+      # breaks it fails before it reaches main.
+      - name: 🔎 Check docs canonicals, robots.txt and sitemap
+        run: |
+          python3 scripts/docs_seo.py target/doc https://docs.wiserone.com
+          python3 scripts/docs_seo.py --check target/doc https://docs.wiserone.com
+
       # Test documentation examples
       - name: 🧪 Test documentation examples
         run: |

@@ -45,6 +45,15 @@ jobs:
           touch ./target/doc/.nojekyll
           echo "docs.wiserone.com" > ./target/doc/CNAME
 
+      # rustdoc pages carry no canonical and its search box makes
+      # endless `?search=` URLs, which Search Console filed as
+      # duplicates. Add canonicals, robots.txt and a sitemap of the
+      # current item pages, then prove the artefact has all three.
+      - name: Add canonicals, robots.txt and sitemap
+        run: |
+          python3 scripts/docs_seo.py target/doc https://docs.wiserone.com
+          python3 scripts/docs_seo.py --check target/doc https://docs.wiserone.com
+
       - name: Upload documentation artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

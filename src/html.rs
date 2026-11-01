@@ -288,6 +288,17 @@ fn sorted_entries(
     Ok(filenames)
 }
 
+/// The `YYYY_MM_DD` page stem for an RFC 3339 timestamp, zero-padded.
+///
+/// The CLI names the day's page with it and the index refresh looks the
+/// page up by it, so both must come from here. They used to build the
+/// stem separately, one padding the day and one not, so on days 1 to 9
+/// `index.html` was never refreshed.
+#[must_use]
+pub fn date_stem(iso: &str) -> String {
+    iso.get(..10).unwrap_or(iso).replace('-', "_")
+}
+
 /// Logs every file in `output_dir`, refreshing `index.html` from
 /// today's page after each one, as generation always has.
 fn log_and_refresh_index(
@@ -296,12 +307,7 @@ fn log_and_refresh_index(
     // Define date and time
     let dt = DateTime::new();
     let iso = dt.format_rfc3339()?;
-    let today_formatted = format!(
-        "{year}_{month:02}_{day:02}",
-        year = dt.year(),
-        month = &iso[5..7],
-        day = dt.day()
-    );
+    let today_formatted = date_stem(&iso);
 
     // Ensure log directory exists and open log file
     let log_dir = output_dir.join("logs");
