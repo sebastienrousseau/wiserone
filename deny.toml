@@ -16,21 +16,14 @@
 
 [licenses]
 # Any license not listed here is denied.
+# Only licences the dependency tree actually uses: cargo-deny warns
+# about an allowance no crate needs, so add one back only alongside the
+# dependency that requires it.
 allow = [
     "Apache-2.0",
     "MIT",
-    "CC0-1.0",
-    "ISC",
-    "0BSD",
-    "BSD-2-Clause",
-    "BSD-3-Clause",
     "Unlicense",
-    "Unicode-DFS-2016",
     "Unicode-3.0",
-    # `foldhash`, reached transitively through
-    # rlg -> config -> yaml-rust2 -> hashlink -> hashbrown.
-    # Zlib is permissive, OSI-approved and FSF Free/Libre.
-    "Zlib",
 ]
 # How closely detected license text must match the canonical SPDX text.
 confidence-threshold = 0.8
