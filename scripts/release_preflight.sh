@@ -15,7 +15,9 @@
 #     DEVELOPMENT, docs/POLICIES.md) names `rust-version` from Cargo.toml;
 #   - docs/releases/v<VERSION>.md holds Highlights in the release format;
 #   - for an unpublished version, the crates.io dry-run archive contains
-#     the manifest, README and licences, and builds.
+#     the manifest, README and licences, and builds;
+#   - the repository has zero open issues and zero open Dependabot
+#     alerts (AGENTS.md §0 "Zero open, always").
 #
 # Signatures are checked with `git verify-tag` locally, or through the
 # GitHub API with --remote (CI has no allowed-signers file; GitHub checks
@@ -24,6 +26,7 @@
 # Usage:
 #   scripts/release_preflight.sh <tag> [--expect <sha>] [--remote]
 #   scripts/release_preflight.sh --msrv [<rev>]   # only the MSRV check
+#   scripts/release_preflight.sh --open           # only the zero-open check
 set -euo pipefail
 shopt -s inherit_errexit
 
@@ -117,6 +120,28 @@ SITES
   ok "every MSRV statement names $msrv"
 }
 
+# Sums the per-page counts `gh api --paginate -q` prints. A failed call
+# fails the check: an unreadable count is never taken as zero.
+open_count() {
+  gh api --paginate "$1" -q "$2" | awk '{ n += $1 } END { print n + 0 }'
+}
+
+check_open() {
+  local issues alerts
+  issues=$(open_count "repos/$REPO/issues?state=open&per_page=100" \
+    '[.[] | select(.pull_request | not)] | length') \
+    || fail "cannot list open issues (the token needs issues: read)"
+  # GITHUB_TOKEN cannot read Dependabot alerts under any permission, so
+  # CI passes a fine-grained token ("Dependabot alerts: read") as
+  # ALERTS_TOKEN; locally the gh login is used.
+  alerts=$(GH_TOKEN=${ALERTS_TOKEN:-${GH_TOKEN:-}} open_count \
+    "repos/$REPO/dependabot/alerts?state=open&per_page=100" 'length') \
+    || fail "cannot list Dependabot alerts (set the DEPENDABOT_ALERTS_TOKEN secret)"
+  [ "$issues" = 0 ] || fail "$issues open issue(s); a release needs zero"
+  [ "$alerts" = 0 ] || fail "$alerts open Dependabot alert(s); a release needs zero"
+  ok "zero open issues and Dependabot alerts"
+}
+
 published() {
   [ "$(curl -sS -o /dev/null -w '%{http_code}' -A "$PROJECT-preflight ($REPO)" \
     "https://crates.io/api/v1/crates/$PROJECT/$1")" = 200 ]
@@ -154,6 +179,10 @@ main() {
     check_msrv "$(git -C "$ROOT" rev-parse "${2:-HEAD}^{commit}")"
     return
   fi
+  if [ "$tag" = --open ]; then
+    check_open
+    return
+  fi
   [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "usage: $0 <vX.Y.Z> [--expect <sha>] [--remote]"
   shift
   while [ $# -gt 0 ]; do
@@ -174,6 +203,7 @@ import release_notes; release_notes.highlights(sys.argv[2])
 PY
   ok "docs/releases/$tag.md holds the Highlights"
   check_package "$commit" "${tag#v}"
+  check_open
   echo "[preflight] PASS: $tag"
 }
 
