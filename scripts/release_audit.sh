@@ -9,8 +9,8 @@
 #   - the tag on GitHub is annotated, verified, says "wiserone v<VERSION>"
 #     and targets --expect <sha> when given;
 #   - the release is published (not a draft), titled "wiserone <VERSION>",
-#     and its body has Highlights, What's Changed, Checksums and the
-#     Full Changelog line;
+#     and its body has Highlights, What's Changed, Checksums (introduced
+#     by its SHA-256 line, in a ```text block) and the Full Changelog line;
 #   - every asset downloaded from the release matches SHA256SUMS, and every
 #     line of SHA256SUMS appears in the release body;
 #   - crates.io serves <VERSION>, and a .crate asset, when attached, is
@@ -48,6 +48,9 @@ audit_body() {
   for section in "## Highlights ⭐️" "## What's Changed" "## Checksums" "**Full Changelog**: "; do
     grep -qF -- "$section" <<<"$body" || fail "release body lacks '$section'"
   done
+  grep -qxF -- "SHA-256 of every asset attached to this release:" <<<"$body" \
+    || fail "release body lacks the Checksums introduction line"
+  grep -qxF -- '```text' <<<"$body" || fail "release body's checksums are not in a \`\`\`text block"
   ok "release body has every section"
 }
 
