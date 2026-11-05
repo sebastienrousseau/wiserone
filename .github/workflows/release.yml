@@ -32,6 +32,10 @@ jobs:
   guard:
     name: ❯ Verify 🔍
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read # zero open issues before a release
+      security-events: read # zero open Dependabot alerts before a release
     outputs:
       version: ${{ steps.resolve.outputs.version }}
       published: ${{ steps.resolve.outputs.published }}
@@ -88,12 +92,21 @@ jobs:
 
       # Blocking preflight (AGENTS.md "Release Preflight Is Blocking"):
       # signed annotated tag with the right message on this commit,
-      # versions consistent, Highlights written, crate archive complete.
+      # versions consistent, Highlights written, crate archive complete,
+      # zero open issues and Dependabot alerts.
       - name: Release preflight
         if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
         run: scripts/release_preflight.sh "${GITHUB_REF_NAME}" --expect "${GITHUB_SHA}" --remote
+
+      # The tag preflight above includes this; a manual run checks it on
+      # its own, so a smoke run shows whether a release would pass now.
+      - name: Zero open issues and Dependabot alerts
+        if: github.ref_type != 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/release_preflight.sh --open
 
   # Build the project for all the targets and generate artifacts.
   build:
