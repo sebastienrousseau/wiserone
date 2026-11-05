@@ -92,9 +92,12 @@ jobs:
             const title = '🔄 Dependency updates available';
             const pending = process.env.UPDATES_AVAILABLE === 'true';
 
+            // Case-insensitive: the title says "updates", and a
+            // case-sensitive "Update" prefix never matched it, so a new
+            // issue was opened every night and none were ever closed.
             const open = (await github.paginate(github.rest.issues.listForRepo, {
               owner, repo, state: 'open', labels: 'automation', per_page: 100,
-            })).filter(i => !i.pull_request && i.title.startsWith('🔄 Dependency Update'))
+            })).filter(i => !i.pull_request && i.title.toLowerCase().startsWith('🔄 dependency update'))
               .sort((a, b) => b.number - a.number);
 
             const close = async (issue, reason) => {
