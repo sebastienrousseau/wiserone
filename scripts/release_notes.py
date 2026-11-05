@@ -119,7 +119,8 @@ def compose(tag: str, sums: str) -> str:
     return "\n".join([
         highlights(tag),
         sections + "\n",
-        "## Checksums\n\n```\n" + sums.strip() + "\n```\n",
+        "## Checksums\n\nSHA-256 of every asset attached to this release:\n\n"
+        "```text\n" + sums.strip() + "\n```\n",
         changelog.group(0) + "\n",
     ])
 
