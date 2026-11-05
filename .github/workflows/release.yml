@@ -35,7 +35,6 @@ jobs:
     permissions:
       contents: read
       issues: read # zero open issues before a release
-      security-events: read # zero open Dependabot alerts before a release
     outputs:
       version: ${{ steps.resolve.outputs.version }}
       published: ${{ steps.resolve.outputs.published }}
@@ -98,6 +97,7 @@ jobs:
         if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
+          ALERTS_TOKEN: ${{ secrets.DEPENDABOT_ALERTS_TOKEN }}
         run: scripts/release_preflight.sh "${GITHUB_REF_NAME}" --expect "${GITHUB_SHA}" --remote
 
       # The tag preflight above includes this; a manual run checks it on
@@ -106,6 +106,7 @@ jobs:
         if: github.ref_type != 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
+          ALERTS_TOKEN: ${{ secrets.DEPENDABOT_ALERTS_TOKEN }}
         run: scripts/release_preflight.sh --open
 
   # Build the project for all the targets and generate artifacts.

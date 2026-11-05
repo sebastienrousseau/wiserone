@@ -131,8 +131,12 @@ check_open() {
   issues=$(open_count "repos/$REPO/issues?state=open&per_page=100" \
     '[.[] | select(.pull_request | not)] | length') \
     || fail "cannot list open issues (the token needs issues: read)"
-  alerts=$(open_count "repos/$REPO/dependabot/alerts?state=open&per_page=100" 'length') \
-    || fail "cannot list Dependabot alerts (the token needs security-events: read)"
+  # GITHUB_TOKEN cannot read Dependabot alerts under any permission, so
+  # CI passes a fine-grained token ("Dependabot alerts: read") as
+  # ALERTS_TOKEN; locally the gh login is used.
+  alerts=$(GH_TOKEN=${ALERTS_TOKEN:-${GH_TOKEN:-}} open_count \
+    "repos/$REPO/dependabot/alerts?state=open&per_page=100" 'length') \
+    || fail "cannot list Dependabot alerts (set the DEPENDABOT_ALERTS_TOKEN secret)"
   [ "$issues" = 0 ] || fail "$issues open issue(s); a release needs zero"
   [ "$alerts" = 0 ] || fail "$alerts open Dependabot alert(s); a release needs zero"
   ok "zero open issues and Dependabot alerts"
