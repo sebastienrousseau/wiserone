@@ -164,7 +164,11 @@ jobs:
             os: ubuntu-latest
             cross: true
           - target: i686-pc-windows-gnu
-            os: ubuntu-latest
+            # Pinned: on ubuntu-26.04 the cross 0.2.5 windows-gnu image
+            # exits 1 with no output before cargo runs (its Wine setup
+            # fails), while every Linux target still builds there.
+            # 24.04 built both on 2026-11-05 (v0.0.21).
+            os: ubuntu-24.04
             cross: true
           - target: i686-pc-windows-msvc
             os: windows-latest
@@ -176,7 +180,11 @@ jobs:
             os: macos-latest
             cross: true
           - target: x86_64-pc-windows-gnu
-            os: ubuntu-latest
+            # Pinned: on ubuntu-26.04 the cross 0.2.5 windows-gnu image
+            # exits 1 with no output before cargo runs (its Wine setup
+            # fails), while every Linux target still builds there.
+            # 24.04 built both on 2026-11-05 (v0.0.21).
+            os: ubuntu-24.04
             cross: true
           - target: x86_64-pc-windows-msvc
             os: windows-latest

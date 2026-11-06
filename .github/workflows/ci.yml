@@ -275,6 +275,9 @@ jobs:
           echo "::group::Checking license compliance"
           cargo deny check
           echo "::endgroup::"
+          echo "::group::Checking the fuzz crate"
+          scripts/check_fuzz_deny.sh
+          echo "::endgroup::"
           echo "✅ License compliance verified"
 
   # Documentation and examples

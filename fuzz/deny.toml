@@ -1,0 +1,53 @@
+# cargo-deny configuration.
+#
+# Rewritten for the current schema. The previous file could not be
+# deserialized at all, so `cargo deny check` failed before running a
+# single lint:
+#
+#   * `copyleft`, `allow-osi-fsf-free` and `confidence-threshold` sat
+#     after the `[bans]` header, so they were parsed as bans keys. They
+#     were meant for `[licenses]`; the first two no longer exist in any
+#     section — the `allow` list below is the explicit replacement.
+#   * `[licenses] unlicensed` was removed upstream: a crate whose
+#     license is not in `allow` is denied regardless.
+#   * `[advisories]` no longer takes per-severity levels
+#     (`notice`/`unsound`/`vulnerability`). Vulnerabilities always fail,
+#     and `unmaintained` now takes a scope rather than a lint level.
+
+[licenses]
+# Any license not listed here is denied.
+# Only licences the dependency tree actually uses: cargo-deny warns
+# about an allowance no crate needs, so add one back only alongside the
+# dependency that requires it.
+allow = [
+    "Apache-2.0",
+    "MIT",
+    "Unlicense",
+    "Unicode-3.0",
+]
+# How closely detected license text must match the canonical SPDX text.
+confidence-threshold = 0.8
+
+[bans]
+multiple-versions = "warn"
+highlight = "all"
+allow = []
+deny = []
+skip = []
+skip-tree = []
+
+[advisories]
+# Scope for unmaintained-crate advisories. "all" includes transitive
+# dependencies, which is where they nearly always appear.
+unmaintained = "all"
+yanked = "deny"
+
+# --- fuzz only: everything above must match ../deny.toml ---
+# libfuzzer-sys bundles LLVM's libFuzzer, so it is
+# "(MIT OR Apache-2.0) AND NCSA". NCSA is allowed for that crate alone;
+# the root deny.toml cannot carry the exception, because the root crate
+# never depends on libfuzzer-sys and cargo-deny would warn about an
+# exception it never used.
+[[licenses.exceptions]]
+crate = "libfuzzer-sys"
+allow = ["NCSA"]

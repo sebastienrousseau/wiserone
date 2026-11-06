@@ -65,6 +65,8 @@ security: ## Run security audits (NO || true allowed)
 	@cargo audit
 	@echo "  🏛️ License compliance..."
 	@cargo deny check
+	@echo "  🧪 Fuzz crate license compliance..."
+	@scripts/check_fuzz_deny.sh
 	@echo "✅ Security audits passed"
 
 # Documentation
